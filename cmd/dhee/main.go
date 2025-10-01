@@ -1,0 +1,70 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"path"
+
+	"github.com/mahesh-hegde/dhee/app/dictionary"
+	"github.com/spf13/pflag"
+)
+
+func main() {
+	if len(os.Args) < 2 {
+		printUsage()
+		os.Exit(1)
+	}
+
+	command := os.Args[1]
+
+	switch command {
+	case "preprocess":
+		runPreprocess()
+	case "server":
+		runServer()
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
+		printUsage()
+		os.Exit(1)
+	}
+}
+
+func printUsage() {
+	fmt.Fprintln(os.Stderr, "Usage: dhee <command> [options]")
+	fmt.Fprintln(os.Stderr, "")
+	fmt.Fprintln(os.Stderr, "Commands:")
+	fmt.Fprintln(os.Stderr, "  preprocess    Convert input data to output format")
+	fmt.Fprintln(os.Stderr, "  server        Start the dhee server")
+}
+
+func runPreprocess() {
+	flags := pflag.NewFlagSet("preprocess", pflag.ExitOnError)
+	input := flags.StringP("input", "i", "", "Input directory (required)")
+	output := flags.StringP("output", "o", "", "Output directory (required)")
+
+	flags.Parse(os.Args[2:])
+
+	if *input == "" || *output == "" {
+		fmt.Fprintln(os.Stderr, "Error: --input and --output are required")
+		os.Exit(1)
+	}
+
+	mwInput := path.Join(*input, "mw.xml")
+	mwOutput := path.Join(*output, "mw.jsonl")
+
+	if err := dictionary.ConvertMonierWilliamsDictionary(mwInput, mwOutput); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func runServer() {
+	flags := pflag.NewFlagSet("server", pflag.ExitOnError)
+	address := flags.StringP("address", "a", "localhost", "Server address to bind")
+	port := flags.IntP("port", "p", 8080, "Server port to bind")
+
+	flags.Parse(os.Args[2:])
+
+	fmt.Printf("Starting server on %s:%d\n", *address, *port)
+	panic("server not implemented yet")
+}
