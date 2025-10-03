@@ -1,4 +1,4 @@
-package textbrowser
+package scripture
 
 import (
 	"encoding/json"
@@ -136,7 +136,7 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 				Path:          path,
 				Authors:       authors,
 				Meter:         meter,
-				Auxiliaries:   make(map[string]Auxiliary),
+				Auxiliaries:   make([]Auxiliary, 0),
 			}
 
 			// Parse all lg elements
@@ -175,24 +175,26 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 
 			// Extract auxiliaries
 			if griffLG != nil {
-				excerpt.Auxiliaries["griffith"] = Auxiliary{
-					Path: path,
-					Text: extractTextLines(griffLG),
-				}
+				excerpt.Auxiliaries = append(excerpt.Auxiliaries,
+					Auxiliary{
+						Name: "griffith",
+						Text: extractTextLines(griffLG),
+					})
 			}
 
 			if oldLG != nil {
-				excerpt.Auxiliaries["oldenberg"] = Auxiliary{
-					Path: path,
-					Text: extractTextLines(oldLG),
-				}
+				excerpt.Auxiliaries = append(excerpt.Auxiliaries,
+					Auxiliary{
+						Name: "oldenberg",
+						Text: extractTextLines(oldLG),
+					})
 			}
 
 			if padaLG != nil {
-				excerpt.Auxiliaries["pada"] = Auxiliary{
-					Path: path,
+				excerpt.Auxiliaries = append(excerpt.Auxiliaries, Auxiliary{
 					Text: extractPadaText(padaLG),
-				}
+					Name: "pada",
+				})
 			}
 
 			// Extract glossings from zurich

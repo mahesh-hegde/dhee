@@ -40,52 +40,6 @@ type Tail struct {
 	PC string `xml:"pc"`
 }
 
-type Cognate struct {
-	Language string `json:"language"`
-	Word     string `json:"word"`
-}
-
-type LexCat struct {
-	LexID       string `json:"lex_id,omitempty"`
-	Stem        string `json:"stem,omitempty"`
-	RootClass   string `json:"root_class,omitempty"`
-	IsLoan      bool   `json:"is_loan,omitempty"`
-	InflictType string `json:"inflict_type,omitempty"`
-}
-
-type Verb struct {
-	VerbType  string   `json:"verb_type,omitempty"`
-	VerbClass int      `json:"verb_class,omitempty"`
-	Pada      string   `json:"pada,omitempty"`  // Either "A" or "P" if known, for Atmanepada and Parasmaipada respectively.
-	Parse     []string `json:"parse,omitempty"` // [prefix, root]
-}
-
-// DictionaryEntry represents the processed dictionary entry
-type DictionaryEntry struct {
-	Word               string              `json:"word"`
-	HTag               string              `json:"htag"`
-	Id                 string              `json:"id"`
-	OtherSpellings     []string            `json:"other_spellings,omitempty"`
-	PrintedPageNum     string              `json:"printed_page_num"`
-	IAST               string              `json:"iast,omitempty"`
-	Cognates           []string            `json:"cognates,omitempty"`
-	LiteraryReferences []string            `json:"literary_references,omitempty"`
-	LexicalGender      string              `json:"lexical_gender,omitempty"`
-	Body               DictionaryEntryBody `json:"body"`
-	Devanagari         string              `json:"devanagari,omitempty"`
-	HomonymNumber      int                 `json:"homonym_number,omitempty"`
-	Stem               string              `json:"stem,omitempty"`
-	IsAnimalName       bool                `json:"is_animal_name,omitempty"`
-	IsPlantName        bool                `json:"is_plant_name,omitempty"`
-	LexicalCategory    LexCat              `json:"lexical_category,omitempty"`
-	Verb               Verb                `json:"verb,omitempty"`
-}
-
-type DictionaryEntryBody struct {
-	Plain  string `json:"plain"`
-	Markup string `json:"-"`
-}
-
 func isEntryTag(tag string) bool {
 	// Matches H1, H1A, H2, H2A, H3, etc.
 	matched, _ := regexp.MatchString(`^H\d+[A-Z]?$`, tag)
@@ -101,7 +55,7 @@ func xmlToDictionaryEntry(xml MwXmlEntry, lastPageNum string) DictionaryEntry {
 	}
 
 	if xml.Header.Key2 != "" && xml.Header.Key2 != entry.Word {
-		entry.OtherSpellings = []string{xml.Header.Key2}
+		entry.Variants = []string{xml.Header.Key2}
 	}
 
 	// Use last page number if current entry doesn't have one
@@ -254,7 +208,7 @@ func handleS(_ xml.StartElement, decoder *xml.Decoder, plainText *strings.Builde
 	}
 	// Remove if equal to word or in otherSpellings
 	if content != entry.Word {
-		found := slices.Contains(entry.OtherSpellings, content)
+		found := slices.Contains(entry.Variants, content)
 		// TODO: convert to IAST always
 		if !found {
 			plainText.WriteString(content)
@@ -271,7 +225,7 @@ func handleLs(decoder *xml.Decoder, plainText *strings.Builder, entry *Dictionar
 	plainText.WriteRune('[')
 	plainText.WriteString(content)
 	plainText.WriteRune(']')
-	entry.LiteraryReferences = append(entry.LiteraryReferences, content)
+	entry.LitRefs = append(entry.LitRefs, content)
 	return nil
 }
 
@@ -334,7 +288,7 @@ func handleInfo(elem xml.StartElement, entry *DictionaryEntry) error {
 
 func parseLexCat(value string, entry *DictionaryEntry) {
 	if value == "loan" {
-		entry.LexicalCategory = LexCat{IsLoan: true}
+		entry.LexCat = LexCat{IsLoan: true}
 		return
 	}
 
@@ -360,7 +314,7 @@ func parseLexCat(value string, entry *DictionaryEntry) {
 		}
 	}
 
-	entry.LexicalCategory = lexCat
+	entry.LexCat = lexCat
 }
 
 func parseVerb(attrs []xml.Attr, entry *DictionaryEntry) {
@@ -433,7 +387,7 @@ func parseOtherSpellings(value string, entry *DictionaryEntry) {
 		if len(parts) == 2 {
 			spelling := parts[1]
 			if spelling != entry.Word {
-				entry.OtherSpellings = append(entry.OtherSpellings, spelling)
+				entry.Variants = append(entry.Variants, spelling)
 			}
 		}
 	}
