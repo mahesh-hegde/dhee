@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/blevesearch/bleve/v2"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/scripture"
@@ -28,6 +29,8 @@ func main() {
 		runServer()
 	case "index":
 		runIndex()
+	case "stats":
+		runStats()
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		printUsage()
@@ -42,6 +45,25 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "  preprocess    Convert input data to output format")
 	fmt.Fprintln(os.Stderr, "  server        Start the dhee server")
 	fmt.Fprintln(os.Stderr, "  index         Build the search index in advance")
+	fmt.Fprintln(os.Stderr, "  stats         Show index statistics")
+}
+
+func readConfig(dataDir string) *config.DheeConfig {
+	confPath := path.Join(dataDir, "config.json")
+	confFile, err := os.Open(confPath)
+	if err != nil {
+		slog.Error("error while opening config.json", "err", err)
+		os.Exit(1)
+	}
+	defer confFile.Close()
+
+	var conf config.DheeConfig
+	confDec := json.NewDecoder(confFile)
+	if err := confDec.Decode(&conf); err != nil {
+		slog.Error("error while reading config.json", "err", err)
+		os.Exit(1)
+	}
+	return &conf
 }
 
 func runPreprocess() {
@@ -86,23 +108,10 @@ func runServer() {
 		slog.Error("--data-dir not provided, stopping")
 		os.Exit(1)
 	}
-	confPath := path.Join(dataDir, "config.json")
-	confFile, err := os.Open(confPath)
-	if err != nil {
-		slog.Error("error while opening config.json", "err", err)
-		os.Exit(1)
-	}
-	defer confFile.Close()
-
-	var conf config.DheeConfig
-	confDec := json.NewDecoder(confFile)
-	if err := confDec.Decode(&conf); err != nil {
-		slog.Error("error while reading config.json", "err", err)
-		os.Exit(1)
-	}
+	conf := readConfig(dataDir)
 
 	fmt.Printf("Starting server on %s:%d\n", address, port)
-	_, err = config.InitDB(dataDir, &conf)
+	_, err := config.InitDB(dataDir, conf)
 	if err != nil {
 		slog.Error("error while initializing DB", "err", err)
 	}
@@ -120,25 +129,51 @@ func runIndex() {
 		slog.Error("--data-dir not provided, stopping")
 		os.Exit(1)
 	}
-	confPath := path.Join(dataDir, "config.json")
-	confFile, err := os.Open(confPath)
-	if err != nil {
-		slog.Error("error while opening config.json", "err", err)
-		os.Exit(1)
-	}
-	defer confFile.Close()
-
-	var conf config.DheeConfig
-	confDec := json.NewDecoder(confFile)
-	if err := confDec.Decode(&conf); err != nil {
-		slog.Error("error while reading config.json", "err", err)
-		os.Exit(1)
-	}
+	conf := readConfig(dataDir)
 
 	slog.Info("starting indexing", "data-dir", dataDir)
-	_, err = config.InitDB(dataDir, &conf)
+	_, err := config.InitDB(dataDir, conf)
 	if err != nil {
 		slog.Error("error while initializing DB", "err", err)
 	}
 	slog.Info("finished indexing")
+}
+
+func runStats() {
+	flags := pflag.NewFlagSet("stats", pflag.ExitOnError)
+	var dataDir string
+	flags.StringVarP(&dataDir, "data-dir", "d", "",
+		"data directory to read config.json and data JSONL files")
+
+	flags.Parse(os.Args[2:])
+
+	if dataDir == "" {
+		slog.Error("--data-dir not provided, stopping")
+		os.Exit(1)
+	}
+
+	dbPath := path.Join(dataDir, "docstore.bleve")
+	slog.Info("opening DB", "dbPath", dbPath)
+	index, err := bleve.Open(dbPath)
+	if err != nil {
+		slog.Error("error opening index, did you run the 'index' command first?", "err", err)
+		os.Exit(1)
+	}
+	defer index.Close()
+
+	docTypes := []string{"excerpt", "dictionary_entry", "_default"}
+	for _, docType := range docTypes {
+		// query := bleve.NewTermQuery(docType)
+		// query.SetField("_type")
+		query := bleve.NewMatchAllQuery()
+		searchRequest := bleve.NewSearchRequest(query)
+		searchRequest.Fields = []string{"auxiliaries.griffith", "body"}
+		searchRequest.Size = 5 // We only need the count
+		searchResult, err := index.Search(searchRequest)
+		if err != nil {
+			slog.Error("error searching for doc type", "type", docType, "err", err)
+			continue
+		}
+		fmt.Printf("'%s' count: %d\n", docType, searchResult.Total)
+	}
 }

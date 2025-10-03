@@ -1,0 +1,59 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "dhee preprocess",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/dhee/main.go",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "preprocess",
+                "--input",
+                "./data",
+                "--output",
+                "./data"
+            ]
+        },
+        {
+            "name": "dhee server",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/dhee/main.go",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "server",
+                "--data-dir",
+                "./data"
+            ]
+        },
+        {
+            "name": "dhee index",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/dhee/main.go",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "index",
+                "--data-dir",
+                "./data"
+            ]
+        },
+        {
+            "name": "dhee stats",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/dhee/main.go",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "stats",
+                "--data-dir",
+                "./data"
+            ]
+        }
+    ]
+}
