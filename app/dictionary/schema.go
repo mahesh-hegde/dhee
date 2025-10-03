@@ -41,7 +41,7 @@ type SearchSuggestion struct {
 }
 
 type SearchSuggestionResponse struct {
-	items []SearchSuggestion
+	Items []SearchSuggestion
 }
 
 type SearchResult struct {
@@ -52,5 +52,5 @@ type SearchResult struct {
 }
 
 type SearchResponse struct {
-	items []SearchResult
+	Items []SearchResult
 }

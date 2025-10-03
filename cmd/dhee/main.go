@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path"
 
 	"github.com/mahesh-hegde/dhee/app/dictionary"
+	"github.com/mahesh-hegde/dhee/app/textbrowser"
 	"github.com/spf13/pflag"
 )
 
@@ -54,6 +56,11 @@ func runPreprocess() {
 
 	if err := dictionary.ConvertMonierWilliamsDictionary(mwInput, mwOutput); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := textbrowser.PreprocessRvDataset(path.Join(*input, "tei"), *output); err != nil {
+		slog.Error("error when preprocessing rigveda dataset", "error", err)
 		os.Exit(1)
 	}
 }

@@ -190,14 +190,11 @@ func handleStartElement(elem xml.StartElement, decoder *xml.Decoder, plainText *
 	case "hom":
 		return handleHom(decoder, plainText, entry)
 
-	case "etym", "lang", "bot", "bio", "ns", "i":
+	case "etym", "lang", "bot", "bio", "ns", "i", "lex":
 		return handleStripTag(decoder, plainText)
 
 	case "info":
 		return handleInfo(elem, entry)
-
-	case "lex":
-		return skipElement(decoder)
 
 	case "pb", "div", "pcol":
 		return handlePcol(decoder, plainText)
