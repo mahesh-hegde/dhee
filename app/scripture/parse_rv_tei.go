@@ -136,7 +136,7 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 				Path:          path,
 				Authors:       authors,
 				Meter:         meter,
-				Auxiliaries:   make([]Auxiliary, 0),
+				Auxiliaries:   make(map[string]Auxiliary),
 			}
 
 			// Parse all lg elements
@@ -175,26 +175,21 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 
 			// Extract auxiliaries
 			if griffLG != nil {
-				excerpt.Auxiliaries = append(excerpt.Auxiliaries,
-					Auxiliary{
-						Name: "griffith",
-						Text: extractTextLines(griffLG),
-					})
+				excerpt.Auxiliaries["griffith"] = Auxiliary{
+					Text: extractTextLines(griffLG),
+				}
 			}
 
 			if oldLG != nil {
-				excerpt.Auxiliaries = append(excerpt.Auxiliaries,
-					Auxiliary{
-						Name: "oldenberg",
-						Text: extractTextLines(oldLG),
-					})
+				excerpt.Auxiliaries["oldenberg"] = Auxiliary{
+					Text: extractTextLines(oldLG),
+				}
 			}
 
 			if padaLG != nil {
-				excerpt.Auxiliaries = append(excerpt.Auxiliaries, Auxiliary{
+				excerpt.Auxiliaries["pada"] = Auxiliary{
 					Text: extractPadaText(padaLG),
-					Name: "pada",
-				})
+				}
 			}
 
 			// Extract glossings from zurich

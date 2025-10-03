@@ -37,7 +37,6 @@ type ExcerptGlossing struct {
 }
 
 type Auxiliary struct {
-	Name string
 	Text []string `json:"text"`
 }
 
@@ -72,11 +71,11 @@ type Excerpt struct {
 	// Complex type. 2D array with each row corresponding to one division of the verse.
 	Glossings [][]ExcerptGlossing `json:"glossings,omitempty"`
 	// Translations and alternative renderings
-	Auxiliaries   []Auxiliary    `json:"auxiliaries,omitempty"`
-	Notes         []string       `json:"notes,omitempty"`
-	Links         []ExternalLink `json:"links,omitempty"`
-	Suggested     []Related      `json:"suggested,omitempty"`
-	SuggestedAuto []Related      `json:"suggested_auto,omitempty"`
+	Auxiliaries   map[string]Auxiliary `json:"auxiliaries,omitempty"`
+	Notes         []string             `json:"notes,omitempty"`
+	Links         []ExternalLink       `json:"links,omitempty"`
+	Suggested     []Related            `json:"suggested,omitempty"`
+	SuggestedAuto []Related            `json:"suggested_auto,omitempty"`
 }
 
 type QualifiedPath struct {
