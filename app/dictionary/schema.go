@@ -80,6 +80,11 @@ type DictionaryEntry struct {
 	Verb           Verb                `json:"verb,omitzero"`
 }
 
+// Type implements mapping.Classifier.
+func (d DictionaryEntry) Type() string {
+	return "dictionary_entry"
+}
+
 type DictionaryEntryBody struct {
 	Plain  string `json:"plain"`
 	Markup string `json:"-"`

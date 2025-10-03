@@ -78,6 +78,11 @@ type Excerpt struct {
 	SuggestedAuto []Related            `json:"suggested_auto,omitempty"`
 }
 
+// Type implements mapping.Classifier.
+func (e Excerpt) Type() string {
+	return "excerpt"
+}
+
 type QualifiedPath struct {
 	Scripture string // Name of the scripture
 	Path      []int  // Hierarchical path
