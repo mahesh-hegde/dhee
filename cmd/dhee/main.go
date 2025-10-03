@@ -26,6 +26,8 @@ func main() {
 		runPreprocess()
 	case "server":
 		runServer()
+	case "index":
+		runIndex()
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		printUsage()
@@ -39,6 +41,7 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "Commands:")
 	fmt.Fprintln(os.Stderr, "  preprocess    Convert input data to output format")
 	fmt.Fprintln(os.Stderr, "  server        Start the dhee server")
+	fmt.Fprintln(os.Stderr, "  index         Build the search index in advance")
 }
 
 func runPreprocess() {
@@ -103,4 +106,39 @@ func runServer() {
 	if err != nil {
 		slog.Error("error while initializing DB", "err", err)
 	}
+}
+
+func runIndex() {
+	flags := pflag.NewFlagSet("index", pflag.ExitOnError)
+	var dataDir string
+	flags.StringVarP(&dataDir, "data-dir", "d", "",
+		"data directory to read config.json and data JSONL files")
+
+	flags.Parse(os.Args[2:])
+
+	if dataDir == "" {
+		slog.Error("--data-dir not provided, stopping")
+		os.Exit(1)
+	}
+	confPath := path.Join(dataDir, "config.json")
+	confFile, err := os.Open(confPath)
+	if err != nil {
+		slog.Error("error while opening config.json", "err", err)
+		os.Exit(1)
+	}
+	defer confFile.Close()
+
+	var conf config.DheeConfig
+	confDec := json.NewDecoder(confFile)
+	if err := confDec.Decode(&conf); err != nil {
+		slog.Error("error while reading config.json", "err", err)
+		os.Exit(1)
+	}
+
+	slog.Info("starting indexing", "data-dir", dataDir)
+	_, err = config.InitDB(dataDir, &conf)
+	if err != nil {
+		slog.Error("error while initializing DB", "err", err)
+	}
+	slog.Info("finished indexing")
 }
