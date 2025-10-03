@@ -99,5 +99,8 @@ func runServer() {
 	}
 
 	fmt.Printf("Starting server on %s:%d\n", address, port)
-	panic("server not implemented yet")
+	_, err = config.InitDB(dataDir, &conf)
+	if err != nil {
+		slog.Error("error while initializing DB", "err", err)
+	}
 }

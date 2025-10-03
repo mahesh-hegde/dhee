@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -15,6 +16,10 @@ import (
 
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/scripture"
+
+	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
+	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
+	"github.com/blevesearch/bleve/v2/analysis/tokenizer/whitespace"
 )
 
 func GetBleveIndexMappings() mapping.IndexMapping {
@@ -22,15 +27,19 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	indexMapping := mapping.NewIndexMapping()
 
 	// Add custom analyzer for Sanskrit/IAST/Devanagari
-	indexMapping.AddCustomAnalyzer("sanskrit_ws",
+	err := indexMapping.AddCustomAnalyzer("sanskrit_ws",
 		map[string]any{
-			"type":      "custom",
-			"tokenizer": "whitespace",
+			"type":      custom.Name,
+			"tokenizer": whitespace.Name, // unicode.Name,
 			"token_filters": []string{
-				"to_lower",
-				"asciifolding", // keeps search robust across diacritics
+				lowercase.Name,
+				// "asciifolding", // GPT suggested but this doesn't exists
 			},
 		})
+	if err != nil {
+		slog.Error("error when defining index", "err", err)
+		os.Exit(1)
+	}
 
 	// ----- Excerpt mapping -----
 	excerptMapping := mapping.NewDocumentMapping()
@@ -227,11 +236,11 @@ func loadJSONL[T any](index bleve.Index, dataFile string, idFunc func(T) string,
 	return nil
 }
 
-func LoadData(index bleve.Index, config DheeConfig) error {
+func LoadData(index bleve.Index, dataDir string, config *DheeConfig) error {
 	// Load scriptures
 	for _, sc := range config.Scriptures {
 		slog.Info("Loading scripture", "name", sc.Name)
-		err := loadJSONL(index, sc.DataFile,
+		err := loadJSONL(index, path.Join(dataDir, sc.DataFile),
 			func(e scripture.Excerpt) string {
 				return fmt.Sprintf("%s:%s", sc.Name, pathToString(e.Path))
 			},
@@ -247,7 +256,7 @@ func LoadData(index bleve.Index, config DheeConfig) error {
 	// Load dictionaries
 	for _, dict := range config.Dictionaries {
 		slog.Info("Loading dictionary", "name", dict.Name)
-		err := loadJSONL(index, dict.DataFile,
+		err := loadJSONL(index, path.Join(dataDir, dict.DataFile),
 			func(e dictionary.DictionaryEntry) string {
 				return fmt.Sprintf("%s:%s", dict.Name, e.Id)
 			},
@@ -263,7 +272,7 @@ func LoadData(index bleve.Index, config DheeConfig) error {
 	return nil
 }
 
-func InitDB(dataDir string, config DheeConfig) (bleve.Index, error) {
+func InitDB(dataDir string, config *DheeConfig) (bleve.Index, error) {
 	dbPath := filepath.Join(dataDir, "docstore.bleve")
 	index, err := bleve.Open(dbPath)
 
@@ -276,13 +285,12 @@ func InitDB(dataDir string, config DheeConfig) (bleve.Index, error) {
 		}
 
 		slog.Info("Loading initial data into the index...")
-		if err := LoadData(index, config); err != nil {
+		if err := LoadData(index, dataDir, config); err != nil {
 			// Cleanup created index on load failure
 			os.RemoveAll(dbPath)
 			return nil, fmt.Errorf("failed to load data: %w", err)
 		}
 		slog.Info("Initial data loaded successfully.")
-
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to open bleve index: %w", err)
 	} else {

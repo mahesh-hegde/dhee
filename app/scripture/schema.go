@@ -15,7 +15,7 @@ type ScriptureDefn struct {
 	Collector    string                `json:"collector"`
 	Hierarchy    []string              `json:"hierarchy"`
 	Auxiliaries  []AuxiliaryDefinition `json:"auxiliaries"`
-	DataFile     string
+	DataFile     string                `json:"data_file"`
 }
 
 type Modifier string
