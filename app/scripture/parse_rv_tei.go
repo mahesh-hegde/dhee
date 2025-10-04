@@ -112,7 +112,8 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 
 	// Navigate to book level
 	bookDiv := tei.Text.Body.Div
-	bookNum := extractNumber(bookDiv.ID)
+	var bookNum int
+	fmt.Sscanf(bookDiv.ID, "b%d", &bookNum)
 
 	// Iterate through hymns
 	for _, hymnDiv := range bookDiv.Divs {

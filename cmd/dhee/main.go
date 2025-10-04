@@ -132,10 +132,11 @@ func runIndex() {
 	conf := readConfig(dataDir)
 
 	slog.Info("starting indexing", "data-dir", dataDir)
-	_, err := config.InitDB(dataDir, conf)
+	idx, err := config.InitDB(dataDir, conf)
 	if err != nil {
 		slog.Error("error while initializing DB", "err", err)
 	}
+	idx.Close()
 	slog.Info("finished indexing")
 }
 
@@ -161,14 +162,15 @@ func runStats() {
 	}
 	defer index.Close()
 
-	docTypes := []string{"excerpt", "dictionary_entry", "_default"}
-	for _, docType := range docTypes {
+	docTypes := map[string]string{"dictionary_entry": "dict_name", "scripture": "scripture"}
+	for docType, field := range docTypes {
 		// query := bleve.NewTermQuery(docType)
 		// query.SetField("_type")
-		query := bleve.NewMatchAllQuery()
+		query := bleve.NewRegexpQuery(".+")
+		query.SetField(field)
 		searchRequest := bleve.NewSearchRequest(query)
-		searchRequest.Fields = []string{"auxiliaries.griffith", "body"}
-		searchRequest.Size = 5 // We only need the count
+		searchRequest.Fields = []string{"*"}
+		searchRequest.Size = 1 // We only need the count
 		searchResult, err := index.Search(searchRequest)
 		if err != nil {
 			slog.Error("error searching for doc type", "type", docType, "err", err)

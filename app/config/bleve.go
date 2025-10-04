@@ -8,6 +8,6 @@ import (
 
 type BleveDocStore struct{}
 
-var _ mapping.Classifier = dictionary.DictionaryEntry{}
+var _ mapping.Classifier = &dictionary.DictionaryEntry{}
 
-var _ mapping.Classifier = scripture.Excerpt{}
+var _ mapping.Classifier = &scripture.Excerpt{}

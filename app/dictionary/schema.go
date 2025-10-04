@@ -60,7 +60,7 @@ type Verb struct {
 type DictionaryEntry struct {
 	// Not written to JSONL data but computed based on which file we read,
 	// and stored in DB to distinguish.
-	DictName       string              `json:"-"`
+	DictName       string              `json:"dict_name,omitempty"`
 	Word           string              `json:"word"`
 	HTag           string              `json:"htag"`
 	Id             string              `json:"id"`
@@ -81,7 +81,7 @@ type DictionaryEntry struct {
 }
 
 // Type implements mapping.Classifier.
-func (d DictionaryEntry) Type() string {
+func (d *DictionaryEntry) Type() string {
 	return "dictionary_entry"
 }
 

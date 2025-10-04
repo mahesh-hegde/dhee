@@ -56,7 +56,7 @@ type Related struct {
 // Excerpt represents a single atomic unit from the source text. Eg: a Rik in case of Rigveda.
 type Excerpt struct {
 	// Not serialized to JSON, but computed based on which file we are reading and stored in DB
-	Scripture string `json:"-"`
+	Scripture string `json:"scripture,omitempty"`
 	// Eg: "4.30.1". Autocomputed from path if does not exist.
 	ReadableIndex string `json:"readable_index"`
 	// Hierarchical path in the document. Eg: mandala 4 hymn 30 verse 1 will be [4,30,1].
@@ -79,7 +79,7 @@ type Excerpt struct {
 }
 
 // Type implements mapping.Classifier.
-func (e Excerpt) Type() string {
+func (e *Excerpt) Type() string {
 	return "excerpt"
 }
 

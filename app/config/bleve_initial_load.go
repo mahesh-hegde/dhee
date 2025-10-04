@@ -46,6 +46,7 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 
 	// ReadableIndex
 	excerptMapping.AddFieldMappingsAt("readable_index", mapping.NewKeywordFieldMapping())
+	excerptMapping.AddFieldMappingsAt("scripture", mapping.NewKeywordFieldMapping())
 
 	// Path
 	excerptMapping.AddFieldMappingsAt("path", mapping.NewNumericFieldMapping())
@@ -100,9 +101,9 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 		m.AddFieldMappingsAt("text", textField)
 		return m
 	}
-	excerptMapping.AddSubDocumentMapping("auxiliaries.griffith", auxMapping("sanskrit_ws"))
+	excerptMapping.AddSubDocumentMapping("auxiliaries.griffith", auxMapping("en"))
+	excerptMapping.AddSubDocumentMapping("auxiliaries.oldenberg", auxMapping("en"))
 	excerptMapping.AddSubDocumentMapping("auxiliaries.pada", auxMapping("sanskrit_ws"))
-	excerptMapping.AddSubDocumentMapping("auxiliaries.oldenberg", auxMapping("sanskrit_ws"))
 
 	// ----- DictionaryEntry mapping -----
 	dictMapping := mapping.NewDocumentMapping()
@@ -113,6 +114,7 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 
 	dictMapping.AddFieldMappingsAt("htag", mapping.NewKeywordFieldMapping())
 	dictMapping.AddFieldMappingsAt("id", mapping.NewKeywordFieldMapping())
+	dictMapping.AddFieldMappingsAt("dict_name", mapping.NewKeywordFieldMapping())
 
 	iastField := mapping.NewTextFieldMapping()
 	iastField.Analyzer = "sanskrit_ws"
@@ -181,10 +183,10 @@ func pathToString(path []int) string {
 	return strings.Join(parts, ".")
 }
 
-const batchSize = 128
+const batchSize = 1024
 
 // loadJSONL is a generic helper to load data from a JSONL file into a bleve index.
-func loadJSONL[T any](index bleve.Index, dataFile string, idFunc func(T) string, enrichFunc func(*T)) error {
+func loadJSONL[T mapping.Classifier](index bleve.Index, dataFile string, idFunc func(T) string, enrichFunc func(T)) error {
 	file, err := os.Open(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to open data file %s: %w", dataFile, err)
@@ -203,7 +205,7 @@ func loadJSONL[T any](index bleve.Index, dataFile string, idFunc func(T) string,
 		}
 
 		if enrichFunc != nil {
-			enrichFunc(&entry)
+			enrichFunc(entry)
 		}
 
 		id := idFunc(entry)
@@ -213,6 +215,7 @@ func loadJSONL[T any](index bleve.Index, dataFile string, idFunc func(T) string,
 		count++
 
 		if count >= batchSize {
+			slog.Info("ingest batch", "size", count)
 			if err := index.Batch(batch); err != nil {
 				return fmt.Errorf("failed to execute batch: %w", err)
 			}
@@ -241,7 +244,7 @@ func LoadData(index bleve.Index, dataDir string, config *DheeConfig) error {
 	for _, sc := range config.Scriptures {
 		slog.Info("Loading scripture", "name", sc.Name)
 		err := loadJSONL(index, path.Join(dataDir, sc.DataFile),
-			func(e scripture.Excerpt) string {
+			func(e *scripture.Excerpt) string {
 				return fmt.Sprintf("%s:%s", sc.Name, pathToString(e.Path))
 			},
 			func(e *scripture.Excerpt) {
@@ -257,7 +260,7 @@ func LoadData(index bleve.Index, dataDir string, config *DheeConfig) error {
 	for _, dict := range config.Dictionaries {
 		slog.Info("Loading dictionary", "name", dict.Name)
 		err := loadJSONL(index, path.Join(dataDir, dict.DataFile),
-			func(e dictionary.DictionaryEntry) string {
+			func(e *dictionary.DictionaryEntry) string {
 				return fmt.Sprintf("%s:%s", dict.Name, e.Id)
 			},
 			func(e *dictionary.DictionaryEntry) {
@@ -268,7 +271,6 @@ func LoadData(index bleve.Index, dataDir string, config *DheeConfig) error {
 			return fmt.Errorf("failed to load dictionary %s: %w", dict.Name, err)
 		}
 	}
-
 	return nil
 }
 
