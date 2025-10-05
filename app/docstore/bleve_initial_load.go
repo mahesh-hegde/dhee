@@ -8,12 +8,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
-	"strings"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/mapping"
 
+	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/scripture"
@@ -176,14 +175,6 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	return indexMapping
 }
 
-func pathToString(path []int) string {
-	var parts []string
-	for _, p := range path {
-		parts = append(parts, strconv.Itoa(p))
-	}
-	return strings.Join(parts, ".")
-}
-
 const batchSize = 1024
 
 // loadJSONL is a generic helper to load data from a JSONL file into a bleve index.
@@ -246,7 +237,7 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 		slog.Info("Loading scripture", "name", sc.Name)
 		err := loadJSONL(index, path.Join(dataDir, sc.DataFile),
 			func(e *scripture.Excerpt) string {
-				return fmt.Sprintf("%s:%s", sc.Name, pathToString(e.Path))
+				return fmt.Sprintf("%s:%s", sc.Name, common.PathToString(e.Path))
 			},
 			func(e *scripture.Excerpt) {
 				e.Scripture = sc.Name

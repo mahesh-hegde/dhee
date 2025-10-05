@@ -38,9 +38,11 @@ type Related struct {
 }
 
 type SearchParams struct {
-	Mode common.SearchMode
-	Q    string
-	Tl   string
+	// name of scriptures to search
+	Scriptures []string
+	Mode       common.SearchMode
+	Q          string
+	Tl         string
 	// Name of auxiliary, or "0" for sanskrit text, or "1" for roman text. Empty implies all auxiliaries, roman and source text
 	SearchIn []string
 }

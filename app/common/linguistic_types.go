@@ -1,5 +1,10 @@
 package common
 
+import (
+	"strconv"
+	"strings"
+)
+
 type Language string
 
 const (
@@ -24,3 +29,11 @@ const (
 	SearchPrefix SearchMode = "prefix"
 	SearchFuzzy  SearchMode = "fuzzy"
 )
+
+func PathToString(path []int) string {
+	var parts []string
+	for _, p := range path {
+		parts = append(parts, strconv.Itoa(p))
+	}
+	return strings.Join(parts, ".")
+}
