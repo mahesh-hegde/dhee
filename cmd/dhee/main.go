@@ -10,6 +10,7 @@ import (
 	"github.com/blevesearch/bleve/v2"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
+	"github.com/mahesh-hegde/dhee/app/docstore"
 	"github.com/mahesh-hegde/dhee/app/scripture"
 	"github.com/spf13/pflag"
 )
@@ -111,7 +112,7 @@ func runServer() {
 	conf := readConfig(dataDir)
 
 	fmt.Printf("Starting server on %s:%d\n", address, port)
-	_, err := config.InitDB(dataDir, conf)
+	_, err := docstore.InitDB(dataDir, conf)
 	if err != nil {
 		slog.Error("error while initializing DB", "err", err)
 	}
@@ -132,7 +133,7 @@ func runIndex() {
 	conf := readConfig(dataDir)
 
 	slog.Info("starting indexing", "data-dir", dataDir)
-	idx, err := config.InitDB(dataDir, conf)
+	idx, err := docstore.InitDB(dataDir, conf)
 	if err != nil {
 		slog.Error("error while initializing DB", "err", err)
 	}

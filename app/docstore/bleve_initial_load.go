@@ -1,4 +1,4 @@
-package config
+package docstore
 
 import (
 	"bufio"
@@ -14,6 +14,7 @@ import (
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/mapping"
 
+	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/scripture"
 
@@ -239,7 +240,7 @@ func loadJSONL[T mapping.Classifier](index bleve.Index, dataFile string, idFunc 
 	return nil
 }
 
-func LoadData(index bleve.Index, dataDir string, config *DheeConfig) error {
+func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) error {
 	// Load scriptures
 	for _, sc := range config.Scriptures {
 		slog.Info("Loading scripture", "name", sc.Name)
@@ -274,7 +275,7 @@ func LoadData(index bleve.Index, dataDir string, config *DheeConfig) error {
 	return nil
 }
 
-func InitDB(dataDir string, config *DheeConfig) (bleve.Index, error) {
+func InitDB(dataDir string, config *config.DheeConfig) (bleve.Index, error) {
 	dbPath := filepath.Join(dataDir, "docstore.bleve")
 	index, err := bleve.Open(dbPath)
 

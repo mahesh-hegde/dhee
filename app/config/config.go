@@ -1,17 +1,40 @@
 package config
 
 import (
-	"github.com/mahesh-hegde/dhee/app/dictionary"
-	"github.com/mahesh-hegde/dhee/app/scripture"
+	"github.com/mahesh-hegde/dhee/app/common"
 )
+
+type AuxiliaryDefinition struct {
+	Name         string          `json:"name"`
+	ReadableName string          `json:"readable_name"`
+	Language     common.Language `json:"language"`
+}
+
+type ScriptureDefn struct {
+	Name         string                `json:"name"`
+	ReadableName string                `json:"readable_name"`
+	Description  string                `json:"description"`
+	Collector    string                `json:"collector"`
+	Hierarchy    []string              `json:"hierarchy"`
+	Auxiliaries  []AuxiliaryDefinition `json:"auxiliaries"`
+	DataFile     string                `json:"data_file"`
+}
+type DictDefn struct {
+	// A name slug used in URLs. Eg: monier-williams
+	Name string `json:"name"`
+	// A human readable name used in titles. Eg: "Monier-Williams Sanskrit-English dictionary"
+	ReadableName   string                 `json:"readable_name"`
+	SourceLanguage common.Language        `json:"source_language"`
+	TargetLanguage common.Language        `json:"target_language"`
+	WordEncoding   common.Transliteration `json:"word_encoding"`
+
+	// File with entries encoded as JSONL
+	DataFile string `json:"data_file"`
+}
 
 type DheeConfig struct {
 	InstanceName string
-	Dictionaries []dictionary.DictDefn
-	Scriptures   []scripture.ScriptureDefn
-}
-
-type DheeApplicationContext struct {
-	Conf  DheeConfig
-	Store DocStore
+	DataDir      string
+	Dictionaries []DictDefn
+	Scriptures   []ScriptureDefn
 }

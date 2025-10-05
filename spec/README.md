@@ -1,0 +1,1 @@
+This folder contains detailed specs and sometimes dumb prompts given to AI for implementation.

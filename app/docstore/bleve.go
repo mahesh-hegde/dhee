@@ -1,4 +1,4 @@
-package config
+package docstore
 
 import (
 	"github.com/blevesearch/bleve/v2/mapping"

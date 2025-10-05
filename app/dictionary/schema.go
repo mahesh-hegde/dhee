@@ -89,16 +89,3 @@ type DictionaryEntryBody struct {
 	Plain  string `json:"plain"`
 	Markup string `json:"-"`
 }
-
-type DictDefn struct {
-	// A name slug used in URLs. Eg: monier-williams
-	Name string `json:"name"`
-	// A human readable name used in titles. Eg: "Monier-Williams Sanskrit-English dictionary"
-	ReadableName   string                 `json:"readable_name"`
-	SourceLanguage common.Language        `json:"source_language"`
-	TargetLanguage common.Language        `json:"target_language"`
-	WordEncoding   common.Transliteration `json:"word_encoding"`
-
-	// File with entries encoded as JSONL
-	DataFile string `json:"data_file"`
-}
