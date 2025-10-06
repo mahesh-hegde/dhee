@@ -33,8 +33,9 @@ type DictDefn struct {
 }
 
 type DheeConfig struct {
-	InstanceName string
-	DataDir      string
-	Dictionaries []DictDefn
-	Scriptures   []ScriptureDefn
+	InstanceName string          `json:"instance_name"`
+	DataDir      string          `json:"-"`
+	Dictionaries []DictDefn      `json:"dictionaries"`
+	DefaultDict  string          `json:"default_dict"`
+	Scriptures   []ScriptureDefn `json:"scriptures"`
 }

@@ -32,7 +32,7 @@ type DictStore interface {
 
 type BleveDictStore struct {
 	idx  bleve.Index
-	conf config.DheeConfig
+	conf *config.DheeConfig
 }
 
 // Add implements DictStore.
@@ -176,7 +176,7 @@ func (b *BleveDictStore) Suggest(ctx context.Context, dictName string, s Suggest
 
 var _ DictStore = &BleveDictStore{}
 
-func NewBleveDictStore(idx bleve.Index, conf config.DheeConfig) *BleveDictStore {
+func NewBleveDictStore(idx bleve.Index, conf *config.DheeConfig) *BleveDictStore {
 	return &BleveDictStore{idx: idx, conf: conf}
 }
 

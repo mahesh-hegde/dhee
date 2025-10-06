@@ -11,7 +11,7 @@ import (
 
 type DictionaryService struct {
 	store DictStore
-	conf  config.DheeConfig
+	conf  *config.DheeConfig
 }
 
 // GetEntries takes a list of words and returns the full dictionary
@@ -51,7 +51,7 @@ func (s *DictionaryService) Related(ctx context.Context, dictName string, word s
 	return s.store.Related(ctx, dictName, word)
 }
 
-func NewDictionaryService(index bleve.Index, conf config.DheeConfig) *DictionaryService {
+func NewDictionaryService(index bleve.Index, conf *config.DheeConfig) *DictionaryService {
 	return &DictionaryService{
 		store: NewBleveDictStore(index, conf),
 		conf:  conf,

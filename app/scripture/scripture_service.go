@@ -3,6 +3,7 @@ package scripture
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"
@@ -10,15 +11,15 @@ import (
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 )
 
-type ScriptureService struct {
+type ExcerptService struct {
 	ds    dictionary.DictStore
 	store ExcerptStore
-	conf  config.DheeConfig
+	conf  *config.DheeConfig
 }
 
 type ExcerptWithWords struct {
 	E     Excerpt
-	Words map[string]dictionary.DictionaryEntry
+	Words map[string][]dictionary.DictionaryEntry
 }
 
 // Get returns the excerpts given by paths. If any of the excerpts could not be found, it returns an error.
@@ -26,10 +27,15 @@ type ExcerptWithWords struct {
 // Get also batch-fetches the dictionary words for surfaces,
 // and lemmas (stripping `-` at end for lemmas). In this process, we expect most entries do not exist
 // in the dictionary. We return only those that were found in the batch search.
-func (s *ScriptureService) Get(ctx context.Context, paths []QualifiedPath) ([]ExcerptWithWords, error) {
-	excerpts := s.store.Get(ctx, paths)
+func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) ([]ExcerptWithWords, error) {
+	excerpts, err := s.store.Get(ctx, paths)
+	if err != nil {
+		slog.Error("error retrieving excerpts", "err", err)
+		return nil, fmt.Errorf("failed to retrieve")
+	}
+
 	if len(excerpts) != len(paths) {
-		// TODO: Return a more specific error
+		slog.Error("not all excerpts could be found", "err", err)
 		return nil, fmt.Errorf("could not find all excerpts")
 	}
 
@@ -51,19 +57,17 @@ func (s *ScriptureService) Get(ctx context.Context, paths []QualifiedPath) ([]Ex
 	}
 
 	// Fetch dictionary entries. We assume the first dictionary is the one we want.
-	// TODO: Make this configurable.
-	dictName := s.conf.Dictionaries[0].Name
+	dictName := s.conf.DefaultDict
 	dictEntries, err := s.ds.Get(ctx, dictName, words)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dictionary entries: %w", err)
 	}
 
 	// Map words to their dictionary entries for quick lookup
-	wordMap := make(map[string]dictionary.DictionaryEntry)
+	wordMap := make(map[string][]dictionary.DictionaryEntry)
 	for _, entries := range dictEntries {
 		if len(entries) > 0 {
-			// If multiple entries exist, just take the first one for now.
-			wordMap[entries[0].Word] = entries[0]
+			wordMap[entries[0].Word] = entries
 		}
 	}
 
@@ -72,7 +76,7 @@ func (s *ScriptureService) Get(ctx context.Context, paths []QualifiedPath) ([]Ex
 	for _, e := range excerpts {
 		ew := ExcerptWithWords{
 			E:     e,
-			Words: make(map[string]dictionary.DictionaryEntry),
+			Words: make(map[string][]dictionary.DictionaryEntry),
 		}
 		for _, g := range e.Glossings {
 			for _, gl := range g {
@@ -92,23 +96,14 @@ func (s *ScriptureService) Get(ctx context.Context, paths []QualifiedPath) ([]Ex
 }
 
 // Search returns upto 100 Excerpts which match the search according to search parameters.
-func (s *ScriptureService) Search(ctx context.Context, search SearchParams) ([]Excerpt, error) {
+func (s *ExcerptService) Search(ctx context.Context, search SearchParams) ([]Excerpt, error) {
 	// If no scriptures are specified, search in all of them.
-	var scriptures []string
-	if len(search.Scriptures) == 0 {
-		for _, sc := range s.conf.Scriptures {
-			scriptures = append(scriptures, sc.Name)
-		}
-	} else {
-		scriptures = search.Scriptures
-	}
-
-	excerpts := s.store.Search(ctx, scriptures, search)
-	return excerpts, nil
+	excerpts, err := s.store.Search(ctx, search.Scriptures, search)
+	return excerpts, fmt.Errorf("failed to search: %w", err)
 }
 
-func NewScriptureService(index bleve.Index, conf config.DheeConfig) *ScriptureService {
-	return &ScriptureService{
+func NewScriptureService(index bleve.Index, conf *config.DheeConfig) *ExcerptService {
+	return &ExcerptService{
 		ds:    dictionary.NewBleveDictStore(index, conf),
 		store: NewBleveExcerptStore(index, conf),
 		conf:  conf,

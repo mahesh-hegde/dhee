@@ -4,23 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
+	"log/slog"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search/query"
+	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 )
 
 type ExcerptStore interface {
 	Add(ctx context.Context, scripture string, es []Excerpt) error
-	Get(ctx context.Context, paths []QualifiedPath) []Excerpt
-	Search(ctx context.Context, scriptures []string, params SearchParams) []Excerpt
+	Get(ctx context.Context, paths []QualifiedPath) ([]Excerpt, error)
+	Search(ctx context.Context, scriptures []string, params SearchParams) ([]Excerpt, error)
 }
 
 type BleveExcerptStore struct {
 	idx  bleve.Index
-	conf config.DheeConfig
+	conf *config.DheeConfig
 }
 
 // Add implements ExcerptStore.
@@ -38,21 +38,14 @@ func (b *BleveExcerptStore) Add(ctx context.Context, scripture string, es []Exce
 }
 
 // Get implements ExcerptStore.
-func (b *BleveExcerptStore) Get(ctx context.Context, paths []QualifiedPath) []Excerpt {
+func (b *BleveExcerptStore) Get(ctx context.Context, paths []QualifiedPath) ([]Excerpt, error) {
 	ids := make([]string, len(paths))
 	for i, p := range paths {
-		pathTokens := make([]string, len(p.Path))
-		for j, token := range p.Path {
-			pathTokens[j] = fmt.Sprintf("%d", token)
-		}
-		// NOTE: This assumes ReadableIndex is the same as the path joined by dots.
-		// This is true for rigveda, but might not be for others.
-		// A more robust solution would be to query by scripture and path fields.
-		ids[i] = fmt.Sprintf("%s:%s", p.Scripture, strings.Join(pathTokens, "."))
+		ids[i] = fmt.Sprintf("%s:%s", p.Scripture, common.PathToString(p.Path))
 	}
 
 	if len(ids) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	query := bleve.NewDocIDQuery(ids)
@@ -62,40 +55,43 @@ func (b *BleveExcerptStore) Get(ctx context.Context, paths []QualifiedPath) []Ex
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {
-		log.Printf("bleve search failed: %v", err)
-		return nil
+		return nil, err
 	}
 
 	var excerpts []Excerpt
 	for _, hit := range searchResults.Hits {
 		e, err := docToExcerpt(hit.Fields)
 		if err != nil {
-			log.Printf("failed to convert doc to excerpt: %v", err)
-			continue
+			return nil, err
 		}
 		excerpts = append(excerpts, e)
 	}
-
-	return excerpts
+	return excerpts, nil
 }
 
 // Search implements ExcerptStore.
-func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, params SearchParams) []Excerpt {
+func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, params SearchParams) ([]Excerpt, error) {
 	var scriptureQueries []query.Query
+
 	for _, s := range scriptures {
 		q := bleve.NewTermQuery(s)
 		q.SetField("scripture")
 		scriptureQueries = append(scriptureQueries, q)
 	}
-	scriptureQuery := bleve.NewDisjunctionQuery(scriptureQueries...)
+	var scriptureQuery query.Query = bleve.NewMatchAllQuery()
+	if len(scriptures) != 0 {
+		scriptureQuery = bleve.NewDisjunctionQuery(scriptureQueries...)
+	}
 
+	// TODO: Support all kinds of search
 	var contentQuery query.Query
 	if params.Q != "" {
 		sourceQuery := bleve.NewMatchQuery(params.Q)
 		sourceQuery.SetField("source_text")
 		romanQuery := bleve.NewMatchQuery(params.Q)
 		romanQuery.SetField("roman_text")
-		// TODO: Make search fields configurable
+		auxQuery := bleve.NewMatchQuery(params.Q)
+		auxQuery.SetField("auxiliaries.*")
 		contentQuery = bleve.NewDisjunctionQuery(sourceQuery, romanQuery)
 	}
 
@@ -106,26 +102,25 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {
-		log.Printf("bleve search failed: %v", err)
-		return nil
+		return nil, err
 	}
 
 	var excerpts []Excerpt
 	for _, hit := range searchResults.Hits {
 		e, err := docToExcerpt(hit.Fields)
 		if err != nil {
-			log.Printf("failed to convert doc to excerpt: %v", err)
+			slog.Info("failed to convert doc to excerpt", "err", err)
 			continue
 		}
 		excerpts = append(excerpts, e)
 	}
 
-	return excerpts
+	return excerpts, nil
 }
 
 var _ ExcerptStore = &BleveExcerptStore{}
 
-func NewBleveExcerptStore(idx bleve.Index, conf config.DheeConfig) *BleveExcerptStore {
+func NewBleveExcerptStore(idx bleve.Index, conf *config.DheeConfig) *BleveExcerptStore {
 	return &BleveExcerptStore{idx: idx, conf: conf}
 }
 
@@ -133,7 +128,7 @@ func NewBleveExcerptStore(idx bleve.Index, conf config.DheeConfig) *BleveExcerpt
 // This is complex because of nested structs and slices. Bleve flattens the structure.
 // A more robust way would be to store the original JSON and retrieve that.
 // For now, we reconstruct it manually.
-func docToExcerpt(fields map[string]interface{}) (Excerpt, error) {
+func docToExcerpt(fields map[string]any) (Excerpt, error) {
 	// A trick to avoid manual mapping: convert map to JSON bytes, then unmarshal.
 	// This works if the field names in the map match the JSON tags in the struct.
 	bytes, err := json.Marshal(fields)
