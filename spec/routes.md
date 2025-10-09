@@ -4,7 +4,7 @@ Routes have to be controlled and validated using golang echo server framework.
 
 Controller methods on `DheeController` need to be created for the following routes. Each of them should validate the parameters and call the appropriate service method.
 
-For each controller method (unless a JSON-output is indicated), a stub template (with no content but taking a .data parameter and rendering it as code block for inspection) should be created and called from the controller endpoint. We will take up the frontend later.
+For each controller method (unless a JSON-output is indicated), a stub template (with no content but taking a .data parameter and rendering it as code block for inspection) should be created in template/ folder and called from the controller endpoint. We will take up the frontend later.
 
 ## get excerpt (s)
 
@@ -66,3 +66,5 @@ StartServer(controller DheeController, config DheeConfig, host int, port int)
 ```
 
 It should setup and start the server on specified bind host and port. `StartServer` call should be the only addition to `main.go`.
+
+finally, do not add additional dependencies without asking. We are very strict about supply chain

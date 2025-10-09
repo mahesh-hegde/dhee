@@ -12,6 +12,7 @@ import (
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/docstore"
 	"github.com/mahesh-hegde/dhee/app/scripture"
+	"github.com/mahesh-hegde/dhee/app/server"
 	"github.com/spf13/pflag"
 )
 
@@ -112,10 +113,13 @@ func runServer() {
 	conf := readConfig(dataDir)
 
 	fmt.Printf("Starting server on %s:%d\n", address, port)
-	_, err := docstore.InitDB(dataDir, conf)
+	index, err := docstore.InitDB(dataDir, conf)
 	if err != nil {
 		slog.Error("error while initializing DB", "err", err)
 	}
+
+	controller := server.NewDheeController(index, conf)
+	server.StartServer(controller, conf, address, port)
 }
 
 func runIndex() {

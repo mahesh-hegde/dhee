@@ -19,6 +19,7 @@ const (
 	TlIAST   Transliteration = "iast"
 	TlHK     Transliteration = "hk"
 	TlNagari Transliteration = "dn"
+	TlSLP1   Transliteration = "slp1"
 )
 
 type SearchMode string
