@@ -1,0 +1,491 @@
+{
+  "mappings": {
+    "slp1_to_iast": {
+      "vowels": {
+        "a": "a",
+        "A": "ā",
+        "i": "i",
+        "I": "ī",
+        "u": "u",
+        "U": "ū",
+        "f": "ṛ",
+        "F": "ṝ",
+        "x": "ḷ",
+        "X": "ḹ",
+        "è": "è",
+        "e": "e",
+        "E": "ai",
+        "ò": "ò",
+        "o": "o",
+        "O": "au"
+      },
+      "yogavaahas": {
+        "M": "ṃ",
+        "H": "ḥ",
+        "~": "~",
+        "M£": "m̐"
+      },
+      "virama": {
+        "": ""
+      },
+      "consonants": {
+        "k": "k",
+        "K": "kh",
+        "g": "g",
+        "G": "gh",
+        "N": "ṅ",
+        "c": "c",
+        "C": "ch",
+        "j": "j",
+        "J": "jh",
+        "Y": "ñ",
+        "w": "ṭ",
+        "W": "ṭh",
+        "q": "ḍ",
+        "Q": "ḍh",
+        "R": "ṇ",
+        "t": "t",
+        "T": "th",
+        "d": "d",
+        "D": "dh",
+        "n": "n",
+        "p": "p",
+        "P": "ph",
+        "b": "b",
+        "B": "bh",
+        "m": "m",
+        "y": "y",
+        "r": "r",
+        "l": "l",
+        "v": "v",
+        "S": "ś",
+        "z": "ṣ",
+        "s": "s",
+        "h": "h",
+        "L": "ḻ",
+        "kz": "kṣ",
+        "jY": "jñ"
+      },
+      "symbols": {
+        "0": "0",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6",
+        "7": "7",
+        "8": "8",
+        "9": "9",
+        "AUM": "oṃ",
+        "'": "'",
+        ".": "|",
+        "..": "||"
+      },
+      "accents": {
+        "̭": "̭",
+        "\\": "॒",
+        "^": "̀",
+        "/": "́",
+        "²": "²",
+        "³": "³",
+        "⁴": "⁴",
+        "⁵": "⁵",
+        "⁶": "⁶",
+        "⁷": "⁷",
+        "⁸": "⁸",
+        "⁹": "⁹",
+        "꣪": "꣪",
+        "꣫": "꣫",
+        "꣬": "꣬",
+        "꣭": "꣭",
+        "꣮": "꣮",
+        "꣯": "꣯",
+        "꣰": "꣰",
+        "꣱": "꣱"
+      },
+      "extra_consonants": {
+        "k0": "q",
+        "K0": "k͟h",
+        "g0": "ġ",
+        "j0": "z",
+        "q0": "r̤",
+        "Q0": "r̤h",
+        "P0": "f",
+        "Y0": "ẏ",
+        "r2": "ṟ",
+        "L0": "l̤"
+      },
+      "shortcuts": {}
+    },
+    "slp1_to_hk": {
+      "vowels": {
+        "a": "a",
+        "A": "A",
+        "i": "i",
+        "I": "I",
+        "u": "u",
+        "U": "U",
+        "f": "R",
+        "F": "RR",
+        "x": "lR",
+        "X": "lRR",
+        "è": "è",
+        "e": "e",
+        "E": "ai",
+        "ò": "ò",
+        "o": "o",
+        "O": "au"
+      },
+      "yogavaahas": {
+        "M": "M",
+        "H": "H",
+        "~": "~"
+      },
+      "virama": {
+        "": ""
+      },
+      "consonants": {
+        "k": "k",
+        "K": "kh",
+        "g": "g",
+        "G": "gh",
+        "N": "G",
+        "c": "c",
+        "C": "ch",
+        "j": "j",
+        "J": "jh",
+        "Y": "J",
+        "w": "T",
+        "W": "Th",
+        "q": "D",
+        "Q": "Dh",
+        "R": "N",
+        "t": "t",
+        "T": "th",
+        "d": "d",
+        "D": "dh",
+        "n": "n",
+        "p": "p",
+        "P": "ph",
+        "b": "b",
+        "B": "bh",
+        "m": "m",
+        "y": "y",
+        "r": "r",
+        "l": "l",
+        "v": "v",
+        "S": "z",
+        "z": "S",
+        "s": "s",
+        "h": "h",
+        "L": "L",
+        "kz": "kS",
+        "jY": "jJ"
+      },
+      "symbols": {
+        "0": "0",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6",
+        "7": "7",
+        "8": "8",
+        "9": "9",
+        "AUM": "OM",
+        "'": "'",
+        ".": "|",
+        "..": "||"
+      },
+      "accents": {},
+      "extra_consonants": {
+        "k0": "q",
+        "K0": "qh",
+        "g0": "g2",
+        "j0": "z2",
+        "q0": "r3",
+        "Q0": "r3h",
+        "P0": "f",
+        "Y0": "Y",
+        "r2": "r2",
+        "L0": "zh"
+      },
+      "shortcuts": {}
+    },
+    "slp1_to_devanagari": {
+      "vowels": {
+        "a": "अ",
+        "A": "आ",
+        "i": "इ",
+        "I": "ई",
+        "u": "उ",
+        "U": "ऊ",
+        "f": "ऋ",
+        "F": "ॠ",
+        "x": "ऌ",
+        "X": "ॡ",
+        "è": "ऎ",
+        "e": "ए",
+        "E": "ऐ",
+        "ò": "ऒ",
+        "o": "ओ",
+        "O": "औ"
+      },
+      "yogavaahas": {
+        "M": "ं",
+        "H": "ः",
+        "~": "ँ",
+        "M£": "ꣳ"
+      },
+      "virama": {
+        "": "्"
+      },
+      "consonants": {
+        "k": "क",
+        "K": "ख",
+        "g": "ग",
+        "G": "घ",
+        "N": "ङ",
+        "c": "च",
+        "C": "छ",
+        "j": "ज",
+        "J": "झ",
+        "Y": "ञ",
+        "w": "ट",
+        "W": "ठ",
+        "q": "ड",
+        "Q": "ढ",
+        "R": "ण",
+        "t": "त",
+        "T": "थ",
+        "d": "द",
+        "D": "ध",
+        "n": "न",
+        "p": "प",
+        "P": "फ",
+        "b": "ब",
+        "B": "भ",
+        "m": "म",
+        "y": "य",
+        "r": "र",
+        "l": "ल",
+        "v": "व",
+        "S": "श",
+        "z": "ष",
+        "s": "स",
+        "h": "ह",
+        "L": "ळ",
+        "kz": "क्ष",
+        "jY": "ज्ञ"
+      },
+      "symbols": {
+        "0": "०",
+        "1": "१",
+        "2": "२",
+        "3": "३",
+        "4": "४",
+        "5": "५",
+        "6": "६",
+        "7": "७",
+        "8": "८",
+        "9": "९",
+        "AUM": "ॐ",
+        "'": "ऽ",
+        ".": "।",
+        "..": "॥"
+      },
+      "accents": {
+        "̭": "॑",
+        "\\": "॒",
+        "^": "᳡",
+        "/": "꣡",
+        "²": "꣢",
+        "³": "꣣",
+        "⁴": "꣤",
+        "⁵": "꣥",
+        "⁶": "꣦",
+        "⁷": "꣧",
+        "⁸": "꣨",
+        "⁹": "꣩",
+        "꣪": "꣪",
+        "꣫": "꣫",
+        "꣬": "꣬",
+        "꣭": "꣭",
+        "꣮": "꣮",
+        "꣯": "꣯",
+        "꣰": "꣰",
+        "꣱": "꣱"
+      },
+      "extra_consonants": {
+        "k0": "क़",
+        "K0": "ख़",
+        "g0": "ग़",
+        "j0": "ज़",
+        "q0": "ड़",
+        "Q0": "ढ़",
+        "P0": "फ़",
+        "Y0": "य़",
+        "r2": "ऱ",
+        "L0": "ऴ"
+      },
+      "shortcuts": {
+        "|": "Lh"
+      }
+    }
+  },
+  "unmapped": {
+    "iast": [
+      {
+        "category": "shortcuts",
+        "slp1": "|",
+        "devanagari": "Lh",
+        "reason": "no_iast_equivalent"
+      }
+    ],
+    "hk": [
+      {
+        "category": "yogavaahas",
+        "slp1": "M£",
+        "devanagari": "ꣳ",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "̭",
+        "devanagari": "॑",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "\\",
+        "devanagari": "॒",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "^",
+        "devanagari": "᳡",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "/",
+        "devanagari": "꣡",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "²",
+        "devanagari": "꣢",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "³",
+        "devanagari": "꣣",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "⁴",
+        "devanagari": "꣤",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "⁵",
+        "devanagari": "꣥",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "⁶",
+        "devanagari": "꣦",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "⁷",
+        "devanagari": "꣧",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "⁸",
+        "devanagari": "꣨",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "⁹",
+        "devanagari": "꣩",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "꣪",
+        "devanagari": "꣪",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "꣫",
+        "devanagari": "꣫",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "꣬",
+        "devanagari": "꣬",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "꣭",
+        "devanagari": "꣭",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "꣮",
+        "devanagari": "꣮",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "꣯",
+        "devanagari": "꣯",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "꣰",
+        "devanagari": "꣰",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "accents",
+        "slp1": "꣱",
+        "devanagari": "꣱",
+        "reason": "no_hk_equivalent"
+      },
+      {
+        "category": "shortcuts",
+        "slp1": "|",
+        "devanagari": "Lh",
+        "reason": "no_hk_equivalent"
+      }
+    ],
+    "devanagari": []
+  },
+  "stats": {
+    "slp1_to_iast_count": 101,
+    "slp1_to_hk_count": 80,
+    "slp1_to_devanagari_count": 102,
+    "unmapped_iast": 1,
+    "unmapped_hk": 22,
+    "unmapped_devanagari": 0
+  }
+}
