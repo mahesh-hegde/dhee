@@ -7,14 +7,17 @@ import (
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"
+	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
+	"github.com/mahesh-hegde/dhee/app/transliteration"
 )
 
 type ExcerptService struct {
-	ds    dictionary.DictStore
-	store ExcerptStore
-	conf  *config.DheeConfig
+	ds             dictionary.DictStore
+	store          ExcerptStore
+	conf           *config.DheeConfig
+	transliterator *transliteration.Transliterator
 }
 
 type ExcerptWithWords struct {
@@ -97,15 +100,26 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) ([]Exce
 
 // Search returns upto 100 Excerpts which match the search according to search parameters.
 func (s *ExcerptService) Search(ctx context.Context, search SearchParams) ([]Excerpt, error) {
+	iastQuery, err := s.transliterator.Convert(search.Q, common.Transliteration(search.Tl), common.TlIAST)
+	if err != nil {
+		slog.Warn("transliteration failed for scripture search", "query", search.Q, "err", err)
+		iastQuery = search.Q
+	}
+	search.Q = iastQuery
+
 	// If no scriptures are specified, search in all of them.
 	excerpts, err := s.store.Search(ctx, search.Scriptures, search)
-	return excerpts, fmt.Errorf("failed to search: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search: %w", err)
+	}
+	return excerpts, nil
 }
 
-func NewScriptureService(index bleve.Index, conf *config.DheeConfig) *ExcerptService {
+func NewScriptureService(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *ExcerptService {
 	return &ExcerptService{
-		ds:    dictionary.NewBleveDictStore(index, conf),
-		store: NewBleveExcerptStore(index, conf),
-		conf:  conf,
+		ds:             dictionary.NewBleveDictStore(index, conf),
+		store:          NewBleveExcerptStore(index, conf),
+		conf:           conf,
+		transliterator: transliterator,
 	}
 }

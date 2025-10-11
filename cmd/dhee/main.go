@@ -13,6 +13,7 @@ import (
 	"github.com/mahesh-hegde/dhee/app/docstore"
 	"github.com/mahesh-hegde/dhee/app/scripture"
 	"github.com/mahesh-hegde/dhee/app/server"
+	"github.com/mahesh-hegde/dhee/app/transliteration"
 	"github.com/spf13/pflag"
 )
 
@@ -118,7 +119,13 @@ func runServer() {
 		slog.Error("error while initializing DB", "err", err)
 	}
 
-	controller := server.NewDheeController(index, conf)
+	transliterator, err := transliteration.NewTransliterator(transliteration.TlOptions{})
+	if err != nil {
+		slog.Error("error while initializing transliterator", "err", err)
+		os.Exit(1)
+	}
+
+	controller := server.NewDheeController(index, conf, transliterator)
 	server.StartServer(controller, conf, address, port)
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/scripture"
+	"github.com/mahesh-hegde/dhee/app/transliteration"
 )
 
 type DheeController struct {
@@ -18,10 +19,10 @@ type DheeController struct {
 	es *scripture.ExcerptService
 }
 
-func NewDheeController(index bleve.Index, conf *config.DheeConfig) *DheeController {
+func NewDheeController(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DheeController {
 	return &DheeController{
-		ds: dictionary.NewDictionaryService(index, conf),
-		es: scripture.NewScriptureService(index, conf),
+		ds: dictionary.NewDictionaryService(index, conf, transliterator),
+		es: scripture.NewScriptureService(index, conf, transliterator),
 	}
 }
 

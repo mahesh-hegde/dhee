@@ -64,8 +64,9 @@ type DictionaryEntry struct {
 	Word           string              `json:"word"`
 	HTag           string              `json:"htag"`
 	Id             string              `json:"id"`
-	IAST           string              `json:"iast,omitempty"`
-	Devanagari     string              `json:"devanagari,omitempty"`
+	IAST           string              `json:"iast"`
+	Devanagari     string              `json:"devanagari"`
+	HK             string              `json:"hk"`
 	Variants       []string            `json:"variants,omitempty"`
 	PrintedPageNum string              `json:"print_page"`
 	Cognates       []string            `json:"cognates,omitempty"`
