@@ -23,6 +23,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	logLevel := os.Getenv("LOG_LEVEL")
+	slogLevel := slog.LevelInfo
+	switch logLevel {
+	case "DEBUG", "debug":
+		slogLevel = slog.LevelDebug
+	case "WARN", "warn":
+		slogLevel = slog.LevelWarn
+	}
+
+	slog.SetLogLoggerLevel(slogLevel)
+
 	command := os.Args[1]
 
 	switch command {

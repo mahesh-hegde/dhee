@@ -14,6 +14,9 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/mahesh-hegde/dhee/app/common"
+	"github.com/mahesh-hegde/dhee/app/transliteration"
 )
 
 type MwXmlEntryBody struct {
@@ -46,12 +49,33 @@ func isEntryTag(tag string) bool {
 	return matched
 }
 
-func xmlToDictionaryEntry(xml MwXmlEntry, lastPageNum string) DictionaryEntry {
+func xmlToDictionaryEntry(tl *transliteration.Transliterator, xml MwXmlEntry, lastPageNum string) DictionaryEntry {
 	entry := DictionaryEntry{
 		Word:           xml.Header.Key1,
 		PrintedPageNum: xml.Tail.PC,
 		HTag:           xml.Tag,
 		Id:             xml.Tail.L,
+	}
+
+	iast, err := tl.Convert(entry.Word, common.TlSLP1, common.TlIAST)
+	if err == nil {
+		entry.IAST = iast
+	} else {
+		slog.Debug("unable to convert word to IAST", "word", entry.Word)
+	}
+
+	hk, err := tl.Convert(entry.Word, common.TlSLP1, common.TlHK)
+	if err == nil {
+		entry.HK = hk
+	} else {
+		slog.Debug("unable to convert word to kyoto-harvard", "word", entry.Word)
+	}
+
+	dn, err := tl.Convert(entry.Word, common.TlSLP1, common.TlNagari)
+	if err == nil {
+		entry.Devanagari = dn
+	} else {
+		slog.Debug("unable to convert word to devanagari", "word", entry.Word)
 	}
 
 	if xml.Header.Key2 != "" && xml.Header.Key2 != entry.Word {
@@ -209,7 +233,6 @@ func handleS(_ xml.StartElement, decoder *xml.Decoder, plainText *strings.Builde
 	// Remove if equal to word or in otherSpellings
 	if content != entry.Word {
 		found := slices.Contains(entry.Variants, content)
-		// TODO: convert to IAST always
 		if !found {
 			plainText.WriteString(content)
 		}
@@ -427,6 +450,11 @@ func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
+	tl, err := transliteration.NewTransliterator(transliteration.TlOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to instantiate transliterator: %w", err)
+	}
+
 	// Open input file
 	inFile, err := os.Open(inputPath)
 	if err != nil {
@@ -469,7 +497,7 @@ func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 				entry.Tag = startElem.Name.Local
 
 				// Convert to dictionary entry
-				dictEntry := xmlToDictionaryEntry(entry, lastPageNum)
+				dictEntry := xmlToDictionaryEntry(tl, entry, lastPageNum)
 
 				// Update last page number
 				if dictEntry.PrintedPageNum != "" {
