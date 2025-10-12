@@ -114,11 +114,9 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 
 	dictMapping.AddFieldMappingsAt("htag", mapping.NewKeywordFieldMapping())
 	dictMapping.AddFieldMappingsAt("id", mapping.NewKeywordFieldMapping())
+	dictMapping.AddFieldMappingsAt("iast", mapping.NewKeywordFieldMapping())
+	dictMapping.AddFieldMappingsAt("hk", mapping.NewKeywordFieldMapping())
 	dictMapping.AddFieldMappingsAt("dict_name", mapping.NewKeywordFieldMapping())
-
-	iastField := mapping.NewTextFieldMapping()
-	iastField.Analyzer = "sanskrit_ws"
-	dictMapping.AddFieldMappingsAt("iast", iastField)
 
 	devField := mapping.NewTextFieldMapping()
 	devField.Analyzer = "sanskrit_ws"
@@ -127,6 +125,10 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	varField := mapping.NewTextFieldMapping()
 	varField.Analyzer = "sanskrit_ws"
 	dictMapping.AddFieldMappingsAt("variants", varField)
+
+	varIastField := mapping.NewTextFieldMapping()
+	varIastField.Analyzer = "sanskrit_ws"
+	dictMapping.AddFieldMappingsAt("variants_iast", varIastField)
 
 	dictMapping.AddFieldMappingsAt("print_page", mapping.NewKeywordFieldMapping())
 	dictMapping.AddFieldMappingsAt("cognates", mapping.NewTextFieldMapping())

@@ -97,6 +97,16 @@ func xmlToDictionaryEntry(tl *transliteration.Transliterator, xml MwXmlEntry, la
 	// Parse body into segments
 	parseBody(xml.Body.Content, &entry)
 
+	// convert otherspellins to IAST for ease of lookup from canonical scriptures
+	for _, va := range entry.Variants {
+		iast, err := tl.Convert(va, common.TlSLP1, common.TlIAST)
+		if err != nil {
+			slog.Debug("cannot convert variant to IAST", "word", va)
+		} else {
+			entry.VariantsIAST = append(entry.VariantsIAST, iast)
+		}
+	}
+
 	return entry
 }
 

@@ -68,6 +68,7 @@ type DictionaryEntry struct {
 	Devanagari     string              `json:"devanagari"`
 	HK             string              `json:"hk"`
 	Variants       []string            `json:"variants,omitempty"`
+	VariantsIAST   []string            `json:"variants_iast,omitempty"`
 	PrintedPageNum string              `json:"print_page"`
 	Cognates       []string            `json:"cognates,omitempty"`
 	LitRefs        []string            `json:"lit_refs,omitempty"`

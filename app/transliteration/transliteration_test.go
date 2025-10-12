@@ -22,6 +22,7 @@ func TestTransliterator_Convert(t *testing.T) {
 	}{
 		// SLP1 to others
 		{"SLP1 to IAST", "saMskfta", common.TlSLP1, common.TlIAST, "saṃskṛta", false},
+		{"SLP1 to IAST with hyphen", "saMskfta-BAzA", common.TlSLP1, common.TlIAST, "saṃskṛta-bhāṣā", false},
 		{"SLP1 to HK", "saMskfta", common.TlSLP1, common.TlHK, "saMskRta", false},
 		{"SLP1 to Devanagari", "saMskftam", common.TlSLP1, common.TlNagari, "संस्कृतम्", false},
 		{"SLP1 to Devanagari Complex", "rAmaH kfzRaSca", common.TlSLP1, common.TlNagari, "रामः कृष्णश्च", false},
