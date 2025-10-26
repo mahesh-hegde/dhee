@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sort"
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"
@@ -94,6 +95,17 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) ([]Exce
 		}
 		result = append(result, ew)
 	}
+
+	sort.Slice(result, func(i, j int) bool {
+		p1 := result[i].Path
+		p2 := result[j].Path
+		for k := 0; k < len(p1) && k < len(p2); k++ {
+			if p1[k] != p2[k] {
+				return p1[k] < p2[k]
+			}
+		}
+		return len(p1) < len(p2)
+	})
 
 	return result, nil
 }
