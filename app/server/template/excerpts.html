@@ -42,9 +42,9 @@
             {{ $name }}
         </div>
         <div class="card-body">
-            {{ range $i, $excerpt := $ }}
-            <p><strong>{{ $excerpt.ReadableIndex }}</strong></p>
-            {{ $auxiliary := index $excerpt.Auxiliaries $name }}
+            {{ range . }}
+            <p><strong>{{ .ReadableIndex }}</strong></p>
+            {{ $auxiliary := index .Auxiliaries $name }}
             {{ range $auxiliary.Text }}
             <p>{{ . }}</p>
             {{ end }}
