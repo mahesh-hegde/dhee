@@ -30,4 +30,6 @@ Design goals
 
 Much of the data present now is taken from from [VedaWeb data](https://github.com/VedaWebProject/vedaweb-data/tree/main/rigveda) and [Monier Williams dictionary](https://www.sanskrit-lexicon.uni-koeln.de/) by Cologne university.
 
-As of present state of this project (WIP), Cologne VedaWeb's tekst may be indeed a better resource for any serious analysis.
+Some transliteration data was taken / adapted from [indic-translation](https://github.com/indic-transliteration/common_maps).
+
+As of present state of this project (WIP), Cologne VedaWeb's `tekst` may be indeed a better resource for any serious analysis.

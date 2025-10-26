@@ -1,0 +1,45 @@
+{
+    "instance_name": "Dhee by Apratiratha",
+    "dictionaries": [
+        {
+            "name": "monier-williams",
+            "readable_name": "Monier-Williams Sanskrit-English Dictionary",
+            "source_language": "sanskrit",
+            "target_language": "english",
+            "word_encoding": "slp1",
+            "data_file": "mw.jsonl"
+        }
+    ],
+    "default_dictionary": "monier-williams",
+    "scriptures": [
+        {
+            "name": "rigveda",
+            "readable_name": "The Rig Veda",
+            "description": "The Rig Veda with linguistic data",
+            "collector": "VedaWeb project",
+            "hierarchy": [
+                "Mandala",
+                "Sukta",
+                "Rik"
+            ],
+            "auxiliaries": [
+                {
+                    "name": "pada",
+                    "readable_name": "Padapāṭha",
+                    "language": "sanskrit"
+                },
+                {
+                    "name": "griffith",
+                    "readable_name": "English Translation by Griffith",
+                    "language": "english"
+                },
+                {
+                    "name": "oldenberg",
+                    "readable_name": "Oldenberg's translation",
+                    "language": "english"
+                }
+            ],
+            "data_file": "rv.jsonl"
+        }
+    ]
+}
