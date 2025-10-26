@@ -23,6 +23,8 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 
 	e.GET("/", controller.GetHome)
 	e.GET("/scriptures/:scriptureName/excerpts/:path", controller.GetExcerpts)
+	e.GET("/scriptures/:scriptureName/hierarchy", controller.GetHierarchy)
+	e.GET("/scriptures/:scriptureName/hierarchy/:path", controller.GetHierarchy).Name = "hierarchy"
 	e.GET("/scripture-search", controller.SearchScripture)
 	e.GET("/dictionaries/:dictionaryName/words/:word", controller.GetDictionaryWord)
 	e.GET("/dictionaries/:dictionaryName/search", controller.SearchDictionary)

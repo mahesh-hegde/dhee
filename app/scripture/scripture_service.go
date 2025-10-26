@@ -122,6 +122,8 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		*verseIdx += 1
 	}
 
+	up := first[:len(first)-1]
+
 	afterIds := []string{}
 	last := paths[len(paths)-1].Path
 	if len(last) < 1 {
@@ -142,6 +144,8 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		Scripture: scri,
 		Previous:  prev,
 		Next:      next,
+		Up:        common.PathToString(up),
+		UpType:    scri.Hierarchy[len(up)-1],
 	}, nil
 }
 
@@ -160,6 +164,15 @@ func (s *ExcerptService) Search(ctx context.Context, search SearchParams) (*Exce
 		return nil, fmt.Errorf("failed to search: %w", err)
 	}
 	return &ExcerptSearchData{Excerpts: excerpts, Search: search}, nil
+}
+
+// GetHier returns the hierarchy for a given path.
+func (s *ExcerptService) GetHier(ctx context.Context, scriptureName string, path []int) (*Hierarchy, error) {
+	scri, ok := s.scriptureMap[scriptureName]
+	if !ok {
+		return nil, fmt.Errorf("scripture not found: %s", scriptureName)
+	}
+	return s.store.GetHier(ctx, &scri, path)
 }
 
 func NewScriptureService(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *ExcerptService {

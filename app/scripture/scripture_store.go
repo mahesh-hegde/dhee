@@ -45,33 +45,44 @@ func (b *BleveExcerptStore) GetHier(ctx context.Context, scripture *config.Scrip
 		return nil, err
 	}
 	plen := len(path)
-	knownChildren := make([]int, 0)
+	known := make(map[int]struct{}, 0)
+	childs := make([]int, 0)
 	for _, hit := range searchResults.Hits {
 		id := hit.ID
-		_, pth, ok := strings.Cut(id, ":")
+		_, pthStr, ok := strings.Cut(id, ":")
 		if !ok {
 			continue
 		}
-		chld, err := common.StringToPath(pth)
+		chldPath, err := common.StringToPath(pthStr)
 		if err != nil {
 			continue
 		}
-		if len(chld) >= plen {
+		if len(chldPath) <= plen {
 			continue
 		}
-		knownChildren = append(knownChildren, chld[plen])
+		chld := chldPath[plen]
+		if _, seen := known[chld]; seen {
+			continue
+		}
+		known[chld] = struct{}{}
+		childs = append(childs, chld)
 	}
 	lineage := make([]HierParent, 0)
 	for level, num := range path {
-		hierParent := HierParent{Type: scripture.Hierarchy[level], Number: num}
+		hierParent := HierParent{
+			Type:     scripture.Hierarchy[level],
+			Number:   num,
+			FullPath: common.PathToString(path[:level+1]),
+		}
 		lineage = append(lineage, hierParent)
 	}
-	sortedChildren := sort.IntSlice(knownChildren)
+	sort.Ints(childs)
 	return &Hierarchy{
 		Scripture: scripture,
 		Path:      lineage,
 		ChildType: scripture.Hierarchy[plen],
-		Children:  sortedChildren,
+		Children:  childs,
+		IsLeaf:    len(lineage)+1 == len(scripture.Hierarchy),
 	}, nil
 }
 

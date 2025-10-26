@@ -13,6 +13,9 @@
         {{ else }}
         <span></span>
         {{ end }}
+        {{ if .Up }}
+        <a href="{{ .Up }}" class="btn btn-info">&uarr; {{ .UpType }} {{ .Up }} </a>
+        {{ end }}
         {{ if .Next }}
         <a href="{{ .Next }}" class="btn btn-primary">Next ({{ .Next }}) &rarr;</a>
         {{ else }}
@@ -73,6 +76,9 @@
         <a href="{{ .Previous }}" class="btn btn-primary">&larr; Previous ({{ .Previous }})</a>
         {{ else }}
         <span></span>
+        {{ end }}
+        {{ if .Up }}
+        <a href="{{ .Up }}" class="btn btn-info">&uarr; {{ .UpType }} {{ .Up }} </a>
         {{ end }}
         {{ if .Next }}
         <a href="{{ .Next }}" class="btn btn-primary">Next ({{ .Next }}) &rarr;</a>

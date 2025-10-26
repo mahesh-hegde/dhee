@@ -35,9 +35,24 @@ func (c *DheeController) GetHome(ctx echo.Context) error {
 
 func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 	scriptureName := ctx.Param("scriptureName")
+
 	pathStr := ctx.Param("path")
+	if pathStr == "" {
+		pathStr = ctx.QueryParam("path")
+	}
 
 	parts := strings.Split(pathStr, ".")
+
+	scri := c.conf.GetScriptureByName(scriptureName)
+
+	if scri == nil {
+		return echo.NewHTTPError(404, "invalid text name")
+	}
+
+	if len(parts) < len(scri.Hierarchy) {
+		ctx.Redirect(307, ctx.Echo().Reverse("hierarchy", scriptureName, pathStr))
+	}
+
 	lastPart := parts[len(parts)-1]
 
 	var paths []scripture.QualifiedPath
@@ -90,6 +105,30 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 	}
 
 	return ctx.Render(http.StatusOK, "excerpts", excerpts)
+}
+
+func (c *DheeController) GetHierarchy(ctx echo.Context) error {
+	scriptureName := ctx.Param("scriptureName")
+	pathStr := ctx.Param("path")
+	var path []int
+	if pathStr != "" {
+		parts := strings.Split(pathStr, ".")
+		for _, part := range parts {
+			i, err := strconv.Atoi(part)
+			if err != nil {
+				return ctx.String(http.StatusBadRequest, "Invalid path")
+			}
+			path = append(path, i)
+		}
+	}
+
+	hier, err := c.es.GetHier(ctx.Request().Context(), scriptureName, path)
+	if err != nil {
+		slog.Error("error getting hierarchy", "err", err)
+		return ctx.String(http.StatusInternalServerError, "Failed to get hierarchy")
+	}
+
+	return ctx.Render(http.StatusOK, "hierarchy", hier)
 }
 
 func (c *DheeController) SearchScripture(ctx echo.Context) error {

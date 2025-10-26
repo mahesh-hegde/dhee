@@ -40,3 +40,12 @@ type DheeConfig struct {
 	Scriptures   []ScriptureDefn `json:"scriptures"`
 	Fuzziness    int             `json:"fuzziness"`
 }
+
+func (c *DheeConfig) GetScriptureByName(name string) *ScriptureDefn {
+	for _, s := range c.Scriptures {
+		if s.Name == name {
+			return &s
+		}
+	}
+	return nil
+}

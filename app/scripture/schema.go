@@ -78,8 +78,9 @@ type Excerpt struct {
 }
 
 type HierParent struct {
-	Number int
-	Type   string
+	Number   int
+	FullPath string
+	Type     string
 }
 
 type Hierarchy struct {
@@ -87,6 +88,7 @@ type Hierarchy struct {
 	Path      []HierParent
 	ChildType string
 	Children  []int
+	IsLeaf    bool
 }
 
 type HighlightedExcerpt struct {
@@ -107,6 +109,8 @@ type ExcerptTemplateData struct {
 	Scripture config.ScriptureDefn
 	Next      string
 	Previous  string
+	Up        string
+	UpType    string
 }
 
 type ExcerptSearchData struct {

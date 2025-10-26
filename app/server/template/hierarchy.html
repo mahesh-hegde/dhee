@@ -1,0 +1,41 @@
+{{define "hierarchy"}}
+<div class="container mt-4">
+    <h2>Hierarchy View: {{.Scripture.ReadableName}}</h2>
+    {{ $pathPrefix := "" }}
+
+    {{ if .Path }}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/scriptures/{{.Scripture.Name}}/hierarchy">{{ .Scripture.Name }}</a>
+            </li>
+            {{range $i, $p := .Path}}
+            <li class="breadcrumb-item">
+                <a href="/scriptures/{{$.Scripture.Name}}/hierarchy/{{ $p.FullPath }}">{{$p.Type}}
+                    {{$p.Number}}</a>
+            </li>
+            {{ $pathPrefix = (printf "%s." $p.FullPath) }}
+            {{end}}
+        </ol>
+    </nav>
+    {{end}}
+
+    <div class="list-group">
+        {{ range .Children }}
+        {{ if $.IsLeaf }}
+        <a href="/scriptures/{{$.Scripture.Name}}/excerpts/{{$pathPrefix}}{{.}}"
+            class="list-group-item list-group-item-action">
+            {{$.ChildType}} {{.}}
+        </a>
+        {{ else }}
+        <a href="/scriptures/{{$.Scripture.Name}}/hierarchy/{{$pathPrefix}}{{.}}"
+            class="list-group-item list-group-item-action">
+            {{$.ChildType}} {{.}}
+        </a>
+        {{ end }}
+        {{ end }}
+    </div>
+    <br />
+    <br />
+    <br />
+</div>
+{{end}}

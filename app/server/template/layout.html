@@ -133,6 +133,8 @@
     {{- template "dictionary_search" .Data -}}
     {{ else if (eq .Page "dictionary_word") }}
     {{- template "dictionary_word" .Data -}}
+    {{ else if (eq .Page "hierarchy") }}
+    {{- template "hierarchy" .Data -}}
     {{ else }}
     <p>Page could not be recognized</p>
     {{ end }}
