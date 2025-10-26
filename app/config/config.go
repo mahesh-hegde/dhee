@@ -38,4 +38,5 @@ type DheeConfig struct {
 	Dictionaries []DictDefn      `json:"dictionaries"`
 	DefaultDict  string          `json:"default_dict"`
 	Scriptures   []ScriptureDefn `json:"scriptures"`
+	Fuzziness    int             `json:"fuzziness"`
 }

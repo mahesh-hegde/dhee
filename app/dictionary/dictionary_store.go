@@ -104,23 +104,34 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 	dictQuery.SetField("dict_name")
 
 	var wordQuery query.Query
+
 	switch s.Mode {
 	case "prefix":
 		q := bleve.NewPrefixQuery(s.Query)
 		q.SetField("word")
-		wordQuery = q
+		vq := bleve.NewPrefixQuery(s.Query)
+		vq.SetField("variants")
+		wordQuery = bleve.NewDisjunctionQuery(q, vq)
 	case "fuzzy":
 		q := bleve.NewFuzzyQuery(s.Query)
 		q.SetField("word")
-		wordQuery = q
+		q.Fuzziness = b.conf.Fuzziness
+		vq := bleve.NewFuzzyQuery(s.Query)
+		vq.SetField("variants")
+		vq.Fuzziness = b.conf.Fuzziness
+		wordQuery = bleve.NewDisjunctionQuery(q, vq)
 	case "regexp":
 		q := bleve.NewRegexpQuery(s.Query)
 		q.SetField("word")
-		wordQuery = q
+		vq := bleve.NewPrefixQuery(s.Query)
+		vq.SetField("variants")
+		wordQuery = bleve.NewDisjunctionQuery(q, vq)
 	default: // exact
 		q := bleve.NewTermQuery(s.Query)
 		q.SetField("word")
-		wordQuery = q
+		vq := bleve.NewPrefixQuery(s.Query)
+		vq.SetField("variants")
+		wordQuery = bleve.NewDisjunctionQuery(q, vq)
 	}
 
 	finalQuery := bleve.NewConjunctionQuery(dictQuery, wordQuery)
