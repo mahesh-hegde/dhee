@@ -38,3 +38,16 @@ func PathToString(path []int) string {
 	}
 	return strings.Join(parts, ".")
 }
+
+func StringToPath(pth string) ([]int, error) {
+	var parts []int
+
+	for _, p := range strings.Split(pth, ".") {
+		idx, err := strconv.Atoi(p)
+		if err != nil {
+			return nil, err
+		}
+		parts = append(parts, idx)
+	}
+	return parts, nil
+}

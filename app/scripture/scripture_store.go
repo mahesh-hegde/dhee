@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"sort"
 	"strings"
 
 	"github.com/blevesearch/bleve/v2"
@@ -20,11 +21,58 @@ type ExcerptStore interface {
 	// finds the immediate previous and next ID with one query
 	FindBeforeAndAfter(ctx context.Context, scripture string, idsBefore []string, idsAfter []string) (prev string, next string)
 	Search(ctx context.Context, scriptures []string, params SearchParams) ([]Excerpt, error)
+	GetHier(ctx context.Context, scripture *config.ScriptureDefn, path []int) (*Hierarchy, error)
 }
 
 type BleveExcerptStore struct {
 	idx  bleve.Index
 	conf *config.DheeConfig
+}
+
+// GetHier implements ExcerptStore.
+func (b *BleveExcerptStore) GetHier(ctx context.Context, scripture *config.ScriptureDefn, path []int) (*Hierarchy, error) {
+	// This might could be made more efficient, but why care when our whole dataset fits in memory?
+	if len(path) >= len(scripture.Hierarchy) {
+		return nil, fmt.Errorf("cannot obtain hierarchy for a leaf element")
+	}
+	query := bleve.NewPrefixQuery(scripture.Name + ":" + common.PathToString(path))
+	query.SetField("_id")
+	searchRequest := bleve.NewSearchRequest(query)
+	searchRequest.Size = 10000 // Max verses I'd expect anywhere
+	searchRequest.Fields = []string{"_id"}
+	searchResults, err := b.idx.Search(searchRequest)
+	if err != nil {
+		return nil, err
+	}
+	plen := len(path)
+	knownChildren := make([]int, 0)
+	for _, hit := range searchResults.Hits {
+		id := hit.ID
+		_, pth, ok := strings.Cut(id, ":")
+		if !ok {
+			continue
+		}
+		chld, err := common.StringToPath(pth)
+		if err != nil {
+			continue
+		}
+		if len(chld) >= plen {
+			continue
+		}
+		knownChildren = append(knownChildren, chld[plen])
+	}
+	lineage := make([]HierParent, 0)
+	for level, num := range path {
+		hierParent := HierParent{Type: scripture.Hierarchy[level], Number: num}
+		lineage = append(lineage, hierParent)
+	}
+	sortedChildren := sort.IntSlice(knownChildren)
+	return &Hierarchy{
+		Scripture: scripture,
+		Path:      lineage,
+		ChildType: scripture.Hierarchy[plen],
+		Children:  sortedChildren,
+	}, nil
 }
 
 // FindBeforeAndAfter implements ExcerptStore.

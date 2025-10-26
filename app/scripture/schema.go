@@ -77,6 +77,18 @@ type Excerpt struct {
 	SuggestedAuto []Related            `json:"suggested_auto,omitempty"`
 }
 
+type HierParent struct {
+	Number int
+	Type   string
+}
+
+type Hierarchy struct {
+	Scripture *config.ScriptureDefn
+	Path      []HierParent
+	ChildType string
+	Children  []int
+}
+
 type HighlightedExcerpt struct {
 	Excerpt     Excerpt
 	SourceHl    string // Highlighted source text
