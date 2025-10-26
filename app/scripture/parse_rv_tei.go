@@ -160,7 +160,7 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 			path := []int{bookNum, hymnNum, stanzaNum}
 
 			excerpt := Excerpt{
-				ReadableIndex: fmt.Sprintf("%02d.%03d.%02d", bookNum, hymnNum, stanzaNum),
+				ReadableIndex: fmt.Sprintf("%d.%d.%d", bookNum, hymnNum, stanzaNum),
 				Path:          path,
 				Authors:       authors,
 				Meter:         meter,
