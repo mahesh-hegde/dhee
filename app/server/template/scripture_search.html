@@ -1,12 +1,41 @@
-<!DOCTYPE html>
-<html>
+{{ define "scripture_search" }}
+<div class="container">
+    <h2 class="my-4">Scripture Search Results</h2>
 
-<head>
-    <title>Scripture Search</title>
-</head>
-
-<body>
-    <pre><code>{{ . }}</code></pre>
-</body>
-
-</html>
+    {{ if . }}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Path</th>
+                <th scope="col">Roman Text</th>
+                <th scope="col">Translation (Griffith)</th>
+                <th scope="col">Addressee</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range . }}
+            <tr>
+                <td><a href="/scriptures/{{ .Excerpt.Scripture }}/excerpts/{{ .Excerpt.ReadableIndex }}">{{
+                        .Excerpt.ReadableIndex }}</a></td>
+                <td>{{ range .Excerpt.RomanText }}{{ . }}<br>{{ end }}</td>
+                <td>
+                    {{ with .Excerpt.Auxiliaries }}
+                    {{ if .griffith }}
+                    {{ range .griffith.Text }}
+                    {{ . }}<br>
+                    {{ end }}
+                    {{ end }}
+                    {{ end }}
+                </td>
+                <td>{{ join .Excerpt.Authors ", " }}</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    {{ else }}
+    <div class="alert alert-warning" role="alert">
+        No results found!
+    </div>
+    {{ end }}
+</div>
+{{ end }}

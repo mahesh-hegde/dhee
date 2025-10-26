@@ -11,6 +11,7 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 	e := echo.New()
 	e.Renderer = NewTemplateRenderer()
 
+	e.GET("/", controller.GetHome)
 	e.GET("/scriptures/:scriptureName/excerpts/:path", controller.GetExcerpts)
 	e.GET("/scripture-search", controller.SearchScripture)
 	e.GET("/dictionaries/:dictionaryName/words/:word", controller.GetDictionaryWord)

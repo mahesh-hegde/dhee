@@ -1,12 +1,62 @@
-<!DOCTYPE html>
-<html>
+{{ define "excerpts" }}
+<div class="container">
+    {{ if . }}
+    <div class="my-4">
+        {{ $first := index . 0 }}
+        <h2 class="text-center">{{ $first.Scripture }} {{ $first.ReadableIndex }}{{ if gt (len .) 1 }} - {{ (index .
+            (sub (len .) 1)).ReadableIndex }}{{ end }}</h2>
+    </div>
 
-<head>
-    <title>Excerpts</title>
-</head>
+    <div class="card my-3">
+        <div class="card-header">
+            Devanagari
+        </div>
+        <div class="card-body">
+            {{ range . }}
+            <p><strong>{{ .ReadableIndex }}</strong></p>
+            {{ range .SourceText }}
+            <p>{{ . }}</p>
+            {{ end }}
+            {{ end }}
+        </div>
+    </div>
 
-<body>
-    <pre><code>{{ . }}</code></pre>
-</body>
+    <div class="card my-3">
+        <div class="card-header">
+            Roman
+        </div>
+        <div class="card-body">
+            {{ range . }}
+            <p><strong>{{ .ReadableIndex }}</strong></p>
+            {{ range .RomanText }}
+            <p>{{ . }}</p>
+            {{ end }}
+            {{ end }}
+        </div>
+    </div>
 
-</html>
+    {{ $firstExcerpt := index . 0 }}
+    {{ range $name, $aux := $firstExcerpt.Auxiliaries }}
+    <div class="card my-3">
+        <div class="card-header">
+            {{ $name }}
+        </div>
+        <div class="card-body">
+            {{ range $i, $excerpt := $ }}
+            <p><strong>{{ $excerpt.ReadableIndex }}</strong></p>
+            {{ $auxiliary := index $excerpt.Auxiliaries $name }}
+            {{ range $auxiliary.Text }}
+            <p>{{ . }}</p>
+            {{ end }}
+            {{ end }}
+        </div>
+    </div>
+    {{ end }}
+
+    {{ else }}
+    <div class="alert alert-warning mt-4" role="alert">
+        No results found!
+    </div>
+    {{ end }}
+</div>
+{{ end }}

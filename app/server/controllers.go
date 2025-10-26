@@ -15,15 +15,21 @@ import (
 )
 
 type DheeController struct {
-	ds *dictionary.DictionaryService
-	es *scripture.ExcerptService
+	ds   *dictionary.DictionaryService
+	es   *scripture.ExcerptService
+	conf *config.DheeConfig
 }
 
 func NewDheeController(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DheeController {
 	return &DheeController{
-		ds: dictionary.NewDictionaryService(index, conf, transliterator),
-		es: scripture.NewScriptureService(index, conf, transliterator),
+		ds:   dictionary.NewDictionaryService(index, conf, transliterator),
+		es:   scripture.NewScriptureService(index, conf, transliterator),
+		conf: conf,
 	}
+}
+
+func (c *DheeController) GetHome(ctx echo.Context) error {
+	return ctx.Render(http.StatusOK, "home", c.conf)
 }
 
 func (c *DheeController) GetExcerpts(ctx echo.Context) error {
@@ -82,7 +88,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 		return ctx.String(http.StatusInternalServerError, "Failed to get excerpts")
 	}
 
-	return ctx.Render(http.StatusOK, "excerpts.html", excerpts)
+	return ctx.Render(http.StatusOK, "excerpts", excerpts)
 }
 
 func (c *DheeController) SearchScripture(ctx echo.Context) error {
@@ -115,7 +121,7 @@ func (c *DheeController) SearchScripture(ctx echo.Context) error {
 		return ctx.String(http.StatusInternalServerError, "Failed to search scripture")
 	}
 
-	return ctx.Render(http.StatusOK, "scripture_search.html", excerpts)
+	return ctx.Render(http.StatusOK, "scripture_search", excerpts)
 }
 
 func (c *DheeController) GetDictionaryWord(ctx echo.Context) error {
@@ -127,7 +133,7 @@ func (c *DheeController) GetDictionaryWord(ctx echo.Context) error {
 		return ctx.String(http.StatusInternalServerError, "Failed to get dictionary entries")
 	}
 
-	return ctx.Render(http.StatusOK, "dictionary_word.html", entries)
+	return ctx.Render(http.StatusOK, "dictionary_word", entries)
 }
 
 func (c *DheeController) SearchDictionary(ctx echo.Context) error {
@@ -179,7 +185,7 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 		return ctx.String(http.StatusInternalServerError, "Failed to search dictionary")
 	}
 
-	return ctx.Render(http.StatusOK, "dictionary_search.html", results)
+	return ctx.Render(http.StatusOK, "dictionary_search", results)
 }
 
 func (c *DheeController) SuggestDictionary(ctx echo.Context) error {

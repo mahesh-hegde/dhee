@@ -1,0 +1,124 @@
+{{ define "home" }}
+<div class="container">
+    <div class="text-center my-4">
+        <h1>Dhee</h1>
+        <p class="lead">A platform for linguistic analysis of vedic Sanskrit texts</p>
+    </div>
+
+    <h2>Scriptures</h2>
+    <div class="accordion" id="scriptureAccordion">
+        {{range .Scriptures}}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-{{.Name}}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-{{.Name}}" aria-expanded="true" aria-controls="collapse-{{.Name}}">
+                    {{.ReadableName}}
+                </button>
+            </h2>
+            <div id="collapse-{{.Name}}" class="accordion-collapse collapse show" aria-labelledby="heading-{{.Name}}"
+                data-bs-parent="#scriptureAccordion">
+                <div class="accordion-body">
+                    <h3>Jump to excerpt</h3>
+                    <form class="jump-form row g-3" data-scripture-name="{{.Name}}">
+                        <div class="col-auto">
+                            <input type="text" class="form-control" placeholder="e.g., 1.1.1">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Go</button>
+                        </div>
+                    </form>
+
+                    <h3 class="mt-4">Search</h3>
+                    <form action="/scripture-search/" method="GET" class="row g-3">
+                        <input type="hidden" name="scriptures" value="{{.Name}}">
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" name="query" placeholder="Search text">
+                        </div>
+                        <div class="col-sm-2">
+                            <select name="tl" class="form-select">
+                                <option value="slp1" selected>SLP1</option>
+                                <option value="iast">IAST</option>
+                                <option value="hk">HK</option>
+                                <option value="dn">Devanagari</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <select name="mode" class="form-select">
+                                <option value="exact" selected>Exact</option>
+                                <option value="fuzzy">Fuzzy</option>
+                                <option value="regex">Regex</option>
+                                <option value="prefix">Prefix</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Go</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <h2 class="mt-5">Dictionaries</h2>
+    <div class="accordion" id="dictionaryAccordion">
+        {{range .Dictionaries}}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-{{.Name}}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-{{.Name}}" aria-expanded="true" aria-controls="collapse-{{.Name}}">
+                    {{.ReadableName}}
+                </button>
+            </h2>
+            <div id="collapse-{{.Name}}" class="accordion-collapse collapse show" aria-labelledby="heading-{{.Name}}"
+                data-bs-parent="#dictionaryAccordion">
+                <div class="accordion-body">
+                    <form action="/dictionaries/{{.Name}}/search" method="GET" class="row g-3">
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" name="q" placeholder="Search text">
+                        </div>
+                        <div class="col-sm-2">
+                            <select name="tl" class="form-select">
+                                <option value="slp1" selected>SLP1</option>
+                                <option value="iast">IAST</option>
+                                <option value="hk">HK</option>
+                                <option value="dn">Devanagari</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <select name="mode" class="form-select">
+                                <option value="prefix" selected>Prefix</option>
+                                <option value="exact">Exact</option>
+                                <option value="fuzzy">Fuzzy</option>
+                                <option value="regex">Regex</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Go</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <div class="mt-5">
+        <h2>About</h2>
+        <p>
+            `dhee` is a website for studying and analyzing old indic texts, specifically Rigveda Samhita.
+        </p>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.jump-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const scriptureName = form.dataset.scriptureName;
+            const path = form.querySelector('input').value;
+            window.location.href = `/scriptures/${scriptureName}/excerpts/${path}`;
+        });
+    });
+</script>
+{{ end }}

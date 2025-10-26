@@ -1,12 +1,30 @@
-<!DOCTYPE html>
-<html>
+{{ define "dictionary_search" }}
+<div class="container">
+    <h2 class="my-4">Dictionary Search Results</h2>
 
-<head>
-    <title>Dictionary Search</title>
-</head>
-
-<body>
-    <pre><code>{{ . }}</code></pre>
-</body>
-
-</html>
+    {{ if .Items }}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Word (IAST)</th>
+                <th scope="col">Word (Devanagari)</th>
+                <th scope="col">Overview</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range .Items }}
+            <tr>
+                <td><a href="/dictionaries/mw/words/{{ .HK }}">{{ .IAST }}</a></td>
+                <td>{{ .Nagari }}</td>
+                <td>{{ .Preview }}</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    {{ else }}
+    <div class="alert alert-warning" role="alert">
+        No results found!
+    </div>
+    {{ end }}
+</div>
+{{ end }}

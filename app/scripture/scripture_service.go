@@ -21,7 +21,7 @@ type ExcerptService struct {
 }
 
 type ExcerptWithWords struct {
-	E     Excerpt
+	Excerpt
 	Words map[string][]dictionary.DictionaryEntry
 }
 
@@ -78,8 +78,8 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) ([]Exce
 	var result []ExcerptWithWords
 	for _, e := range excerpts {
 		ew := ExcerptWithWords{
-			E:     e,
-			Words: make(map[string][]dictionary.DictionaryEntry),
+			Excerpt: e,
+			Words:   make(map[string][]dictionary.DictionaryEntry),
 		}
 		for _, g := range e.Glossings {
 			for _, gl := range g {
