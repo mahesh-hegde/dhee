@@ -12,10 +12,9 @@ Design goals
 ### Short term
 
 - [X] View one / many verses directly along with translations
-- [X] Search verses based on regexp or word, based on  
+- [ ] Search (regexp and / or text based - half done, there are some bugs due to accent marks in the dataset).
 - [ ] Show Monier-Williams dictionary hints along with Padapatha text.
 - [ ] Hierarchical navigation (i.e show the mandala/sukta/rik hierarchy).
-- [ ] Search (regexp and / or text based)
 
 ### Long term
 - [ ] Semantic search and similarity scores (hybrid embeddings + BM25, embeddings generated at build time)
@@ -26,7 +25,15 @@ Design goals
 - [ ] port INRIA's nominal declension and verb conjugation generator to Go and use it to analyze arbitrary word forms.
 
 
-### Acknowledgements
+## How to run?
+```bash
+# create a bleve search index of all data
+go run ./cmd/dhee index --data-dir ./data
+# run server
+go run ./cmd/dhee server --data-dir ./data
+```
+
+## Acknowledgements
 
 Much of the data present now is taken from from [VedaWeb data](https://github.com/VedaWebProject/vedaweb-data/tree/main/rigveda) and [Monier Williams dictionary](https://www.sanskrit-lexicon.uni-koeln.de/) by Cologne university.
 

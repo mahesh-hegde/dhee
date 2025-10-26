@@ -9,10 +9,10 @@
     <div class="accordion" id="scriptureAccordion">
         {{range .Scriptures}}
         <div class="accordion-item">
-            <h2 class="accordion-header" id="heading-{{.Name}}">
+            <h2 class="accordion-header" id="heading-{{.Name}}" style="--bs-accordion-active-bg:  burlywood;">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapse-{{.Name}}" aria-expanded="true" aria-controls="collapse-{{.Name}}">
-                    {{.ReadableName}}
+                    <b>{{.ReadableName}}</b>
                 </button>
             </h2>
             <div id="collapse-{{.Name}}" class="accordion-collapse collapse show" aria-labelledby="heading-{{.Name}}"
