@@ -33,7 +33,7 @@ type ExcerptWithWords struct {
 // and lemmas (stripping `-` at end for lemmas). In this process, we expect most entries do not exist
 // in the dictionary. We return only those that were found in the batch search.
 func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*ExcerptTemplateData, error) {
-	if len(paths) == 0 {
+	if len(paths) == 0 || len(paths[0].Path) == 0 {
 		return nil, fmt.Errorf("specify a scripture and path")
 	}
 	excerpts, err := s.store.Get(ctx, paths)
@@ -111,12 +111,37 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		return len(p1) < len(p2)
 	})
 
+	// Calculate possible next and previous candidates
+	beforeIds := []string{}
+	first := paths[0].Path
+	// for now, just consider the last element
+	verseIdx := &first[len(first)-1]
+	if *verseIdx > 1 {
+		*verseIdx -= 1
+		beforeIds = append(beforeIds, common.PathToString(first))
+		*verseIdx += 1
+	}
+
+	afterIds := []string{}
+	last := paths[len(paths)-1].Path
+	if len(last) < 1 {
+		return nil, fmt.Errorf("unexpected input in last path element")
+	}
+	verseIdx = &last[len(last)-1]
+	*verseIdx += 1
+	afterIds = append(afterIds, common.PathToString(last))
+	*verseIdx -= 1
+
+	prev, next := s.store.FindBeforeAndAfter(ctx, paths[0].Scripture, beforeIds, afterIds)
+
 	// Combine excerpt with its scripture information
 	scriptureName := paths[0].Scripture
 	scri := s.scriptureMap[scriptureName]
 	return &ExcerptTemplateData{
 		Excerpts:  es,
 		Scripture: scri,
+		Previous:  prev,
+		Next:      next,
 	}, nil
 }
 

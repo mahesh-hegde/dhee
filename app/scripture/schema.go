@@ -93,6 +93,8 @@ func (e *Excerpt) Type() string {
 type ExcerptTemplateData struct {
 	Excerpts  []ExcerptWithWords
 	Scripture config.ScriptureDefn
+	Next      string
+	Previous  string
 }
 
 type ExcerptSearchData struct {

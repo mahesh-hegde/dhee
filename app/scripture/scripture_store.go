@@ -16,12 +16,59 @@ import (
 type ExcerptStore interface {
 	Add(ctx context.Context, scripture string, es []Excerpt) error
 	Get(ctx context.Context, paths []QualifiedPath) ([]Excerpt, error)
+	// FindBeforeAndAfter, given a set of possible idsBefore and idsAfter in priority order,
+	// finds the immediate previous and next ID with one query
+	FindBeforeAndAfter(ctx context.Context, scripture string, idsBefore []string, idsAfter []string) (prev string, next string)
 	Search(ctx context.Context, scriptures []string, params SearchParams) ([]Excerpt, error)
 }
 
 type BleveExcerptStore struct {
 	idx  bleve.Index
 	conf *config.DheeConfig
+}
+
+// FindBeforeAndAfter implements ExcerptStore.
+func (b *BleveExcerptStore) FindBeforeAndAfter(ctx context.Context, scripture string, idsBefore []string, idsAfter []string) (prev string, next string) {
+	ids := make([]string, len(idsBefore)+len(idsAfter))
+	idset := make(map[string]struct{}, 0)
+	for i, p := range idsBefore {
+		ids[i] = fmt.Sprintf("%s:%s", scripture, p)
+	}
+	for i, p := range idsAfter {
+		ids[i+len(idsBefore)] = fmt.Sprintf("%s:%s", scripture, p)
+	}
+	if len(ids) == 0 {
+		return "", ""
+	}
+	query := bleve.NewDocIDQuery(ids)
+	searchRequest := bleve.NewSearchRequest(query)
+	searchRequest.Size = len(ids)
+	searchRequest.Fields = []string{"_id"}
+
+	searchResults, err := b.idx.Search(searchRequest)
+	if err != nil {
+		slog.Error("error when querying existence of IDs")
+		return "", ""
+	}
+	for _, hit := range searchResults.Hits {
+		idset[hit.ID] = struct{}{}
+	}
+	var before, after string
+	for _, id := range idsBefore {
+		fullId := fmt.Sprintf("%s:%s", scripture, id)
+		if _, found := idset[fullId]; found {
+			before = id
+			break
+		}
+	}
+	for _, id := range idsAfter {
+		fullId := fmt.Sprintf("%s:%s", scripture, id)
+		if _, found := idset[fullId]; found {
+			after = id
+			break
+		}
+	}
+	return before, after
 }
 
 // Add implements ExcerptStore.
