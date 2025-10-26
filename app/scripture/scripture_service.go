@@ -121,7 +121,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 }
 
 // Search returns upto 100 Excerpts which match the search according to search parameters.
-func (s *ExcerptService) Search(ctx context.Context, search SearchParams) ([]Excerpt, error) {
+func (s *ExcerptService) Search(ctx context.Context, search SearchParams) (*ExcerptSearchData, error) {
 	iastQuery, err := s.transliterator.Convert(search.Q, common.Transliteration(search.Tl), common.TlIAST)
 	if err != nil {
 		slog.Warn("transliteration failed for scripture search", "query", search.Q, "err", err)
@@ -134,7 +134,7 @@ func (s *ExcerptService) Search(ctx context.Context, search SearchParams) ([]Exc
 	if err != nil {
 		return nil, fmt.Errorf("failed to search: %w", err)
 	}
-	return excerpts, nil
+	return &ExcerptSearchData{Excerpts: excerpts, Search: search}, nil
 }
 
 func NewScriptureService(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *ExcerptService {

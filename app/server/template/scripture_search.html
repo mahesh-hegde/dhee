@@ -1,8 +1,8 @@
 {{ define "scripture_search" }}
 <div class="container">
-    <h2 class="my-4">Scripture Search Results</h2>
+    <h2 class="my-4">Search Results for {{ .Search.Q | printf "%q" }}</h2>
 
-    {{ if . }}
+    {{ with .Excerpts }}
     <table class="table table-striped">
         <thead>
             <tr>
@@ -17,17 +17,17 @@
             <tr>
                 <td><a href="/scriptures/{{ .Scripture }}/excerpts/{{ .ReadableIndex }}">{{
                         .ReadableIndex }}</a></td>
-                <td>{{ range .RomanText }}{{ . }}<br>{{ end }}</td>
-                <td>
-                    {{ with .Auxiliaries }}
-                    {{ if .griffith }}
-                    {{ range .griffith.Text }}
-                    {{ . }}<br>
-                    {{ end }}
-                    {{ end }}
-                    {{ end }}
+                <td class="roman-text-search">{{ range .RomanText }}{{ . }}<br>{{ end }}</td>
+                <td class="wrap-50">
+                    {{- with .Auxiliaries -}}
+                    {{- if .griffith -}}
+                    {{- range .griffith.Text -}}
+                    {{- . -}}
+                    {{- end -}}
+                    {{- end -}}
+                    {{- end -}}
                 </td>
-                <td>{{ join .Authors ", " }}</td>
+                <td>{{ join .Addressees ", " }}</td>
             </tr>
             {{ end }}
         </tbody>

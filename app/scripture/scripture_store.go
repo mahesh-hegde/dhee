@@ -196,6 +196,21 @@ func docToExcerpt(fields map[string]any) (Excerpt, error) {
 		errs = append(errs, err)
 	}
 
+	e.Authors, _, err = getStringSlice(fields, "authors")
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	e.Addressees, _, err = getStringSlice(fields, "addressees")
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	e.Group, _, err = getString(fields, "group")
+	if err != nil {
+		errs = append(errs, err)
+	}
+
 	// Reconstruct Auxiliaries
 	e.Auxiliaries = make(map[string]Auxiliary)
 	for k, v := range fields {

@@ -25,12 +25,18 @@ type Body struct {
 	Div Div `xml:"div"`
 }
 
+type P struct {
+	Lang     string `xml:"lang,attr"`
+	CharData string `xml:",chardata"`
+}
+
 type Div struct {
 	XMLName xml.Name `xml:"div"`
 	ID      string   `xml:"id,attr"`
 	Type    string   `xml:"type,attr"`
 	Divs    []Div    `xml:"div"`
 	LGs     []LG     `xml:"lg"`
+	Ps      []P      `xml:"p"`
 }
 
 type Stanza struct {
@@ -122,9 +128,30 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 		// Extract dedication info if available
 		var authors []string
 		var meter string
+		var group string
+		var addressees []string
 
 		// Iterate through stanzas
 		for _, stanzaDiv := range hymnDiv.Divs {
+			if stanzaDiv.Type == "dedication" {
+				for _, subDiv := range stanzaDiv.Divs {
+					if subDiv.Type == "addressee" {
+						for _, p := range subDiv.Ps {
+							if p.Lang == "eng" {
+								addressees = append(addressees, p.CharData)
+							}
+						}
+					}
+					if subDiv.Type == "group" {
+						for _, p := range subDiv.Ps {
+							if p.Lang == "eng" {
+								group = p.CharData
+							}
+						}
+					}
+				}
+			}
+
 			if stanzaDiv.Type != "stanza" {
 				continue
 			}
@@ -137,6 +164,8 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 				Path:          path,
 				Authors:       authors,
 				Meter:         meter,
+				Addressees:    addressees,
+				Group:         group,
 				Auxiliaries:   make(map[string]Auxiliary),
 			}
 

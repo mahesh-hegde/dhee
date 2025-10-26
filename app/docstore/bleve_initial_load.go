@@ -19,7 +19,7 @@ import (
 
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
-	"github.com/blevesearch/bleve/v2/analysis/tokenizer/whitespace"
+	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 )
 
 func GetBleveIndexMappings() mapping.IndexMapping {
@@ -30,10 +30,10 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	err := indexMapping.AddCustomAnalyzer("sanskrit_ws",
 		map[string]any{
 			"type":      custom.Name,
-			"tokenizer": whitespace.Name, // unicode.Name,
+			"tokenizer": unicode.Name,
 			"token_filters": []string{
+				// asciifolding.Name,
 				lowercase.Name,
-				// "asciifolding", // GPT suggested but this doesn't exists
 			},
 		})
 	if err != nil {
@@ -57,11 +57,15 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	excerptMapping.AddFieldMappingsAt("source_text", sourceField)
 
 	romanField := mapping.NewTextFieldMapping()
-	romanField.Analyzer = "sanskrit_ws"
+	// romanField.Analyzer = "sanskrit_ws"
 	excerptMapping.AddFieldMappingsAt("roman_text", romanField)
 
 	// Authors
 	excerptMapping.AddFieldMappingsAt("authors", mapping.NewTextFieldMapping())
+	// Addressees
+	excerptMapping.AddFieldMappingsAt("addressees", mapping.NewTextFieldMapping())
+	// Group
+	excerptMapping.AddFieldMappingsAt("group", mapping.NewTextFieldMapping())
 
 	// Meter
 	excerptMapping.AddFieldMappingsAt("meter", mapping.NewKeywordFieldMapping())

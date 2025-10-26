@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -118,6 +119,7 @@ func (c *DheeController) SearchScripture(ctx echo.Context) error {
 
 	excerpts, err := c.es.Search(ctx.Request().Context(), params)
 	if err != nil {
+		slog.Error("error in scripture search", "err", err)
 		return ctx.String(http.StatusInternalServerError, "Failed to search scripture")
 	}
 

@@ -70,6 +70,8 @@ type Excerpt struct {
 	// Translations and alternative renderings
 	Auxiliaries   map[string]Auxiliary `json:"auxiliaries,omitempty"`
 	Notes         []string             `json:"notes,omitempty"`
+	Group         string               `json:"group,omitempty"`
+	Addressees    []string             `json:"addressees,omitempty"`
 	Links         []ExternalLink       `json:"links,omitempty"`
 	Suggested     []Related            `json:"suggested,omitempty"`
 	SuggestedAuto []Related            `json:"suggested_auto,omitempty"`
@@ -91,6 +93,11 @@ func (e *Excerpt) Type() string {
 type ExcerptTemplateData struct {
 	Excerpts  []ExcerptWithWords
 	Scripture config.ScriptureDefn
+}
+
+type ExcerptSearchData struct {
+	Excerpts []Excerpt
+	Search   SearchParams
 }
 
 type QualifiedPath struct {
