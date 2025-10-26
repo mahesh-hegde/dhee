@@ -57,7 +57,7 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	excerptMapping.AddFieldMappingsAt("source_text", sourceField)
 
 	romanField := mapping.NewTextFieldMapping()
-	// romanField.Analyzer = "sanskrit_ws"
+	romanField.Analyzer = "sanskrit_ws"
 	excerptMapping.AddFieldMappingsAt("roman_text", romanField)
 
 	// Authors

@@ -144,6 +144,7 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewFuzzyQuery(q)
 			bq.SetField(field)
+			bq.Fuzziness = 2
 			return bq
 		}
 	case common.SearchPrefix:
@@ -171,6 +172,7 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 100
 	searchRequest.Fields = []string{"*"}
+	searchRequest.SortBy([]string{"-_score", "_id"})
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {

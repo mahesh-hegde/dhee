@@ -8,6 +8,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/dhee/main.go",
             "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart",
             "args": [
                 "preprocess",
                 "--input",
@@ -23,6 +24,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/dhee/main.go",
             "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart",
             "args": [
                 "server",
                 "--data-dir",
@@ -36,6 +38,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/dhee/main.go",
             "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart",
             "args": [
                 "index",
                 "--data-dir",
@@ -49,6 +52,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/dhee/main.go",
             "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart",
             "args": [
                 "stats",
                 "--data-dir",
