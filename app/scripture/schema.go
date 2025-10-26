@@ -1,6 +1,8 @@
 package scripture
 
-import "github.com/mahesh-hegde/dhee/app/common"
+import (
+	"github.com/mahesh-hegde/dhee/app/common"
+)
 
 type Modifier string
 

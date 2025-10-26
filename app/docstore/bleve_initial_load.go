@@ -95,12 +95,16 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	// Auxiliaries
 	auxMapping := func(analyzer string) *mapping.DocumentMapping {
 		m := mapping.NewDocumentMapping()
-		m.AddFieldMappingsAt("path", mapping.NewNumericFieldMapping())
+		pathField := mapping.NewNumericFieldMapping()
+		pathField.Store = true
+		m.AddFieldMappingsAt("path", pathField)
 		textField := mapping.NewTextFieldMapping()
+		textField.Store = true
 		textField.Analyzer = analyzer
 		m.AddFieldMappingsAt("text", textField)
 		return m
 	}
+
 	excerptMapping.AddSubDocumentMapping("auxiliaries.griffith", auxMapping("en"))
 	excerptMapping.AddSubDocumentMapping("auxiliaries.oldenberg", auxMapping("en"))
 	excerptMapping.AddSubDocumentMapping("auxiliaries.pada", auxMapping("sanskrit_ws"))
