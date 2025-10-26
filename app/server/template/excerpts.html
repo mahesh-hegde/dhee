@@ -2,17 +2,17 @@
 <div class="container">
     {{ if . }}
     <div class="my-4">
-        {{ $first := index . 0 }}
-        <h2 class="text-center">{{ $first.Scripture }} {{ $first.ReadableIndex }}{{ if gt (len .) 1 }} - {{ (index .
-            (sub (len .) 1)).ReadableIndex }}{{ end }}</h2>
+        <h2 class="text-center">{{ .Scripture.ReadableName }} {{ (index .Excerpts
+            0).ReadableIndex }}{{ if gt (len .Excerpts) 1 }} - {{ (index .Excerpts
+            (sub (len .Excerpts) 1)).ReadableIndex }}{{ end }}</h2>
     </div>
 
     <div class="card my-3">
         <div class="card-header">
-            Devanagari
+            Text (Devanagari)
         </div>
         <div class="card-body">
-            {{ range . }}
+            {{ range .Excerpts }}
             <p><strong>{{ .ReadableIndex }}</strong></p>
             {{ range .SourceText }}
             <p>{{ . }}</p>
@@ -23,10 +23,10 @@
 
     <div class="card my-3">
         <div class="card-header">
-            Roman
+            Text (Roman)
         </div>
         <div class="card-body">
-            {{ range . }}
+            {{ range .Excerpts }}
             <p><strong>{{ .ReadableIndex }}</strong></p>
             {{ range .RomanText }}
             <p>{{ . }}</p>
@@ -34,23 +34,25 @@
             {{ end }}
         </div>
     </div>
-
-    {{ $firstExcerpt := index . 0 }}
-    {{ range $name, $aux := $firstExcerpt.Auxiliaries }}
+    {{ $excerpts := .Excerpts }}
+    {{ $firstExcerpt := index .Excerpts 0 }}
+    {{ range $idx, $aux := .Scripture.Auxiliaries }}
+    {{ with (index $firstExcerpt.Auxiliaries $aux.Name).Text }}
     <div class="card my-3">
         <div class="card-header">
-            {{ $name }}
+            {{ $aux.ReadableName }}
         </div>
         <div class="card-body">
-            {{ range . }}
+            {{ range $excerpts }}
             <p><strong>{{ .ReadableIndex }}</strong></p>
-            {{ $auxiliary := index .Auxiliaries $name }}
+            {{ $auxiliary := index .Auxiliaries $aux.Name }}
             {{ range $auxiliary.Text }}
             <p>{{ . }}</p>
             {{ end }}
             {{ end }}
         </div>
     </div>
+    {{ end }}
     {{ end }}
 
     {{ else }}

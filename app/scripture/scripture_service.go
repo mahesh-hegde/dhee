@@ -19,6 +19,7 @@ type ExcerptService struct {
 	store          ExcerptStore
 	conf           *config.DheeConfig
 	transliterator *transliteration.Transliterator
+	scriptureMap   map[string]config.ScriptureDefn
 }
 
 type ExcerptWithWords struct {
@@ -31,7 +32,10 @@ type ExcerptWithWords struct {
 // Get also batch-fetches the dictionary words for surfaces,
 // and lemmas (stripping `-` at end for lemmas). In this process, we expect most entries do not exist
 // in the dictionary. We return only those that were found in the batch search.
-func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) ([]ExcerptWithWords, error) {
+func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*ExcerptTemplateData, error) {
+	if len(paths) == 0 {
+		return nil, fmt.Errorf("specify a scripture and path")
+	}
 	excerpts, err := s.store.Get(ctx, paths)
 	if err != nil {
 		slog.Error("error retrieving excerpts", "err", err)
@@ -76,7 +80,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) ([]Exce
 	}
 
 	// Combine excerpts with their word meanings
-	var result []ExcerptWithWords
+	var es []ExcerptWithWords
 	for _, e := range excerpts {
 		ew := ExcerptWithWords{
 			Excerpt: e,
@@ -93,12 +97,12 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) ([]Exce
 				}
 			}
 		}
-		result = append(result, ew)
+		es = append(es, ew)
 	}
 
-	sort.Slice(result, func(i, j int) bool {
-		p1 := result[i].Path
-		p2 := result[j].Path
+	sort.Slice(es, func(i, j int) bool {
+		p1 := es[i].Path
+		p2 := es[j].Path
 		for k := 0; k < len(p1) && k < len(p2); k++ {
 			if p1[k] != p2[k] {
 				return p1[k] < p2[k]
@@ -107,7 +111,13 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) ([]Exce
 		return len(p1) < len(p2)
 	})
 
-	return result, nil
+	// Combine excerpt with its scripture information
+	scriptureName := paths[0].Scripture
+	scri := s.scriptureMap[scriptureName]
+	return &ExcerptTemplateData{
+		Excerpts:  es,
+		Scripture: scri,
+	}, nil
 }
 
 // Search returns upto 100 Excerpts which match the search according to search parameters.
@@ -128,10 +138,16 @@ func (s *ExcerptService) Search(ctx context.Context, search SearchParams) ([]Exc
 }
 
 func NewScriptureService(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *ExcerptService {
+	scriptureMap := map[string]config.ScriptureDefn{}
+	for _, scri := range conf.Scriptures {
+		scriptureMap[scri.Name] = scri
+	}
+
 	return &ExcerptService{
 		ds:             dictionary.NewBleveDictStore(index, conf),
 		store:          NewBleveExcerptStore(index, conf),
 		conf:           conf,
 		transliterator: transliterator,
+		scriptureMap:   scriptureMap,
 	}
 }

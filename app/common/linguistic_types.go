@@ -26,7 +26,7 @@ type SearchMode string
 
 const (
 	SearchExact  SearchMode = "exact"
-	SearchRegex  SearchMode = "re"
+	SearchRegex  SearchMode = "regex"
 	SearchPrefix SearchMode = "prefix"
 	SearchFuzzy  SearchMode = "fuzzy"
 )

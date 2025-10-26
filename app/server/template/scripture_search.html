@@ -15,11 +15,11 @@
         <tbody>
             {{ range . }}
             <tr>
-                <td><a href="/scriptures/{{ .Excerpt.Scripture }}/excerpts/{{ .Excerpt.ReadableIndex }}">{{
-                        .Excerpt.ReadableIndex }}</a></td>
-                <td>{{ range .Excerpt.RomanText }}{{ . }}<br>{{ end }}</td>
+                <td><a href="/scriptures/{{ .Scripture }}/excerpts/{{ .ReadableIndex }}">{{
+                        .ReadableIndex }}</a></td>
+                <td>{{ range .RomanText }}{{ . }}<br>{{ end }}</td>
                 <td>
-                    {{ with .Excerpt.Auxiliaries }}
+                    {{ with .Auxiliaries }}
                     {{ if .griffith }}
                     {{ range .griffith.Text }}
                     {{ . }}<br>
@@ -27,7 +27,7 @@
                     {{ end }}
                     {{ end }}
                 </td>
-                <td>{{ join .Excerpt.Authors ", " }}</td>
+                <td>{{ join .Authors ", " }}</td>
             </tr>
             {{ end }}
         </tbody>
