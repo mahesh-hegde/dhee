@@ -116,8 +116,7 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	// ----- DictionaryEntry mapping -----
 	dictMapping := mapping.NewDocumentMapping()
 
-	wordField := mapping.NewTextFieldMapping()
-	wordField.Analyzer = "sanskrit_ws"
+	wordField := mapping.NewKeywordFieldMapping()
 	dictMapping.AddFieldMappingsAt("word", wordField)
 
 	dictMapping.AddFieldMappingsAt("htag", mapping.NewKeywordFieldMapping())
@@ -130,8 +129,7 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	devField.Analyzer = "sanskrit_ws"
 	dictMapping.AddFieldMappingsAt("devanagari", devField)
 
-	varField := mapping.NewTextFieldMapping()
-	varField.Analyzer = "sanskrit_ws"
+	varField := mapping.NewKeywordFieldMapping()
 	dictMapping.AddFieldMappingsAt("variants", varField)
 
 	varIastField := mapping.NewTextFieldMapping()

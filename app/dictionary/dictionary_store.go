@@ -69,6 +69,7 @@ func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []strin
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 100 // A reasonable limit
 	searchRequest.Fields = []string{"*"}
+	searchRequest.SortBy([]string{"htag", "word", "_id"})
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {
@@ -126,6 +127,7 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 100
 	searchRequest.Fields = []string{"*"}
+	searchRequest.SortBy([]string{"htag", "word", "_id"})
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {
@@ -136,12 +138,13 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 	for _, hit := range searchResults.Hits {
 		items = append(items, DictSearchResult{
 			IAST:    hit.Fields["iast"].(string),
+			Word:    hit.Fields["word"].(string),
 			Nagari:  hit.Fields["devanagari"].(string),
 			Preview: hit.Fields["body.plain"].(string),
 		})
 	}
 
-	return SearchResults{Items: items}, nil
+	return SearchResults{Items: items, DictionaryName: dictName}, nil
 }
 
 // Suggest implements DictStore.
@@ -224,6 +227,7 @@ func docToDictEntry(fields map[string]interface{}) (DictionaryEntry, error) {
 	entry.HTag = getString("htag")
 	entry.Id = getString("id")
 	entry.IAST = getString("iast")
+	entry.HK = getString("hk")
 	entry.Devanagari = getString("devanagari")
 	entry.PrintedPageNum = getString("print_page")
 	entry.LexicalGender = getString("lexical_gender")

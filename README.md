@@ -32,4 +32,6 @@ Much of the data present now is taken from from [VedaWeb data](https://github.co
 
 Some transliteration data was taken / adapted from [indic-translation](https://github.com/indic-transliteration/common_maps).
 
+Favicon from Anil Sharma on Pixabay: https://pixabay.com/photos/eagle-bird-golden-eagle-bird-flying-6979972/
+
 As of present state of this project (WIP), Cologne VedaWeb's `tekst` may be indeed a better resource for any serious analysis.

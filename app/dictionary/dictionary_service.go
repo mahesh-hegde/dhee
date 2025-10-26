@@ -18,7 +18,7 @@ type DictionaryService struct {
 
 // GetEntries takes a list of words and returns the full dictionary
 // data about those words
-func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName string, words []string, tl common.Transliteration) (map[string]DictionaryEntry, error) {
+func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName string, words []string, tl common.Transliteration) (map[string][]DictionaryEntry, error) {
 	slp1Words := make([]string, len(words))
 	for i, word := range words {
 		slp1Words[i] = word
@@ -40,10 +40,10 @@ func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName strin
 
 	// The store returns a slice of entries for each word. For the service layer,
 	// we'll just return the first one for now.
-	finalResults := make(map[string]DictionaryEntry)
+	finalResults := make(map[string][]DictionaryEntry)
 	for word, entries := range results {
 		if len(entries) > 0 {
-			finalResults[word] = entries[0]
+			finalResults[word] = entries
 		}
 	}
 	return finalResults, nil

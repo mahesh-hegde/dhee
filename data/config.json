@@ -14,7 +14,7 @@
     "scriptures": [
         {
             "name": "rigveda",
-            "readable_name": "The Rig Veda",
+            "readable_name": "Rig Veda",
             "description": "The Rig Veda with linguistic data",
             "collector": "VedaWeb project",
             "hierarchy": [

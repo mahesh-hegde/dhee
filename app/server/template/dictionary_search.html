@@ -2,6 +2,8 @@
 <div class="container">
     <h2 class="my-4">Dictionary Search Results</h2>
 
+    {{ $dictionary := .DictionaryName }}
+
     {{ if .Items }}
     <table class="table table-striped">
         <thead>
@@ -14,7 +16,7 @@
         <tbody>
             {{ range .Items }}
             <tr>
-                <td><a href="/dictionaries/mw/words/{{ .HK }}">{{ .IAST }}</a></td>
+                <td><a href="/dictionaries/{{ $dictionary }}/words/{{ .Word }}">{{ .IAST }}</a></td>
                 <td>{{ .Nagari }}</td>
                 <td>{{ .Preview }}</td>
             </tr>

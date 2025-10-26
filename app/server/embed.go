@@ -7,6 +7,7 @@ import (
 )
 
 //go:embed template/*.html
+//go:embed template/*.ico
 var templateFs embed.FS
 
 func MustParseTemplates() *template.Template {

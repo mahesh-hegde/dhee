@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/mahesh-hegde/dhee/app/config"
@@ -9,7 +10,16 @@ import (
 
 func StartServer(controller *DheeController, conf *config.DheeConfig, host string, port int) {
 	e := echo.New()
-	e.Renderer = NewTemplateRenderer()
+	e.Renderer = NewTemplateRenderer(conf)
+
+	e.GET("/favicon.ico", func(c echo.Context) error {
+		file, err := templateFs.ReadFile("template/favicon.ico")
+		if err != nil {
+			// Let's not expose internal server errors, a simple 404 is sufficient
+			return c.NoContent(http.StatusNotFound)
+		}
+		return c.Blob(http.StatusOK, "image/x-icon", file)
+	})
 
 	e.GET("/", controller.GetHome)
 	e.GET("/scriptures/:scriptureName/excerpts/:path", controller.GetExcerpts)

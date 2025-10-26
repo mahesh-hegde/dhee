@@ -27,13 +27,14 @@ type Suggestions struct {
 
 type DictSearchResult struct {
 	IAST    string
-	HK      string
+	Word    string
 	Nagari  string
 	Preview string
 }
 
 type SearchResults struct {
-	Items []DictSearchResult
+	DictionaryName string
+	Items          []DictSearchResult
 }
 
 type Cognate struct {
