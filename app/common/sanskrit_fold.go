@@ -9,10 +9,16 @@ var FoldableAccents = map[string]string{
 	"ā́": "ā",
 	"é":  "e",
 	"ú":  "u",
+	"ū́": "ū",
+	"ī́": "ī",
 	"à":  "a",
 }
 
-var FoldableAccentsList = []string{"ó", "o", "í", "i", "á", "a", "ā́", "ā", "é", "e", "ú", "u", "à", "a"}
+var FoldableAccentsList = []string{
+	"ó", "o", "í", "i", "á", "a", "ā́", "ā", "é",
+	"e", "ú", "u", "à", "a", "ú", "u",
+	"ū́", "ū", "ī́", "ī",
+}
 
 var replacer = strings.NewReplacer(FoldableAccentsList...)
 

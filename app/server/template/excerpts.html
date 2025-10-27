@@ -64,7 +64,76 @@
     </div>
     {{ $excerpts := .Excerpts }}
     {{ $firstExcerpt := index .Excerpts 0 }}
+    {{ $tags := .GrammaticalTags }}
     {{ range $idx, $aux := .Scripture.Auxiliaries }}
+    {{ if eq $aux.Name "pada" }}
+    {{/* Special handling for pada auxiliary */}}
+    <div class="card my-3">
+        <div class="card-header">
+            {{ $aux.ReadableName }}
+        </div>
+        <div class="card-body">
+            {{ range $eidx, $excerpt := $excerpts }}
+            <p><strong>{{ $excerpt.ReadableIndex }}</strong></p>
+            {{- range $pidx, $pada := $excerpt.Padas -}}
+            {{- if $pidx }} | {{ end -}}
+            {{ if $pada.Found }}
+            {{/* Word with dictionary entries */}}
+            {{ $dictLink := "" }}
+            {{ if gt (len $pada.SurfaceMeanings) 0 }}
+            {{ $dictLink = (index $pada.SurfaceMeanings 0).Word }}
+            {{ else if gt (len $pada.LemmaMeanings) 0 }}
+            {{ $dictLink = (index $pada.LemmaMeanings 0).Word }}
+            {{- end -}}
+            <span class="pada-word" data-pada-id="pada-{{ $eidx }}-{{ $pidx }}">
+                {{ if ne $dictLink "" }}
+                <!-- TODO: make this relative -->
+                <a href="/dictionaries/monier-williams/words/{{ $dictLink }}" class="text-decoration-none">{{
+                    $pada.Word
+                    }}</a>
+                {{ else }}
+                {{ $pada.Word }}
+                {{ end }}
+            </span>
+            {{/* Hidden data for popup */}}
+            <div id="pada-{{ $eidx }}-{{ $pidx }}" class="pada-data" style="display: none;">
+                <div class="pada-popup-content">
+                    <div class="mt-2">
+                        {{ template "grammatical-badges" (sliceOf $pada.G $tags) }}
+                    </div>
+                    {{ if gt (len $pada.SurfaceMeanings) 0 }}
+                    <div class="mb-2">
+                        {{ range $smidx, $entry := $pada.SurfaceMeanings }}
+                        <div class="mt-1">
+                            <em>{{ $entry.IAST }}</em>: {{ $entry.Body.Plain }}
+                        </div>
+                        {{ end }}
+                        <hr />
+                    </div>
+                    {{ else if gt (len $pada.LemmaMeanings) 0 }}
+                    <div class="mb-2">
+                        {{ range $lmidx, $entry := $pada.LemmaMeanings }}
+                        <div class="mt-1">
+                            <em>{{ $entry.IAST }}</em>: {{ $entry.Body.Plain }}
+                        </div>
+                        <hr />
+                        {{ end }}
+                    </div>
+                    {{ end }}
+                    {{/* Grammatical badges */}}
+                </div>
+            </div>
+            {{ else }}
+            {{/* Word without dictionary entries */}}
+            <span>{{ $pada.Word }}</span>
+            {{ end }}
+            {{ end }}
+            </p>
+            {{ end }}
+        </div>
+    </div>
+    {{ else }}
+    {{/* Standard auxiliary handling */}}
     {{ with (index $firstExcerpt.Auxiliaries $aux.Name).Text }}
     <div class="card my-3">
         <div class="card-header">
@@ -80,6 +149,7 @@
             {{ end }}
         </div>
     </div>
+    {{ end }}
     {{ end }}
     {{ end }}
 
@@ -102,12 +172,10 @@
                             <th>Source index</th>
                             <th>Surface</th>
                             <th>Lemma</th>
-                            <th>Kind</th>
                             <th>Information</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {{ $tags := .GrammaticalTags }}
                         {{ range .Excerpts }}
                         {{ $ew := . }}
                         {{ $idx := .ReadableIndex }}
@@ -143,54 +211,7 @@
                             </td>
 
                             <td>
-                                {{ if ne $g.Gramm "" }}
-                                <span class="badge bg-light text-dark" data-bs-toggle="tooltip"
-                                    title="{{ with index $tags $g.Gramm }}{{ . }}{{ end }}">{{ $g.Gramm }}</span>
-                                {{ else }}
-                                <span class="text-muted small">N/A</span>
-                                {{ end }}
-                            </td>
-
-                            <td>
-                                {{/* show badges for available fields */}}
-                                {{ if ne $g.Root "" }}
-                                <span class="badge bg-secondary me-1">Root={{ $g.Root }}</span>
-                                {{ end }}
-                                {{ if ne $g.Number "" }}
-                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
-                                    title="{{ with index $tags $g.Number }}{{ . }}{{ end }}">Number:{{ $g.Number
-                                    }}</span>
-                                {{ end }}
-                                {{ if ne $g.Gender "" }}
-                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
-                                    title="{{ with index $tags $g.Gender }}{{ . }}{{ end }}">Gender:{{ $g.Gender
-                                    }}</span>
-                                {{ end }}
-                                {{ if ne $g.Case "" }}
-                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
-                                    title="{{ with index $tags $g.Case }}{{ . }}{{ end }}">Case:{{ $g.Case }}</span>
-                                {{ end }}
-                                {{ if ne $g.Tense "" }}
-                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
-                                    title="{{ with index $tags $g.Tense }}{{ . }}{{ end }}">Tense:{{ $g.Tense }}</span>
-                                {{ end }}
-                                {{ if ne $g.Voice "" }}
-                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
-                                    title="{{ with index $tags $g.Voice }}{{ . }}{{ end }}">Voice:{{ $g.Voice }}</span>
-                                {{ end }}
-                                {{ if ne $g.Person "" }}
-                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
-                                    title="{{ with index $tags $g.Person }}{{ . }}{{ end }}">Person:{{ $g.Person
-                                    }}</span>
-                                {{ end }}
-                                {{ if ne $g.Mood "" }}
-                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
-                                    title="{{ with index $tags $g.Mood }}{{ . }}{{ end }}">Mood:{{ $g.Mood }}</span>
-                                {{ end }}
-                                {{/* Modifiers (slice) */}}
-                                {{ range $mi, $mod := $g.Modifiers }}
-                                <span class="badge bg-secondary me-1">{{ $mod }}</span>
-                                {{ end }}
+                                {{ template "grammatical-badges" (sliceOf $g $tags) }}
                             </td>
                         </tr>
                         {{ end }}
@@ -207,16 +228,90 @@
             border-bottom: 1px dotted currentColor;
             cursor: help;
         }
+
+        .pada-word {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .pada-popup {
+            position: absolute;
+            background: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 4px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-width: 400px;
+            max-height: calc(100vh - 20px);
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .pada-word a {
+            border-bottom: 1px dotted currentColor;
+            text-decoration: none;
+            cursor: help;
+        }
     </style>
 
     <script>
-        // Initialize bootstrap tooltips inside this template
-        (function () {
+        // Pada word popup handler
+        var initFn = (function () {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             tooltipTriggerList.forEach(function (tooltipTriggerEl) {
                 new bootstrap.Tooltip(tooltipTriggerEl)
             })
-        })();
+
+            var activePopup = null;
+
+            document.querySelectorAll('.pada-word').forEach(function (wordEl) {
+                var padaId = wordEl.getAttribute('data-pada-id');
+                var dataEl = document.getElementById(padaId);
+
+                if (!dataEl) return;
+
+                wordEl.addEventListener('mouseenter', function (e) {
+                    // Remove any existing popup
+                    if (activePopup) {
+                        activePopup.remove();
+                        activePopup = null;
+                    }
+
+                    // Create popup
+                    var popup = document.createElement('div');
+                    popup.className = 'pada-popup';
+                    popup.innerHTML = dataEl.querySelector('.pada-popup-content').innerHTML;
+
+                    // Position popup
+                    document.body.appendChild(popup);
+                    var rect = wordEl.getBoundingClientRect();
+                    popup.style.left = rect.left + 'px';
+                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+
+                    activePopup = popup;
+                });
+
+                wordEl.addEventListener('mouseleave', function (e) {
+                    setTimeout(function () {
+                        if (activePopup && !activePopup.matches(':hover')) {
+                            activePopup.remove();
+                            activePopup = null;
+                        }
+                    }, 100);
+                });
+            });
+
+            // Close popup when clicking outside
+            document.addEventListener('click', function (e) {
+                if (activePopup && !e.target.closest('.pada-word') && !e.target.closest('.pada-popup')) {
+                    activePopup.remove();
+                    activePopup = null;
+                }
+            });
+        });
     </script>
 
     <div class="d-flex justify-content-between my-4">
@@ -242,4 +337,48 @@
     {{ end }}
 
 </div>
+{{ end }}
+
+{{/* Reusable template for grammatical badges */}}
+{{ define "grammatical-badges" }}
+{{ $g := index . 0 }}
+{{ $tags := index . 1 }}
+{{ if ne $g.Gramm "" }}
+<span class="badge bg-light text-dark me-1" data-bs-toggle="tooltip"
+    title="{{ with index $tags $g.Gramm }}{{ . }}{{ end }}">{{ $g.Gramm }}</span>
+{{ end }}
+{{ if ne $g.Root "" }}
+<span class="badge bg-secondary me-1">Root={{ $g.Root }}</span>
+{{ end }}
+{{ if ne $g.Number "" }}
+<span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+    title="{{ with index $tags $g.Number }}{{ . }}{{ end }}">Number:{{ $g.Number }}</span>
+{{ end }}
+{{ if ne $g.Gender "" }}
+<span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+    title="{{ with index $tags $g.Gender }}{{ . }}{{ end }}">Gender:{{ $g.Gender }}</span>
+{{ end }}
+{{ if ne $g.Case "" }}
+<span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+    title="{{ with index $tags $g.Case }}{{ . }}{{ end }}">Case:{{ $g.Case }}</span>
+{{ end }}
+{{ if ne $g.Tense "" }}
+<span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+    title="{{ with index $tags $g.Tense }}{{ . }}{{ end }}">Tense:{{ $g.Tense }}</span>
+{{ end }}
+{{ if ne $g.Voice "" }}
+<span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+    title="{{ with index $tags $g.Voice }}{{ . }}{{ end }}">Voice:{{ $g.Voice }}</span>
+{{ end }}
+{{ if ne $g.Person "" }}
+<span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+    title="{{ with index $tags $g.Person }}{{ . }}{{ end }}">Person:{{ $g.Person }}</span>
+{{ end }}
+{{ if ne $g.Mood "" }}
+<span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+    title="{{ with index $tags $g.Mood }}{{ . }}{{ end }}">Mood:{{ $g.Mood }}</span>
+{{ end }}
+{{ range $mi, $mod := $g.Modifiers }}
+<span class="badge bg-secondary me-1">{{ $mod }}</span>
+{{ end }}
 {{ end }}
