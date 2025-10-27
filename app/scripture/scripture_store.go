@@ -35,7 +35,7 @@ func (b *BleveExcerptStore) GetHier(ctx context.Context, scripture *config.Scrip
 	if len(path) >= len(scripture.Hierarchy) {
 		return nil, fmt.Errorf("cannot obtain hierarchy for a leaf element")
 	}
-	query := bleve.NewPrefixQuery(scripture.Name + ":" + common.PathToString(path))
+	query := bleve.NewPrefixQuery(scripture.Name + ":" + common.PathToString(path) + ".")
 	query.SetField("_id")
 	searchRequest := bleve.NewSearchRequest(query)
 	searchRequest.Size = 10000 // Max verses I'd expect anywhere
