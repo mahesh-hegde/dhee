@@ -197,10 +197,12 @@ func ConvertRvTeiToExcerpts(file io.Reader) ([]Excerpt, error) {
 				excerpt.SourceText = extractTextLines(eichlerLG)
 			}
 
-			if vnhLG != nil {
-				excerpt.RomanText = extractTextLines(vnhLG)
+			if zurLG != nil {
+				excerpt.RomanText = extractTextLines(zurLG)
 			} else if lubLG != nil {
 				excerpt.RomanText = extractTextLines(lubLG)
+			} else if vnhLG != nil {
+				excerpt.RomanText = extractTextLines(vnhLG)
 			}
 
 			// Extract auxiliaries

@@ -33,12 +33,14 @@ type DictDefn struct {
 }
 
 type DheeConfig struct {
-	InstanceName string          `json:"instance_name"`
-	DataDir      string          `json:"-"`
-	Dictionaries []DictDefn      `json:"dictionaries"`
-	DefaultDict  string          `json:"default_dict"`
-	Scriptures   []ScriptureDefn `json:"scriptures"`
-	Fuzziness    int             `json:"fuzziness"`
+	InstanceName   string          `json:"instance_name"`
+	DataDir        string          `json:"-"`
+	Dictionaries   []DictDefn      `json:"dictionaries"`
+	DefaultDict    string          `json:"default_dict"`
+	Scriptures     []ScriptureDefn `json:"scriptures"`
+	Fuzziness      int             `json:"fuzziness"`
+	LogLatency     bool            `json:"log_latency"`
+	TimeoutSeconds int64           `json:"timeout_seconds"`
 }
 
 func (c *DheeConfig) GetScriptureByName(name string) *ScriptureDefn {

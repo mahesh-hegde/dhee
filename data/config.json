@@ -1,6 +1,7 @@
 {
     "instance_name": "Dhee by Apratiratha",
-    "fuzziness": 3,
+    "fuzziness": 2,
+    "timeout_seconds": 10,
     "dictionaries": [
         {
             "name": "monier-williams",
@@ -21,7 +22,7 @@
             "hierarchy": [
                 "Mandala",
                 "Sukta",
-                "Rik"
+                "Verse"
             ],
             "auxiliaries": [
                 {

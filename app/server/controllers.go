@@ -39,6 +39,9 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 	pathStr := ctx.Param("path")
 	if pathStr == "" {
 		pathStr = ctx.QueryParam("path")
+		if pathStr != "" {
+			return ctx.Redirect(307, ctx.Echo().Reverse("excerpts", scriptureName, pathStr))
+		}
 	}
 
 	parts := strings.Split(pathStr, ".")
@@ -50,7 +53,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 	}
 
 	if len(parts) < len(scri.Hierarchy) {
-		ctx.Redirect(307, ctx.Echo().Reverse("hierarchy", scriptureName, pathStr))
+		return ctx.Redirect(307, ctx.Echo().Reverse("hierarchy", scriptureName, pathStr))
 	}
 
 	lastPart := parts[len(parts)-1]

@@ -19,9 +19,10 @@
                 data-bs-parent="#scriptureAccordion">
                 <div class="accordion-body">
                     <h3>Jump to excerpt</h3>
-                    <form class="jump-form row g-3" data-scripture-name="{{.Name}}">
+                    <form class="jump-form row g-3" data-scripture-name="{{.Name}}"
+                        action="scriptures/{{.Name}}/excerpts" method="get">
                         <div class="col-auto">
-                            <input type="text" class="form-control" placeholder="e.g., 1.1.1">
+                            <input type="text" name="path" class="form-control" placeholder="e.g., 1.1.1">
                         </div>
                         <div class="col-auto">
                             <button type="submit" class="btn btn-primary">Go</button>
@@ -44,9 +45,9 @@
                         </div>
                         <div class="col-sm-2">
                             <select name="mode" class="form-select">
-                                <option value="exact" selected>Exact</option>
-                                <option value="fuzzy">Fuzzy</option>
+                                <option value="exact" selected>Normal</option>
                                 <option value="regex">Regex</option>
+                                <option value="fuzzy">Fuzzy</option>
                                 <option value="prefix">Prefix</option>
                             </select>
                         </div>
@@ -67,7 +68,7 @@
             <h2 class="accordion-header" id="heading-{{.Name}}">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapse-{{.Name}}" aria-expanded="true" aria-controls="collapse-{{.Name}}">
-                    {{.ReadableName}}
+                    <b>{{.ReadableName}}</b>
                 </button>
             </h2>
             <div id="collapse-{{.Name}}" class="accordion-collapse collapse show" aria-labelledby="heading-{{.Name}}"
@@ -94,7 +95,7 @@
                             </select>
                         </div>
                         <div class="col-auto">
-                            <button type="submit" class="btn btn-primary">Go</button>
+                            <button type="submit" class="btn btn-primary">Find</button>
                         </div>
                     </form>
                 </div>
@@ -114,15 +115,4 @@
         </p>
     </div>
 </div>
-
-<script>
-    document.querySelectorAll('.jump-form').forEach(form => {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const scriptureName = form.dataset.scriptureName;
-            const path = form.querySelector('input').value;
-            window.location.href = `/scriptures/${scriptureName}/excerpts/${path}`;
-        });
-    });
-</script>
 {{ end }}

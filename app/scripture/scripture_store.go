@@ -35,9 +35,22 @@ func (b *BleveExcerptStore) GetHier(ctx context.Context, scripture *config.Scrip
 	if len(path) >= len(scripture.Hierarchy) {
 		return nil, fmt.Errorf("cannot obtain hierarchy for a leaf element")
 	}
-	query := bleve.NewPrefixQuery(scripture.Name + ":" + common.PathToString(path) + ".")
-	query.SetField("_id")
-	searchRequest := bleve.NewSearchRequest(query)
+	qs := scripture.Name + ":" + common.PathToString(path)
+	if len(path) != 0 {
+		qs += "."
+	}
+	qPref := bleve.NewPrefixQuery(qs)
+	qPref.SetField("_id")
+
+	var qFinal query.Query = qPref
+	if len(path) < len(scripture.Hierarchy)-1 {
+		limitVerses := qs + "[^.]*(.1)*"
+		qReg := bleve.NewRegexpQuery(limitVerses)
+		qReg.SetField("_id")
+		qFinal = bleve.NewConjunctionQuery(qPref, qReg)
+	}
+
+	searchRequest := bleve.NewSearchRequest(qFinal)
 	searchRequest.Size = 10000 // Max verses I'd expect anywhere
 	searchRequest.Fields = []string{"_id"}
 	searchResults, err := b.idx.Search(searchRequest)
@@ -205,7 +218,7 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewFuzzyQuery(q)
 			bq.SetField(field)
-			bq.Fuzziness = 2
+			bq.Fuzziness = b.conf.Fuzziness
 			return bq
 		}
 	case common.SearchPrefix:

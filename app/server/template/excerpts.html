@@ -7,6 +7,15 @@
             (sub (len .Excerpts) 1)).ReadableIndex }}{{ end }}</h2>
     </div>
 
+    <div class="d-flex flex-column justify-content-start p-2">
+        <div class="d-flex justify-content-start my-3">
+            <span class="badge bg-success">Addressed to: {{ .AddressedTo }}</span>
+        </div>
+        <div class="d-flex justify-content-start">
+            <span class="badge bg-secondary">Group: {{ (index .Excerpts 0).Group }}</span>
+        </div>
+    </div>
+
     <div class="d-flex justify-content-between my-4">
         {{ if .Previous }}
         <a href="{{ .Previous }}" class="btn btn-primary">&larr; Previous ({{ .Previous }})</a>
@@ -30,9 +39,11 @@
         <div class="card-body">
             {{ range .Excerpts }}
             <p><strong>{{ .ReadableIndex }}</strong></p>
-            {{ range .SourceText }}
-            <p>{{ . }}</p>
-            {{ end }}
+            <div class="verse">
+                {{ range .SourceText }}
+                <p class="line">{{ . }}</p>
+                {{ end }}
+            </div>
             {{ end }}
         </div>
     </div>
@@ -41,11 +52,12 @@
         <div class="card-header">
             Text (Roman)
         </div>
-        <div class="card-body">
+        <div class="card-body verse">
             {{ range .Excerpts }}
             <p><strong>{{ .ReadableIndex }}</strong></p>
             {{ range .RomanText }}
-            <p>{{ . }}</p>
+            <p class="roman-text">{{ . }}</p>
+            <!-- <p class="roman-text line">{{ . }}</p> -->
             {{ end }}
             {{ end }}
         </div>

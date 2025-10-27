@@ -267,12 +267,12 @@ func loadJSONL[T mapping.Classifier](index bleve.Index, dataFile string, idFunc 
 
 var replacer = strings.NewReplacer(common.FoldableAccentsList...)
 
-func normalizeRomanTextForKwStorage(txt []string) []string {
+func normalizeRomanTextForKwStorage(txt []string) string {
 	var result []string
 	for _, t := range txt {
 		result = append(result, replacer.Replace(t))
 	}
-	return result
+	return strings.Join(result, " ")
 }
 
 func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) error {

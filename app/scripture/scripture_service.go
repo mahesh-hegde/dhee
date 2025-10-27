@@ -140,12 +140,13 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 	scriptureName := paths[0].Scripture
 	scri := s.scriptureMap[scriptureName]
 	return &ExcerptTemplateData{
-		Excerpts:  es,
-		Scripture: scri,
-		Previous:  prev,
-		Next:      next,
-		Up:        common.PathToString(up),
-		UpType:    scri.Hierarchy[len(up)-1],
+		Excerpts:    es,
+		AddressedTo: strings.Join(es[0].Addressees, ", "),
+		Scripture:   scri,
+		Previous:    prev,
+		Next:        next,
+		Up:          common.PathToString(up),
+		UpType:      scri.Hierarchy[len(up)-1],
 	}, nil
 }
 

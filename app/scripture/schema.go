@@ -63,7 +63,7 @@ type Excerpt struct {
 	// Romanized text (eg: IAST)
 	RomanText []string `json:"roman_text"`
 	// Romanized text stored as keyword in bleve for regex queries
-	RomanTextK []string `json:"roman_text_k"`
+	RomanTextK string `json:"roman_text_k"`
 	// Authors to whom the verse is attributed
 	Authors []string `json:"authors,omitempty"`
 	Meter   string   `json:"meter,omitempty"`
@@ -107,12 +107,13 @@ func (e *Excerpt) Type() string {
 }
 
 type ExcerptTemplateData struct {
-	Excerpts  []ExcerptWithWords
-	Scripture config.ScriptureDefn
-	Next      string
-	Previous  string
-	Up        string
-	UpType    string
+	Excerpts    []ExcerptWithWords
+	Scripture   config.ScriptureDefn
+	AddressedTo string
+	Next        string
+	Previous    string
+	Up          string
+	UpType      string
 }
 
 type ExcerptSearchData struct {

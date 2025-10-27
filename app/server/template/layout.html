@@ -74,6 +74,22 @@
             background-color: #3a0000;
         }
 
+        .verse .line {
+            display: block;
+        }
+
+        .verse .line:nth-child(odd)::after {
+            content: " |";
+            margin-left: .25em;
+            white-space: pre;
+        }
+
+        .verse .line:nth-child(even)::after {
+            content: " ||";
+            margin-left: .25em;
+            white-space: pre;
+        }
+
         .accordion-header {
             --bs-accordion-active-bg: lightgray;
             --bs-accordion-active-color: teal;
