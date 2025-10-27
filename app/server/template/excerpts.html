@@ -83,6 +83,142 @@
     {{ end }}
     {{ end }}
 
+    <!-- Grammatical analysis collapsible -->
+    <div class="card my-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>Grammatical analysis</div>
+            <div>
+                <button class="btn btn-sm btn-outline-info me-2" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#grammaticalCollapse" aria-expanded="true" aria-controls="grammaticalCollapse">
+                    Toggle table
+                </button>
+            </div>
+        </div>
+        <div class="card-body collapse" id="grammaticalCollapse">
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Source index</th>
+                            <th>Surface</th>
+                            <th>Lemma</th>
+                            <th>Kind</th>
+                            <th>Information</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ $tags := .GrammaticalTags }}
+                        {{ range .Excerpts }}
+                        {{ $ew := . }}
+                        {{ $idx := .ReadableIndex }}
+                        {{ range $rindex, $row := .Glossings }}
+                        {{ range $windex, $g := $row }}
+                        <tr>
+                            <td class="text-muted small">{{ $idx }}</td>
+
+                            {{/* Surface cell: show dotted underline if dictionary entries exist for surface */}}
+                            {{ $surfEntries := index $ew.Words $g.Surface }}
+                            <td>
+                                {{ if gt (len $surfEntries) 0 }}
+                                <span class="dotted-underline" data-bs-toggle="tooltip"
+                                    title="{{ range $i, $e := $surfEntries }}{{ if $i }}; {{ end }}{{ $e.Body.Plain }}{{ end }}">{{
+                                    $g.Surface }}</span>
+                                {{ else }}
+                                <span>{{ $g.Surface }}</span>
+                                {{ end }}
+                            </td>
+
+                            {{/* Lemma cell: show dotted underline if dictionary entries exist for lemma */}}
+                            {{ $lemmaEntries := index $ew.Words $g.Lemma }}
+                            <td>
+                                {{ if and (ne $g.Lemma "") (gt (len $lemmaEntries) 0) }}
+                                <span class="dotted-underline" data-bs-toggle="tooltip"
+                                    title="{{ range $i, $e := $lemmaEntries }}{{ if $i }}; {{ end }}{{ $e.Body.Plain }}{{ end }}">{{
+                                    $g.Lemma }}</span>
+                                {{ else if ne $g.Lemma "" }}
+                                <span>{{ $g.Lemma }}</span>
+                                {{ else }}
+                                <span class="text-muted">N/A</span>
+                                {{ end }}
+                            </td>
+
+                            <td>
+                                {{ if ne $g.Gramm "" }}
+                                <span class="badge bg-light text-dark" data-bs-toggle="tooltip"
+                                    title="{{ with index $tags $g.Gramm }}{{ . }}{{ end }}">{{ $g.Gramm }}</span>
+                                {{ else }}
+                                <span class="text-muted small">N/A</span>
+                                {{ end }}
+                            </td>
+
+                            <td>
+                                {{/* show badges for available fields */}}
+                                {{ if ne $g.Root "" }}
+                                <span class="badge bg-secondary me-1">Root={{ $g.Root }}</span>
+                                {{ end }}
+                                {{ if ne $g.Number "" }}
+                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+                                    title="{{ with index $tags $g.Number }}{{ . }}{{ end }}">Number:{{ $g.Number
+                                    }}</span>
+                                {{ end }}
+                                {{ if ne $g.Gender "" }}
+                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+                                    title="{{ with index $tags $g.Gender }}{{ . }}{{ end }}">Gender:{{ $g.Gender
+                                    }}</span>
+                                {{ end }}
+                                {{ if ne $g.Case "" }}
+                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+                                    title="{{ with index $tags $g.Case }}{{ . }}{{ end }}">Case:{{ $g.Case }}</span>
+                                {{ end }}
+                                {{ if ne $g.Tense "" }}
+                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+                                    title="{{ with index $tags $g.Tense }}{{ . }}{{ end }}">Tense:{{ $g.Tense }}</span>
+                                {{ end }}
+                                {{ if ne $g.Voice "" }}
+                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+                                    title="{{ with index $tags $g.Voice }}{{ . }}{{ end }}">Voice:{{ $g.Voice }}</span>
+                                {{ end }}
+                                {{ if ne $g.Person "" }}
+                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+                                    title="{{ with index $tags $g.Person }}{{ . }}{{ end }}">Person:{{ $g.Person
+                                    }}</span>
+                                {{ end }}
+                                {{ if ne $g.Mood "" }}
+                                <span class="badge bg-secondary me-1" data-bs-toggle="tooltip"
+                                    title="{{ with index $tags $g.Mood }}{{ . }}{{ end }}">Mood:{{ $g.Mood }}</span>
+                                {{ end }}
+                                {{/* Modifiers (slice) */}}
+                                {{ range $mi, $mod := $g.Modifiers }}
+                                <span class="badge bg-secondary me-1">{{ $mod }}</span>
+                                {{ end }}
+                            </td>
+                        </tr>
+                        {{ end }}
+                        {{ end }}
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .dotted-underline {
+            border-bottom: 1px dotted currentColor;
+            cursor: help;
+        }
+    </style>
+
+    <script>
+        // Initialize bootstrap tooltips inside this template
+        (function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        })();
+    </script>
+
     <div class="d-flex justify-content-between my-4">
         {{ if .Previous }}
         <a href="{{ .Previous }}" class="btn btn-primary">&larr; Previous ({{ .Previous }})</a>
@@ -104,5 +240,6 @@
         No results found!
     </div>
     {{ end }}
+
 </div>
 {{ end }}

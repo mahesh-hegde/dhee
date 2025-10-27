@@ -27,6 +27,15 @@ type ExcerptWithWords struct {
 	Words map[string][]dictionary.DictionaryEntry
 }
 
+func normalizeLemma(lemma string) string {
+	lemma = strings.TrimSuffix(lemma, "-")
+	lemma = strings.TrimPrefix(lemma, "√")
+	if strings.Contains(lemma, "- ") {
+		lemma, _, _ = strings.Cut(lemma, "- ")
+	}
+	return lemma
+}
+
 // Get returns the excerpts given by paths. If any of the excerpts could not be found, it returns an error.
 //
 // Get also batch-fetches the dictionary words for surfaces,
@@ -53,7 +62,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		for _, g := range e.Glossings {
 			for _, gl := range g {
 				wordsToFetch[gl.Surface] = ""
-				lemma := strings.TrimSuffix(gl.Lemma, "-")
+				lemma := normalizeLemma(gl.Lemma)
 				wordsToFetch[lemma] = ""
 			}
 		}
@@ -71,7 +80,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		words = append(words, slp1)
 	}
 
-	// Fetch dictionary entries. We assume the first dictionary is the one we want.
+	// Fetch dictionary entries.
 	dictName := s.conf.DefaultDict
 	dictEntries, err := s.ds.Get(ctx, dictName, words)
 	if err != nil {
@@ -99,9 +108,9 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 				if entry, ok := wordMap[mapped]; ok {
 					ew.Words[gl.Surface] = entry
 				}
-				lemma := strings.TrimSuffix(gl.Lemma, "-")
-				mappedLemma := wordsToFetch[lemma]
-				if entry, ok := wordMap[mappedLemma]; ok {
+				lemma := normalizeLemma(gl.Lemma)
+				slpLemma := wordsToFetch[lemma]
+				if entry, ok := wordMap[slpLemma]; ok {
 					ew.Words[gl.Lemma] = entry
 				}
 			}
@@ -149,13 +158,14 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 	scriptureName := paths[0].Scripture
 	scri := s.scriptureMap[scriptureName]
 	return &ExcerptTemplateData{
-		Excerpts:    es,
-		AddressedTo: strings.Join(es[0].Addressees, ", "),
-		Scripture:   scri,
-		Previous:    prev,
-		Next:        next,
-		Up:          common.PathToString(up),
-		UpType:      scri.Hierarchy[len(up)-1],
+		Excerpts:        es,
+		AddressedTo:     strings.Join(es[0].Addressees, ", "),
+		Scripture:       scri,
+		Previous:        prev,
+		Next:            next,
+		Up:              common.PathToString(up),
+		UpType:          scri.Hierarchy[len(up)-1],
+		GrammaticalTags: common.GrammaticalTags,
 	}, nil
 }
 

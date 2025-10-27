@@ -108,13 +108,15 @@ func (e *Excerpt) Type() string {
 }
 
 type ExcerptTemplateData struct {
-	Excerpts    []ExcerptWithWords
-	Scripture   config.ScriptureDefn
-	AddressedTo string
-	Next        string
-	Previous    string
-	Up          string
-	UpType      string
+	Excerpts        []ExcerptWithWords
+	Scripture       config.ScriptureDefn
+	GlossingMap     map[string]ExcerptGlossing
+	AddressedTo     string
+	Next            string
+	Previous        string
+	Up              string
+	UpType          string
+	GrammaticalTags map[string]string
 }
 
 type ExcerptSearchData struct {

@@ -12,7 +12,7 @@
             "data_file": "mw.jsonl"
         }
     ],
-    "default_dictionary": "monier-williams",
+    "default_dict": "monier-williams",
     "scriptures": [
         {
             "name": "rigveda",
