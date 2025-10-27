@@ -48,20 +48,27 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 	}
 
 	// Collect all words to fetch from the dictionary
-	wordsToFetch := make(map[string]bool)
+	wordsToFetch := make(map[string]string)
 	for _, e := range excerpts {
 		for _, g := range e.Glossings {
 			for _, gl := range g {
-				wordsToFetch[gl.Surface] = true
+				wordsToFetch[gl.Surface] = ""
 				lemma := strings.TrimSuffix(gl.Lemma, "-")
-				wordsToFetch[lemma] = true
+				wordsToFetch[lemma] = ""
 			}
 		}
 	}
 
 	var words []string
+
 	for w := range wordsToFetch {
-		words = append(words, w)
+		folded := common.FoldAccents(w)
+		slp1, err := s.transliterator.Convert(folded, common.TlIAST, common.TlSLP1)
+		if err != nil {
+			slog.Debug("could not transliterate word to slp1", "word", folded)
+		}
+		wordsToFetch[w] = slp1
+		words = append(words, slp1)
 	}
 
 	// Fetch dictionary entries. We assume the first dictionary is the one we want.
@@ -88,12 +95,14 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		}
 		for _, g := range e.Glossings {
 			for _, gl := range g {
-				if entry, ok := wordMap[gl.Surface]; ok {
+				mapped := wordsToFetch[gl.Surface]
+				if entry, ok := wordMap[mapped]; ok {
 					ew.Words[gl.Surface] = entry
 				}
 				lemma := strings.TrimSuffix(gl.Lemma, "-")
-				if entry, ok := wordMap[lemma]; ok {
-					ew.Words[lemma] = entry
+				mappedLemma := wordsToFetch[lemma]
+				if entry, ok := wordMap[mappedLemma]; ok {
+					ew.Words[gl.Lemma] = entry
 				}
 			}
 		}
