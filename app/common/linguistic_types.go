@@ -29,6 +29,7 @@ const (
 	SearchRegex  SearchMode = "regex"
 	SearchPrefix SearchMode = "prefix"
 	SearchFuzzy  SearchMode = "fuzzy"
+	SearchASCII  SearchMode = "ascii"
 )
 
 func PathToString(path []int) string {

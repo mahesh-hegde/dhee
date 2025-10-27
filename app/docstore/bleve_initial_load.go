@@ -12,6 +12,7 @@ import (
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis"
+	"github.com/blevesearch/bleve/v2/analysis/char/asciifolding"
 	"github.com/blevesearch/bleve/v2/mapping"
 
 	"github.com/mahesh-hegde/dhee/app/common"
@@ -45,7 +46,7 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	indexMapping := mapping.NewIndexMapping()
 
 	// Add custom analyzer for Sanskrit/IAST/Devanagari
-	err := indexMapping.AddCustomAnalyzer("sanskrit_ws",
+	err1 := indexMapping.AddCustomAnalyzer("sanskrit_ws",
 		map[string]any{
 			"type":         custom.Name,
 			"char_filters": []string{"accent_fold"},
@@ -54,8 +55,16 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 				lowercase.Name,
 			},
 		})
-	if err != nil {
-		slog.Error("error when defining index", "err", err)
+	err2 := indexMapping.AddCustomAnalyzer("ascii_folding", map[string]any{
+		"type":         custom.Name,
+		"char_filters": []string{asciifolding.Name},
+		"tokenizer":    unicode.Name,
+		"token_filters": []string{
+			lowercase.Name,
+		},
+	})
+	if err1 != nil || err2 != nil {
+		slog.Error("error when defining index", "err1", err1, "err2", err2)
 		os.Exit(1)
 	}
 
@@ -85,6 +94,10 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 
 	romanKField := mapping.NewKeywordFieldMapping()
 	excerptMapping.AddFieldMappingsAt("roman_text_k", romanKField)
+
+	romanFField := mapping.NewTextFieldMapping()
+	romanFField.Analyzer = "ascii_folding"
+	excerptMapping.AddFieldMappingsAt("roman_text_f", romanFField)
 
 	// Authors
 	excerptMapping.AddFieldMappingsAt("authors", mapping.NewTextFieldMapping())
@@ -286,6 +299,7 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 			func(e *scripture.Excerpt) {
 				e.Scripture = sc.Name
 				e.RomanTextK = normalizeRomanTextForKwStorage(e.RomanText)
+				e.RomanTextF = e.RomanTextK
 			},
 		)
 		if err != nil {

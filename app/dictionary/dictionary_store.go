@@ -120,7 +120,7 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 		vq.SetField("variants")
 		vq.Fuzziness = b.conf.Fuzziness
 		wordQuery = bleve.NewDisjunctionQuery(q, vq)
-	case "regexp":
+	case "regex":
 		q := bleve.NewRegexpQuery(s.Query)
 		q.SetField("word")
 		vq := bleve.NewPrefixQuery(s.Query)

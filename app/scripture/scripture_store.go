@@ -214,6 +214,15 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 			bq.SetField(field)
 			return bq
 		}
+	case common.SearchASCII:
+		queryMaker = func(q string, field string) query.Query {
+			bq := bleve.NewMatchQuery(q)
+			if field == "roman_text" {
+				field = "roman_text_f" // ugly hack
+			}
+			bq.SetField(field)
+			return bq
+		}
 	case common.SearchFuzzy:
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewFuzzyQuery(q)
@@ -246,7 +255,11 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 100
 	searchRequest.Fields = []string{"*"}
-	searchRequest.SortBy([]string{"_id"})
+	if params.Mode == common.SearchRegex {
+		searchRequest.SortBy([]string{"_id"})
+	} else {
+		searchRequest.SortBy([]string{"-_score", "_id"})
+	}
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {

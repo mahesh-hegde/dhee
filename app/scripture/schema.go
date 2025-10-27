@@ -64,6 +64,7 @@ type Excerpt struct {
 	RomanText []string `json:"roman_text"`
 	// Romanized text stored as keyword in bleve for regex queries
 	RomanTextK string `json:"roman_text_k"`
+	RomanTextF string `json:"roman_text_f"`
 	// Authors to whom the verse is attributed
 	Authors []string `json:"authors,omitempty"`
 	Meter   string   `json:"meter,omitempty"`
