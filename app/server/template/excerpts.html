@@ -121,7 +121,7 @@
                             <td>
                                 {{ if gt (len $surfEntries) 0 }}
                                 <span class="dotted-underline" data-bs-toggle="tooltip"
-                                    title="{{ range $i, $e := $surfEntries }}{{ if $i }}; {{ end }}{{ $e.Body.Plain }}{{ end }}">{{
+                                    title="{{ range $i, $e := $surfEntries }}{{ if $i }}&#10;&#10;{{ end }}{{ $e.Body.Plain }}{{ end }}">{{
                                     $g.Surface }}</span>
                                 {{ else }}
                                 <span>{{ $g.Surface }}</span>

@@ -3,6 +3,7 @@ package scripture
 import (
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
+	"github.com/mahesh-hegde/dhee/app/dictionary"
 )
 
 type Modifier string
@@ -21,6 +22,14 @@ type ExcerptGlossing struct {
 	Root         string     `json:"root,omitempty"`
 	Modifiers    []Modifier `json:"modifiers,omitempty"`
 	Constituents []string   `json:"constituents,omitempty"`
+}
+
+type PadaElement struct {
+	Word            string
+	Found           bool
+	G               ExcerptGlossing
+	SurfaceMeanings []dictionary.DictionaryEntry
+	LemmaMeanings   []dictionary.DictionaryEntry
 }
 
 type Auxiliary struct {
@@ -105,6 +114,12 @@ type HighlightedExcerpt struct {
 // Type implements mapping.Classifier.
 func (e *Excerpt) Type() string {
 	return "excerpt"
+}
+
+type ExcerptWithWords struct {
+	Excerpt
+	Words map[string][]dictionary.DictionaryEntry
+	Padas []PadaElement
 }
 
 type ExcerptTemplateData struct {

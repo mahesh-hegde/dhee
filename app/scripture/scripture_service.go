@@ -22,11 +22,6 @@ type ExcerptService struct {
 	scriptureMap   map[string]config.ScriptureDefn
 }
 
-type ExcerptWithWords struct {
-	Excerpt
-	Words map[string][]dictionary.DictionaryEntry
-}
-
 func normalizeLemma(lemma string) string {
 	lemma = strings.TrimSuffix(lemma, "-")
 	lemma = strings.TrimPrefix(lemma, "√")
@@ -101,19 +96,56 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		ew := ExcerptWithWords{
 			Excerpt: e,
 			Words:   make(map[string][]dictionary.DictionaryEntry),
+			Padas:   make([]PadaElement, 0),
 		}
+		padaMap := make(map[string]PadaElement, 0)
+
 		for _, g := range e.Glossings {
 			for _, gl := range g {
+				var lemmaMeanings, surfaceMeanings []dictionary.DictionaryEntry
 				mapped := wordsToFetch[gl.Surface]
-				if entry, ok := wordMap[mapped]; ok {
-					ew.Words[gl.Surface] = entry
+				if entrySlice, ok := wordMap[mapped]; ok {
+					surfaceMeanings = entrySlice
+					ew.Words[gl.Surface] = entrySlice
 				}
 				lemma := normalizeLemma(gl.Lemma)
 				slpLemma := wordsToFetch[lemma]
-				if entry, ok := wordMap[slpLemma]; ok {
-					ew.Words[gl.Lemma] = entry
+				if entrySlice, ok := wordMap[slpLemma]; ok {
+					lemmaMeanings = entrySlice
+					ew.Words[gl.Lemma] = entrySlice
+				}
+
+				// pada may be folded but glossings may not etc..
+				surface := common.FoldAccents(gl.Surface)
+				padaMap[surface] = PadaElement{
+					Word:            gl.Surface,
+					Found:           true,
+					G:               gl,
+					SurfaceMeanings: surfaceMeanings,
+					LemmaMeanings:   lemmaMeanings,
 				}
 			}
+		}
+
+		// Do we have Padas?
+		padas, hasPadas := e.Auxiliaries["pada"]
+		if !hasPadas {
+			continue
+		}
+
+		padaLines := padas.Text
+		padaWords := make([]string, 0, len(padaLines))
+		for _, padaLine := range padaLines {
+			split := strings.SplitSeq(padaLine, " | ")
+			for padaWord := range split {
+				padaWords = append(padaWords, strings.TrimSpace(padaWord))
+			}
+		}
+
+		for _, padaWord := range padaWords {
+			padaElem := padaMap[padaWord]
+			padaElem.Word = padaWord
+			ew.Padas = append(ew.Padas, padaElem)
 		}
 		es = append(es, ew)
 	}
@@ -157,6 +189,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 	// Combine excerpt with its scripture information
 	scriptureName := paths[0].Scripture
 	scri := s.scriptureMap[scriptureName]
+
 	return &ExcerptTemplateData{
 		Excerpts:        es,
 		AddressedTo:     strings.Join(es[0].Addressees, ", "),
