@@ -12,9 +12,9 @@ Design goals
 ### Short term
 
 - [X] View one / many verses directly along with translations
-- [ ] Search (regexp and / or text based - half done, there are some bugs due to accent marks in the dataset).
+- [X] Search (regexp and / or text based - half done, there are some bugs due to accent marks in the dataset).
+- [X] Hierarchical navigation (i.e show the mandala/sukta/rik hierarchy).
 - [ ] Show Monier-Williams dictionary hints along with Padapatha text.
-- [ ] Hierarchical navigation (i.e show the mandala/sukta/rik hierarchy).
 
 ### Long term
 - [ ] Semantic search and similarity scores (hybrid embeddings + BM25, embeddings generated at build time)

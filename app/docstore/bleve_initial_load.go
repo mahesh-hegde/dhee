@@ -8,8 +8,10 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/blevesearch/bleve/v2"
+	"github.com/blevesearch/bleve/v2/analysis"
 	"github.com/blevesearch/bleve/v2/mapping"
 
 	"github.com/mahesh-hegde/dhee/app/common"
@@ -20,7 +22,23 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
+	"github.com/blevesearch/bleve/v2/registry"
 )
+
+type AccentFoldingCharFilter struct{}
+
+func (ac AccentFoldingCharFilter) Filter(input []byte) []byte {
+	// TODO: do this in-place
+	replacer := strings.NewReplacer(common.FoldableAccentsList...)
+	replaced := replacer.Replace(string(input))
+	return []byte(replaced)
+}
+
+func init() {
+	registry.RegisterCharFilter("accent_fold", func(config map[string]interface{}, cache *registry.Cache) (analysis.CharFilter, error) {
+		return AccentFoldingCharFilter{}, nil
+	})
+}
 
 func GetBleveIndexMappings() mapping.IndexMapping {
 	// Base index mapping
@@ -29,10 +47,10 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	// Add custom analyzer for Sanskrit/IAST/Devanagari
 	err := indexMapping.AddCustomAnalyzer("sanskrit_ws",
 		map[string]any{
-			"type":      custom.Name,
-			"tokenizer": unicode.Name,
+			"type":         custom.Name,
+			"char_filters": []string{"accent_fold"},
+			"tokenizer":    unicode.Name,
 			"token_filters": []string{
-				// asciifolding.Name,
 				lowercase.Name,
 			},
 		})
@@ -56,9 +74,17 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	sourceField.Analyzer = "sanskrit_ws"
 	excerptMapping.AddFieldMappingsAt("source_text", sourceField)
 
+	// Ideally we should store 3 versions of roman text
+	// 1. ASCII folded
+	// 2. Accent characters folded
+	// 3. Original
+	// and search across all 3, instead of forcing unintuitive substring search on our users.
 	romanField := mapping.NewTextFieldMapping()
 	romanField.Analyzer = "sanskrit_ws"
 	excerptMapping.AddFieldMappingsAt("roman_text", romanField)
+
+	romanKField := mapping.NewKeywordFieldMapping()
+	excerptMapping.AddFieldMappingsAt("roman_text_k", romanKField)
 
 	// Authors
 	excerptMapping.AddFieldMappingsAt("authors", mapping.NewTextFieldMapping())
@@ -239,6 +265,16 @@ func loadJSONL[T mapping.Classifier](index bleve.Index, dataFile string, idFunc 
 	return nil
 }
 
+var replacer = strings.NewReplacer(common.FoldableAccentsList...)
+
+func normalizeRomanTextForKwStorage(txt []string) []string {
+	var result []string
+	for _, t := range txt {
+		result = append(result, replacer.Replace(t))
+	}
+	return result
+}
+
 func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) error {
 	// Load scriptures
 	for _, sc := range config.Scriptures {
@@ -249,6 +285,7 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 			},
 			func(e *scripture.Excerpt) {
 				e.Scripture = sc.Name
+				e.RomanTextK = normalizeRomanTextForKwStorage(e.RomanText)
 			},
 		)
 		if err != nil {

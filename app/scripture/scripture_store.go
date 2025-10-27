@@ -190,12 +190,14 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 		scriptureQuery = bleve.NewDisjunctionQuery(scriptureQueries...)
 	}
 
-	// TODO: Support all kinds of search
 	var queryMaker func(string, string) query.Query
 	switch params.Mode {
 	case common.SearchRegex:
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewRegexpQuery(q)
+			if field == "roman_text" {
+				field = "roman_text_k" // ugly hack
+			}
 			bq.SetField(field)
 			return bq
 		}
