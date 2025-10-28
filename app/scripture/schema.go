@@ -28,6 +28,8 @@ type PadaElement struct {
 	Word            string
 	Found           bool
 	G               ExcerptGlossing
+	Slp1NormLemma   string
+	Slp1NormSurface string
 	SurfaceMeanings []dictionary.DictionaryEntry
 	LemmaMeanings   []dictionary.DictionaryEntry
 }

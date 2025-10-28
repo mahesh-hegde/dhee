@@ -101,6 +101,10 @@
                     <div class="mt-2">
                         {{ template "grammatical-badges" (sliceOf $pada.G $tags) }}
                     </div>
+                    {{- if $pada.G.Lemma -}}
+                    <p>from <i>{{$pada.G.Lemma}}</i></p>
+                    <hr />
+                    {{- end -}}
                     {{ if gt (len $pada.SurfaceMeanings) 0 }}
                     <div class="mb-2">
                         {{ range $smidx, $entry := $pada.SurfaceMeanings }}
@@ -121,7 +125,17 @@
                         {{ end }}
                     </div>
                     {{ end }}
-                    {{/* Grammatical badges */}}
+                    {{/* Show buttons to fuzzy search lemma and surface */}}
+                    <span class="d-flex justify-content-evenly">
+                        {{- if $pada.Slp1NormSurface -}}
+                        <a href="/dictionaries/monier-williams/search?q={{ $pada.Slp1NormSurface }}&tl=slp1&mode=fuzzy"
+                            class="badge bg-secondary me-1">🔎 {{ $pada.G.Surface}}</a>
+                        {{- end -}}
+                        {{- if $pada.Slp1NormLemma -}}
+                        <a href="/dictionaries/monier-williams/search?q={{ $pada.Slp1NormLemma }}&tl=slp1&mode=fuzzy"
+                            class="badge bg-secondary me-1">🔎 {{ $pada.G.Lemma }}</a>
+                        {{- end -}}
+                    </span>
                 </div>
             </div>
             {{ else }}
@@ -136,7 +150,7 @@
     {{ else }}
     {{/* Standard auxiliary handling */}}
     {{ with (index $firstExcerpt.Auxiliaries $aux.Name).Text }}
-    <div class="card my-3">
+    <div class=" card my-3">
         <div class="card-header">
             {{ $aux.ReadableName }}
         </div>
@@ -185,7 +199,8 @@
                         <tr>
                             <td class="text-muted small">{{ $idx }}</td>
 
-                            {{/* Surface cell: show dotted underline if dictionary entries exist for surface */}}
+                            {{/* Surface cell: show dotted underline if dictionary entries exist for surface
+                            */}}
                             {{ $surfEntries := index $ew.Words $g.Surface }}
                             <td>
                                 {{ if gt (len $surfEntries) 0 }}
@@ -197,7 +212,8 @@
                                 {{ end }}
                             </td>
 
-                            {{/* Lemma cell: show dotted underline if dictionary entries exist for lemma */}}
+                            {{/* Lemma cell: show dotted underline if dictionary entries exist for lemma
+                            */}}
                             {{ $lemmaEntries := index $ew.Words $g.Lemma }}
                             <td>
                                 {{ if and (ne $g.Lemma "") (gt (len $lemmaEntries) 0) }}

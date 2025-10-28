@@ -28,6 +28,8 @@ func normalizeLemma(lemma string) string {
 	if strings.Contains(lemma, "- ") {
 		lemma, _, _ = strings.Cut(lemma, "- ")
 	}
+	// PadapATha items often end with " iti"
+	lemma = strings.TrimSuffix(lemma, " iti")
 	return lemma
 }
 
@@ -145,6 +147,8 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 					Word:            gl.Surface,
 					Found:           true,
 					G:               gl,
+					Slp1NormLemma:   slpLemma,
+					Slp1NormSurface: slpWord,
 					SurfaceMeanings: surfaceMeanings,
 					LemmaMeanings:   lemmaMeanings,
 				}
