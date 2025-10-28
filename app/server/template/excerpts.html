@@ -199,31 +199,65 @@
                         <tr>
                             <td class="text-muted small">{{ $idx }}</td>
 
-                            {{/* Surface cell: show dotted underline if dictionary entries exist for surface
-                            */}}
+                            {{/* Surface cell: always show hover card with search link */}}
                             {{ $surfEntries := index $ew.Words $g.Surface }}
                             <td>
                                 {{ if gt (len $surfEntries) 0 }}
-                                <span class="dotted-underline" data-bs-toggle="tooltip"
-                                    title="{{ range $i, $e := $surfEntries }}{{ if $i }}&#10;&#10;{{ end }}{{ $e.Body.Plain }}{{ end }}">{{
-                                    $g.Surface }}</span>
+                                <span class="table-word table-word-underline"
+                                    data-word-id="surf-{{ $rindex }}-{{ $windex }}">{{ $g.Surface }}</span>
                                 {{ else }}
-                                <span>{{ $g.Surface }}</span>
+                                <span class="table-word" data-word-id="surf-{{ $rindex }}-{{ $windex }}">{{ $g.Surface
+                                    }}</span>
                                 {{ end }}
+                                <div id="surf-{{ $rindex }}-{{ $windex }}" class="table-word-data"
+                                    style="display: none;">
+                                    <div class="table-word-popup-content">
+                                        {{ if gt (len $surfEntries) 0 }}
+                                        {{ range $i, $e := $surfEntries }}
+                                        <div class="mb-2">
+                                            <span class="dict-iast-surface"><em>{{ $e.IAST }}</em></span>: {{
+                                            $e.Body.Plain }}
+                                        </div>
+                                        {{ if lt $i (sub (len $surfEntries) 1) }}
+                                        <hr />{{ end }}
+                                        {{ end }}
+                                        <hr />
+                                        {{ end }}
+                                        <a href="/dictionaries/monier-williams/search?q={{ $g.Surface }}&tl=iast&mode=fuzzy"
+                                            class="badge bg-secondary">🔎 {{ $g.Surface }}</a>
+                                    </div>
+                                </div>
                             </td>
 
-                            {{/* Lemma cell: show dotted underline if dictionary entries exist for lemma
-                            */}}
+                            {{/* Lemma cell: always show hover card with search link */}}
                             {{ $lemmaEntries := index $ew.Words $g.Lemma }}
                             <td>
-                                {{ if and (ne $g.Lemma "") (gt (len $lemmaEntries) 0) }}
-                                {{/* TODO: use similar hover cards as pada text, but without badges and showing up on
-                                top right corner */}}
-                                <span class="dotted-underline" data-bs-toggle="tooltip"
-                                    title="{{ range $i, $e := $lemmaEntries }}{{ if $i }}; {{ end }}{{ $e.Body.Plain }}{{ end }}">{{
-                                    $g.Lemma }}</span>
-                                {{ else if ne $g.Lemma "" }}
-                                <span>{{ $g.Lemma }}</span>
+                                {{ if ne $g.Lemma "" }}
+                                {{ if gt (len $lemmaEntries) 0 }}
+                                <span class="table-word table-word-underline"
+                                    data-word-id="lemma-{{ $rindex }}-{{ $windex }}">{{ $g.Lemma }}</span>
+                                {{ else }}
+                                <span class="table-word" data-word-id="lemma-{{ $rindex }}-{{ $windex }}">{{ $g.Lemma
+                                    }}</span>
+                                {{ end }}
+                                <div id="lemma-{{ $rindex }}-{{ $windex }}" class="table-word-data"
+                                    style="display: none;">
+                                    <div class="table-word-popup-content">
+                                        {{ if gt (len $lemmaEntries) 0 }}
+                                        {{ range $i, $e := $lemmaEntries }}
+                                        <div class="mb-2">
+                                            <span class="dict-iast-lemma"><em>{{ $e.IAST }}</em></span>: {{
+                                            $e.Body.Plain }}
+                                        </div>
+                                        {{ if lt $i (sub (len $lemmaEntries) 1) }}
+                                        <hr />{{ end }}
+                                        {{ end }}
+                                        <hr />
+                                        {{ end }}
+                                        <a href="/dictionaries/monier-williams/search?q={{ $g.Lemma }}&tl=iast&mode=fuzzy"
+                                            class="badge bg-secondary">🔎 {{ $g.Lemma }}</a>
+                                    </div>
+                                </div>
                                 {{ else }}
                                 <span class="text-muted">N/A</span>
                                 {{ end }}
@@ -276,10 +310,34 @@
             color: var(--bs-body-color);
             font-weight: bold;
         }
+
+        .table-word {
+            cursor: pointer;
+        }
+
+        .table-word-underline {
+            border-bottom: 1px dotted currentColor;
+        }
+
+        .table-word-popup {
+            position: absolute;
+            background: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 4px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-width: 400px;
+            max-height: 40vh;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
     </style>
 
     <script>
-        // Pada word popup handler
+        // Pada word popup handler and table word popup handler
         // initFn will be called by layout body after bootstrap is loaded. This way we can keep JS loading in the end.
         var initFn = (function () {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -289,6 +347,7 @@
 
             var activePopup = null;
 
+            // Pada word hover cards
             document.querySelectorAll('.pada-word').forEach(function (wordEl) {
                 var padaId = wordEl.getAttribute('data-pada-id');
                 var dataEl = document.getElementById(padaId);
@@ -326,9 +385,48 @@
                 });
             });
 
+            // Table word hover cards
+            document.querySelectorAll('.table-word').forEach(function (wordEl) {
+                var wordId = wordEl.getAttribute('data-word-id');
+                var dataEl = document.getElementById(wordId);
+
+                if (!dataEl) return;
+
+                wordEl.addEventListener('mouseenter', function (e) {
+                    // Remove any existing popup
+                    if (activePopup) {
+                        activePopup.remove();
+                        activePopup = null;
+                    }
+
+                    // Create popup
+                    var popup = document.createElement('div');
+                    popup.className = 'table-word-popup';
+                    popup.innerHTML = dataEl.querySelector('.table-word-popup-content').innerHTML;
+
+                    // Position popup
+                    document.body.appendChild(popup);
+                    var rect = wordEl.getBoundingClientRect();
+                    popup.style.left = rect.left + 'px';
+                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+
+                    activePopup = popup;
+                });
+
+                wordEl.addEventListener('mouseleave', function (e) {
+                    setTimeout(function () {
+                        if (activePopup && !activePopup.matches(':hover')) {
+                            activePopup.remove();
+                            activePopup = null;
+                        }
+                    }, 100);
+                });
+            });
+
             // Close popup when clicking outside
             document.addEventListener('click', function (e) {
-                if (activePopup && !e.target.closest('.pada-word') && !e.target.closest('.pada-popup')) {
+                if (activePopup && !e.target.closest('.pada-word') && !e.target.closest('.pada-popup') &&
+                    !e.target.closest('.table-word') && !e.target.closest('.table-word-popup')) {
                     activePopup.remove();
                     activePopup = null;
                 }
