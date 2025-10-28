@@ -62,6 +62,9 @@ func (s *DictionaryService) Suggest(ctx context.Context, dictName string, partia
 }
 
 func (s *DictionaryService) Search(ctx context.Context, dictionaryName string, searchParams SearchParams) (SearchResults, error) {
+	if searchParams.Tl == common.TlIAST {
+		searchParams.Query = common.FoldAccents(searchParams.Query)
+	}
 	slp1Query, err := s.transliterator.Convert(searchParams.Query, searchParams.Tl, common.TlSLP1)
 	if err != nil {
 		slog.Warn("transliteration failed for search", "query", searchParams.Query, "err", err)

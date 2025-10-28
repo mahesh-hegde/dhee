@@ -2,6 +2,7 @@
     "instance_name": "Dhee by Apratiratha",
     "fuzziness": 2,
     "timeout_seconds": 10,
+    "log_latency": true,
     "dictionaries": [
         {
             "name": "monier-williams",

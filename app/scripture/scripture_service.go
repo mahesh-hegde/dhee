@@ -125,15 +125,17 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		for _, g := range e.Glossings {
 			for _, gl := range g {
 				var lemmaMeanings, surfaceMeanings []dictionary.DictionaryEntry
-				mapped := wordsToFetch[gl.Surface]
-				if entrySlice, ok := wordMap[mapped]; ok {
+				slpWord := wordsToFetch[gl.Surface]
+				if entrySlice, ok := wordMap[slpWord]; ok {
 					surfaceMeanings = entrySlice
 					ew.Words[gl.Surface] = entrySlice
 				}
 				lemma := normalizeLemma(gl.Lemma)
 				slpLemma := wordsToFetch[lemma]
 				if entrySlice, ok := wordMap[slpLemma]; ok {
-					lemmaMeanings = entrySlice
+					if slpWord != slpLemma {
+						lemmaMeanings = entrySlice
+					}
 					ew.Words[gl.Lemma] = entrySlice
 				}
 

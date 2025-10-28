@@ -110,7 +110,8 @@
                         {{ end }}
                         <hr />
                     </div>
-                    {{ else if gt (len $pada.LemmaMeanings) 0 }}
+                    {{ end }}
+                    {{ if gt (len $pada.LemmaMeanings) 0 }}
                     <div class="mb-2">
                         {{ range $lmidx, $entry := $pada.LemmaMeanings }}
                         <div class="mt-1">
@@ -244,7 +245,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             z-index: 1000;
             max-width: 400px;
-            max-height: calc(100vh - 20px);
+            max-height: 40vh;
             overflow-y: auto;
             font-size: 0.9rem;
             line-height: 1.4;

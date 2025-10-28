@@ -34,12 +34,14 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 				logger.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
 					slog.String("uri", v.URI),
 					slog.Int("status", v.Status),
+					slog.Int64("latency_ms", v.Latency.Milliseconds()),
 				)
 			} else {
 				logger.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
 					slog.String("uri", v.URI),
 					slog.Int("status", v.Status),
 					slog.String("err", v.Error.Error()),
+					slog.Int64("latency_ms", v.Latency.Milliseconds()),
 				)
 			}
 			return nil

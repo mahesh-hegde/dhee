@@ -67,7 +67,7 @@ func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []strin
 
 	finalQuery := bleve.NewConjunctionQuery(dictQuery, wordsQuery)
 	searchRequest := bleve.NewSearchRequest(finalQuery)
-	// searchRequest.Size = 1000 // A reasonable limit
+	searchRequest.Size = 500 // A reasonable limit
 	searchRequest.Fields = []string{"*"}
 	searchRequest.SortBy([]string{"htag", "word", "_id"})
 
