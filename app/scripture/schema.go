@@ -120,6 +120,7 @@ func (e *Excerpt) Type() string {
 
 type ExcerptWithWords struct {
 	Excerpt
+	// Dict words indexed by morphological surface & lemma
 	Words map[string][]dictionary.DictionaryEntry
 	Padas []PadaElement
 }

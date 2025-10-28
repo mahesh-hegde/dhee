@@ -24,13 +24,21 @@ type ExcerptService struct {
 
 func normalizeLemma(lemma string) string {
 	lemma = strings.TrimSuffix(lemma, "-")
+	lemma = strings.TrimRight(lemma, "ⁱ")
 	lemma = strings.TrimPrefix(lemma, "√")
 	if strings.Contains(lemma, "- ") {
 		lemma, _, _ = strings.Cut(lemma, "- ")
 	}
+	return common.FoldAccents(lemma)
+}
+
+func normalizePadaWord(pw string) string {
+	// MW dictionary has no words containing -
+	pw = strings.ReplaceAll(pw, "-", "")
 	// PadapATha items often end with " iti"
-	lemma = strings.TrimSuffix(lemma, " iti")
-	return lemma
+	pw = strings.TrimSuffix(pw, " iti")
+	pw = strings.TrimPrefix(pw, "/ ")
+	return common.FoldAccents(pw)
 }
 
 // Get returns the excerpts given by paths. If any of the excerpts could not be found, it returns an error.
@@ -59,7 +67,8 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 	for eidx, e := range excerpts {
 		for _, g := range e.Glossings {
 			for _, gl := range g {
-				wordsToFetch[gl.Surface] = ""
+				foldedSurface := common.FoldAccents(gl.Surface)
+				wordsToFetch[foldedSurface] = ""
 				lemma := normalizeLemma(gl.Lemma)
 				wordsToFetch[lemma] = ""
 			}
@@ -76,12 +85,12 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		for _, padaLine := range padaLines {
 			split := strings.SplitSeq(padaLine, " | ")
 			for padaWord := range split {
-				padaWord = common.FoldAccents(padaWord)
+				padaWord = normalizePadaWord(padaWord)
 				padaWords = append(padaWords, strings.TrimSpace(padaWord))
 				wordsToFetch[padaWord] = ""
-				if first, _, hyphenated := strings.Cut(padaWord, "-"); hyphenated {
-					wordsToFetch[first] = ""
-				}
+				// if first, _, hyphenated := strings.Cut(padaWord, "-"); hyphenated {
+				// 	wordsToFetch[first] = ""
+				// }
 			}
 		}
 		padaWordsByExcerpt[eidx] = padaWords
@@ -90,10 +99,9 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 	var words []string
 
 	for w := range wordsToFetch {
-		folded := common.FoldAccents(w)
-		slp1, err := s.transliterator.Convert(folded, common.TlIAST, common.TlSLP1)
+		slp1, err := s.transliterator.Convert(w, common.TlIAST, common.TlSLP1)
 		if err != nil {
-			slog.Debug("could not transliterate word to slp1", "word", folded)
+			slog.Debug("could not transliterate word to slp1", "word", w)
 		}
 		wordsToFetch[w] = slp1
 		words = append(words, slp1)
@@ -127,7 +135,8 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		for _, g := range e.Glossings {
 			for _, gl := range g {
 				var lemmaMeanings, surfaceMeanings []dictionary.DictionaryEntry
-				slpWord := wordsToFetch[gl.Surface]
+				foldedSurface := common.FoldAccents(gl.Surface)
+				slpWord := wordsToFetch[foldedSurface]
 				if entrySlice, ok := wordMap[slpWord]; ok {
 					surfaceMeanings = entrySlice
 					ew.Words[gl.Surface] = entrySlice
@@ -141,9 +150,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 					ew.Words[gl.Lemma] = entrySlice
 				}
 
-				// pada may be folded but glossings may not etc..
-				surface := common.FoldAccents(gl.Surface)
-				padaMap[surface] = PadaElement{
+				padaMap[foldedSurface] = PadaElement{
 					Word:            gl.Surface,
 					Found:           true,
 					G:               gl,
@@ -159,19 +166,19 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 
 		for _, padaWord := range padaWords {
 			// MW dictionary does not contain any word with a "-"
-			normPW := strings.ReplaceAll(padaWord, "-", "")
+			normPW := normalizePadaWord(padaWord)
 			if padaElem, ok := padaMap[normPW]; ok {
 				padaElem.Word = padaWord
 				ew.Padas = append(ew.Padas, padaElem)
 				continue
 			}
-			cutPw, _, found := strings.Cut(padaWord, "-")
-			if found && cutPw != "" {
-				padaElem := padaMap[normPW]
-				padaElem.Word = padaWord
-				ew.Padas = append(ew.Padas, padaElem)
-				continue
-			}
+			// cutPw, _, found := strings.Cut(padaWord, "-")
+			// if found && cutPw != "" {
+			// 	padaElem := padaMap[normPW]
+			// 	padaElem.Word = padaWord
+			// 	ew.Padas = append(ew.Padas, padaElem)
+			// 	continue
+			// }
 			ew.Padas = append(ew.Padas, PadaElement{
 				Word:  padaWord,
 				Found: false,

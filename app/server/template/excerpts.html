@@ -131,7 +131,7 @@
                         <a href="/dictionaries/monier-williams/search?q={{ $pada.Slp1NormSurface }}&tl=slp1&mode=fuzzy"
                             class="badge bg-secondary me-1">🔎 {{ $pada.G.Surface}}</a>
                         {{- end -}}
-                        {{- if $pada.Slp1NormLemma -}}
+                        {{- if (and $pada.Slp1NormLemma (ne $pada.Slp1NormLemma $pada.Slp1NormSurface))}}
                         <a href="/dictionaries/monier-williams/search?q={{ $pada.Slp1NormLemma }}&tl=slp1&mode=fuzzy"
                             class="badge bg-secondary me-1">🔎 {{ $pada.G.Lemma }}</a>
                         {{- end -}}
@@ -278,6 +278,7 @@
 
     <script>
         // Pada word popup handler
+        // initFn will be called by layout body after bootstrap is loaded. This way we can keep JS loading in the end.
         var initFn = (function () {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             tooltipTriggerList.forEach(function (tooltipTriggerEl) {
