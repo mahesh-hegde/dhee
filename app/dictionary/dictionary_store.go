@@ -67,7 +67,7 @@ func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []strin
 
 	finalQuery := bleve.NewConjunctionQuery(dictQuery, wordsQuery)
 	searchRequest := bleve.NewSearchRequest(finalQuery)
-	searchRequest.Size = 100 // A reasonable limit
+	// searchRequest.Size = 1000 // A reasonable limit
 	searchRequest.Fields = []string{"*"}
 	searchRequest.SortBy([]string{"htag", "word", "_id"})
 
@@ -138,7 +138,11 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 100
 	searchRequest.Fields = []string{"*"}
-	searchRequest.SortBy([]string{"htag", "word", "_id"})
+	if s.Mode == "fuzzy" {
+		searchRequest.SortBy([]string{"-_score", "htag", "_id"})
+	} else {
+		searchRequest.SortBy([]string{"htag", "_id"})
+	}
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {

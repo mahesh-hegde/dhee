@@ -81,6 +81,8 @@ type DictionaryEntry struct {
 	IsPlantName    bool                `json:"is_plant_name,omitempty"`
 	LexCat         LexCat              `json:"lexcat,omitzero"`
 	Verb           Verb                `json:"verb,omitzero"`
+	// Other words referenced from this entry in SLP1 format
+	Referenced []string `json:"referenced,omitempty"`
 }
 
 // Type implements mapping.Classifier.

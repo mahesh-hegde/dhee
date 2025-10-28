@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -21,6 +22,15 @@ import (
 
 type MwXmlEntryBody struct {
 	Content string `xml:",innerxml"`
+}
+
+func attrVal(el xml.StartElement, attr string) string {
+	for _, a := range el.Attr {
+		if a.Name.Local == attr {
+			return a.Value
+		}
+	}
+	return ""
 }
 
 // MwXmlEntry represents a single dictionary entry from the XML
@@ -49,7 +59,9 @@ func isEntryTag(tag string) bool {
 	return matched
 }
 
-func xmlToDictionaryEntry(tl *transliteration.Transliterator, xml MwXmlEntry, lastPageNum string) DictionaryEntry {
+func xmlToDictionaryEntry(xml MwXmlEntry, lastPageNum string) DictionaryEntry {
+	tl := standardTl
+
 	entry := DictionaryEntry{
 		Word:           xml.Header.Key1,
 		PrintedPageNum: xml.Tail.PC,
@@ -167,7 +179,7 @@ func handleStartElement(elem xml.StartElement, decoder *xml.Decoder, plainText *
 		return handleAb(elem, decoder, plainText)
 
 	case "s1":
-		return handleS1(elem, decoder, plainText)
+		return handleS1(elem, decoder, plainText, entry)
 
 	case "s":
 		return handleS(elem, decoder, plainText, entry)
@@ -226,7 +238,10 @@ func handleAb(elem xml.StartElement, decoder *xml.Decoder, plainText *strings.Bu
 	return nil
 }
 
-func handleS1(_ xml.StartElement, decoder *xml.Decoder, plainText *strings.Builder) error {
+func handleS1(el xml.StartElement, decoder *xml.Decoder, plainText *strings.Builder, entry *DictionaryEntry) error {
+	if slp1Attr := attrVal(el, "slp1"); slp1Attr != "" {
+		entry.Referenced = append(entry.Referenced, slp1Attr)
+	}
 	content, err := readElementText(decoder)
 	if err != nil {
 		return err
@@ -244,7 +259,13 @@ func handleS(_ xml.StartElement, decoder *xml.Decoder, plainText *strings.Builde
 	if content != entry.Word {
 		found := slices.Contains(entry.Variants, content)
 		if !found {
-			plainText.WriteString(content)
+			entry.Referenced = append(entry.Referenced, content)
+		}
+		iast, err := standardTl.Convert(content, common.TlSLP1, common.TlIAST)
+		if err != nil {
+			slog.Warn("could not convert SLP string to IAST", "content", content)
+		} else {
+			plainText.WriteString(iast)
 		}
 	}
 	return nil
@@ -454,15 +475,18 @@ func skipElement(decoder *xml.Decoder) error {
 	return err
 }
 
+var standardTl = func() *transliteration.Transliterator {
+	tl, err := transliteration.NewTransliterator(transliteration.TlOptions{})
+	if err != nil {
+		log.Panicf("failed to instantiate transliterator: %s", err)
+	}
+	return tl
+}()
+
 func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 	// Create output directory
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
-	}
-
-	tl, err := transliteration.NewTransliterator(transliteration.TlOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to instantiate transliterator: %w", err)
 	}
 
 	// Open input file
@@ -507,7 +531,7 @@ func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 				entry.Tag = startElem.Name.Local
 
 				// Convert to dictionary entry
-				dictEntry := xmlToDictionaryEntry(tl, entry, lastPageNum)
+				dictEntry := xmlToDictionaryEntry(entry, lastPageNum)
 
 				// Update last page number
 				if dictEntry.PrintedPageNum != "" {

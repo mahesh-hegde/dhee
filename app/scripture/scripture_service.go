@@ -53,7 +53,8 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 
 	// Collect all words to fetch from the dictionary
 	wordsToFetch := make(map[string]string)
-	for _, e := range excerpts {
+	padaWordsByExcerpt := make([][]string, len(excerpts))
+	for eidx, e := range excerpts {
 		for _, g := range e.Glossings {
 			for _, gl := range g {
 				wordsToFetch[gl.Surface] = ""
@@ -61,6 +62,27 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 				wordsToFetch[lemma] = ""
 			}
 		}
+
+		// Do we have Padas?
+		padas, hasPadas := e.Auxiliaries["pada"]
+		if !hasPadas {
+			continue
+		}
+
+		padaLines := padas.Text
+		padaWords := make([]string, 0, len(padaLines))
+		for _, padaLine := range padaLines {
+			split := strings.SplitSeq(padaLine, " | ")
+			for padaWord := range split {
+				padaWord = common.FoldAccents(padaWord)
+				padaWords = append(padaWords, strings.TrimSpace(padaWord))
+				wordsToFetch[padaWord] = ""
+				if first, _, hyphenated := strings.Cut(padaWord, "-"); hyphenated {
+					wordsToFetch[first] = ""
+				}
+			}
+		}
+		padaWordsByExcerpt[eidx] = padaWords
 	}
 
 	var words []string
@@ -92,7 +114,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 
 	// Combine excerpts with their word meanings
 	var es []ExcerptWithWords
-	for _, e := range excerpts {
+	for eidx, e := range excerpts {
 		ew := ExcerptWithWords{
 			Excerpt: e,
 			Words:   make(map[string][]dictionary.DictionaryEntry),
@@ -127,25 +149,27 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 			}
 		}
 
-		// Do we have Padas?
-		padas, hasPadas := e.Auxiliaries["pada"]
-		if !hasPadas {
-			continue
-		}
-
-		padaLines := padas.Text
-		padaWords := make([]string, 0, len(padaLines))
-		for _, padaLine := range padaLines {
-			split := strings.SplitSeq(padaLine, " | ")
-			for padaWord := range split {
-				padaWords = append(padaWords, strings.TrimSpace(padaWord))
-			}
-		}
+		padaWords := padaWordsByExcerpt[eidx]
 
 		for _, padaWord := range padaWords {
-			padaElem := padaMap[padaWord]
-			padaElem.Word = padaWord
-			ew.Padas = append(ew.Padas, padaElem)
+			// MW dictionary does not contain any word with a "-"
+			normPW := strings.ReplaceAll(padaWord, "-", "")
+			if padaElem, ok := padaMap[normPW]; ok {
+				padaElem.Word = padaWord
+				ew.Padas = append(ew.Padas, padaElem)
+				continue
+			}
+			cutPw, _, found := strings.Cut(padaWord, "-")
+			if found && cutPw != "" {
+				padaElem := padaMap[normPW]
+				padaElem.Word = padaWord
+				ew.Padas = append(ew.Padas, padaElem)
+				continue
+			}
+			ew.Padas = append(ew.Padas, PadaElement{
+				Word:  padaWord,
+				Found: false,
+			})
 		}
 		es = append(es, ew)
 	}
