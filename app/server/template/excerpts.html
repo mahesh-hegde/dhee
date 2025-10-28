@@ -217,6 +217,8 @@
                             {{ $lemmaEntries := index $ew.Words $g.Lemma }}
                             <td>
                                 {{ if and (ne $g.Lemma "") (gt (len $lemmaEntries) 0) }}
+                                {{/* TODO: use similar hover cards as pada text, but without badges and showing up on
+                                top right corner */}}
                                 <span class="dotted-underline" data-bs-toggle="tooltip"
                                     title="{{ range $i, $e := $lemmaEntries }}{{ if $i }}; {{ end }}{{ $e.Body.Plain }}{{ end }}">{{
                                     $g.Lemma }}</span>
