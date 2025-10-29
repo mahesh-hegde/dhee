@@ -36,7 +36,7 @@
         <div class="card-header">
             Text (Devanagari)
         </div>
-        <div class="card-body">
+        <div class="card-body" id="source-text-section">
             {{ range .Excerpts }}
             <p><strong>{{ .ReadableIndex }}</strong></p>
             <div class="verse">
@@ -479,10 +479,12 @@
                 }
             }
 
-            // Roman text selection search popup
-            const romanTextEl = document.getElementById('roman-text-section');
-            if (romanTextEl) {
-                romanTextEl.addEventListener('mouseup', function (e) {
+            // Text selection search popup
+            function setupTextSelectionSearch(elementId, transliteration) {
+                const textEl = document.getElementById(elementId);
+                if (!textEl) return;
+
+                textEl.addEventListener('mouseup', function (e) {
                     const searchResultWindow = document.querySelector('.search-result-window');
                     if (searchResultWindow && searchResultWindow.contains(e.target)) {
                         return;
@@ -517,8 +519,8 @@
                             document.body.appendChild(popup);
 
                             const popupRect = popup.getBoundingClientRect();
-                            popup.style.left = `${rect.left + window.scrollX}px`;
-                            popup.style.top = `${rect.top + window.scrollY - popupRect.height - 5}px`;
+                            popup.style.left = `${rect.right + window.scrollX - popupRect.width}px`;
+                            popup.style.top = `${rect.bottom + window.scrollY + 5}px`;
 
                             activePopup = popup;
 
@@ -533,17 +535,17 @@
                                     existingResultWindow.remove();
                                 }
 
-                                const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(selectedText)}&tl=iast&mode=fuzzy&preview=true`;
+                                const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(selectedText)}&tl=${transliteration}&mode=fuzzy&preview=true`;
                                 fetch(url)
                                     .then(response => response.text())
                                     .then(html => {
                                         const resultWindow = document.createElement('div');
                                         resultWindow.className = 'search-result-window';
-                                        
+
                                         const closeButton = document.createElement('button');
                                         closeButton.className = 'btn-close';
                                         closeButton.setAttribute('aria-label', 'Close');
-                                        
+
                                         const contentDiv = document.createElement('div');
                                         contentDiv.innerHTML = html;
 
@@ -552,10 +554,10 @@
 
                                         document.body.appendChild(resultWindow);
 
-                                        closeButton.onclick = function() {
+                                        closeButton.onclick = function () {
                                             resultWindow.remove();
                                         };
-                                        
+
                                         makeDraggable(resultWindow);
                                     }).catch(err => console.error("Failed to fetch search preview:", err));
                             });
@@ -563,6 +565,8 @@
                     }, 10);
                 });
             }
+            setupTextSelectionSearch('roman-text-section', 'iast');
+            setupTextSelectionSearch('source-text-section', 'devanagari');
 
             // Close popup when clicking outside
             document.addEventListener('click', function (e) {
