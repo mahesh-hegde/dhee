@@ -347,15 +347,29 @@
             box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
             max-width: 40vw;
             max-height: 50vh;
-            overflow-y: auto;
-            padding: 1.5rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-result-title-bar {
+            height: 2em;
+            background-color: darkgreen;
             cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+
+        .search-result-content {
+            padding: 1.5rem;
+            overflow-y: auto;
         }
 
         .search-result-window .btn-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            margin-right: 0.5em;
+            filter: invert(1) grayscale(100%) brightness(200%);
         }
     </style>
 
@@ -448,7 +462,9 @@
 
             function makeDraggable(element) {
                 let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-                element.onmousedown = dragMouseDown;
+                const dragHandle = element.querySelector('.search-result-title-bar');
+                if (!dragHandle) { return; }
+                dragHandle.onmousedown = dragMouseDown;
 
                 function dragMouseDown(e) {
                     if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a, button')) {
@@ -542,14 +558,19 @@
                                         const resultWindow = document.createElement('div');
                                         resultWindow.className = 'search-result-window';
 
+                                        const titleBar = document.createElement('div');
+                                        titleBar.className = 'search-result-title-bar';
+
                                         const closeButton = document.createElement('button');
                                         closeButton.className = 'btn-close';
                                         closeButton.setAttribute('aria-label', 'Close');
+                                        titleBar.appendChild(closeButton);
 
                                         const contentDiv = document.createElement('div');
+                                        contentDiv.className = 'search-result-content';
                                         contentDiv.innerHTML = html;
 
-                                        resultWindow.appendChild(closeButton);
+                                        resultWindow.appendChild(titleBar);
                                         resultWindow.appendChild(contentDiv);
 
                                         document.body.appendChild(resultWindow);
