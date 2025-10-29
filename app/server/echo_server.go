@@ -16,6 +16,7 @@ import (
 func StartServer(controller *DheeController, conf *config.DheeConfig, host string, port int) {
 	e := echo.New()
 	e.Renderer = NewTemplateRenderer(conf)
+	e.HideBanner = true
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Recover())

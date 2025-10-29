@@ -184,6 +184,7 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 	dictionaryName := ctx.Param("dictionaryName")
 	query := ctx.QueryParam("q")
 	textQuery := ctx.QueryParam("textQuery")
+	preview := ctx.QueryParam("preview")
 
 	if query == "" && textQuery == "" {
 		return ctx.String(http.StatusBadRequest, "one of q or textQuery is required")
@@ -229,7 +230,11 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 		return ctx.String(http.StatusInternalServerError, "Failed to search dictionary")
 	}
 
-	return ctx.Render(http.StatusOK, "dictionary_search", results)
+	templateName := "dictionary_search"
+	if preview == "true" {
+		templateName = "dictionary_search.preview"
+	}
+	return ctx.Render(http.StatusOK, templateName, results)
 }
 
 func (c *DheeController) SuggestDictionary(ctx echo.Context) error {

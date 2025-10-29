@@ -3,6 +3,7 @@ package server
 import (
 	"html/template"
 	"io"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/mahesh-hegde/dhee/app/config"
@@ -14,12 +15,23 @@ type TemplateRenderer struct {
 }
 
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	wrappedData := map[string]any{
-		"Page": name,
-		"Conf": t.conf,
-		"Data": data,
+	baseName, modifier, found := strings.Cut(name, ".")
+	var wrappedData any
+	var tName string
+	if found && modifier == "preview" {
+		wrappedData = data
+		// this is a hack which works since all conditions checked in
+		// layout.html correspond to filenames
+		tName = name + ".html"
+	} else {
+		wrappedData = map[string]any{
+			"Page": baseName,
+			"Conf": t.conf,
+			"Data": data,
+		}
+		tName = "layout.html"
 	}
-	err := t.tmpl.ExecuteTemplate(w, "layout.html", wrappedData)
+	err := t.tmpl.ExecuteTemplate(w, tName, wrappedData)
 	if err != nil {
 		c.Logger().Error(err)
 		return err
