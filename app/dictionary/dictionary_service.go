@@ -23,6 +23,9 @@ func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName strin
 	for i, word := range words {
 		slp1Words[i] = word
 		if tl != common.TlSLP1 {
+			if tl == common.TlNagari {
+				word = s.transliterator.FoldDevanagariAccents(word)
+			}
 			slp1Word, err := s.transliterator.Convert(word, tl, common.TlSLP1)
 			if err != nil {
 				slog.Warn("transliteration failed for word", "word", word, "err", err)
@@ -64,6 +67,9 @@ func (s *DictionaryService) Suggest(ctx context.Context, dictName string, partia
 func (s *DictionaryService) Search(ctx context.Context, dictionaryName string, searchParams SearchParams) (SearchResults, error) {
 	if searchParams.Tl == common.TlIAST {
 		searchParams.Query = common.FoldAccents(searchParams.Query)
+	}
+	if searchParams.Tl == common.TlNagari {
+		searchParams.Query = s.transliterator.FoldDevanagariAccents(searchParams.Query)
 	}
 	slp1Query, err := s.transliterator.Convert(searchParams.Query, searchParams.Tl, common.TlSLP1)
 	if err != nil {
