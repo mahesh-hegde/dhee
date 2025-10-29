@@ -480,7 +480,7 @@
             }
 
             // Text selection search popup
-            function setupTextSelectionSearch(elementId, transliteration) {
+            function setupTextSelectionSearch(elementId, transliteration, fuzziness) {
                 const textEl = document.getElementById(elementId);
                 if (!textEl) return;
 
@@ -535,7 +535,7 @@
                                     existingResultWindow.remove();
                                 }
 
-                                const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(selectedText)}&tl=${transliteration}&mode=fuzzy&preview=true`;
+                                const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(selectedText)}&tl=${transliteration}&mode=fuzzy&preview=true&fuzziness=${fuzziness}`;
                                 fetch(url)
                                     .then(response => response.text())
                                     .then(html => {
@@ -565,8 +565,8 @@
                     }, 10);
                 });
             }
-            setupTextSelectionSearch('roman-text-section', 'iast');
-            setupTextSelectionSearch('source-text-section', 'dn');
+            setupTextSelectionSearch('roman-text-section', 'iast', 2);
+            setupTextSelectionSearch('source-text-section', 'dn', 3);
 
             // Close popup when clicking outside
             document.addEventListener('click', function (e) {
