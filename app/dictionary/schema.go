@@ -85,8 +85,30 @@ type DictionaryEntry struct {
 	Referenced []string `json:"referenced,omitempty"`
 }
 
+type DictionaryEntryInDB struct {
+	DictName string `json:"dict_name"`
+
+	Word string `json:"word"`
+
+	// numeric ID from source data
+	SId string `json:"sid"`
+
+	// JSON serialized entry on which no searching is performed
+	Entry string `json:"e"`
+
+	// variants from all entries collected together as keyword fields
+	Variants []string `json:"variants"`
+
+	// keyword fields
+	LitRefs        []string `json:"lit_refs"`
+	PrintedPageNum string   `json:"print_page"`
+
+	// Body text indexed using standard english analyzer for full text searches
+	BodyText string `json:"body_text"`
+}
+
 // Type implements mapping.Classifier.
-func (d *DictionaryEntry) Type() string {
+func (d *DictionaryEntryInDB) Type() string {
 	return "dictionary_entry"
 }
 

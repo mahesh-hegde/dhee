@@ -278,22 +278,22 @@ func extractPadaText(lg *LG) []string {
 	return nil
 }
 
-func extractGlossings(lg *LG) [][]ExcerptGlossing {
-	var result [][]ExcerptGlossing
+func extractGlossings(lg *LG) [][]WordGlossing {
+	var result [][]WordGlossing
 
 	for _, line := range lg.Lines {
 		if !strings.HasSuffix(line.ID, "_tokens") {
 			continue
 		}
 
-		var lineGlossings []ExcerptGlossing
+		var lineGlossings []WordGlossing
 
 		for _, fs := range line.FS {
 			if fs.Type != "zurich_info" {
 				continue
 			}
 
-			glossing := ExcerptGlossing{}
+			glossing := WordGlossing{}
 			var modifiers []Modifier
 
 			for _, f := range fs.F {

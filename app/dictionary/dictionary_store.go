@@ -2,6 +2,7 @@ package dictionary
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 
@@ -67,9 +68,10 @@ func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []strin
 
 	finalQuery := bleve.NewConjunctionQuery(dictQuery, wordsQuery)
 	searchRequest := bleve.NewSearchRequest(finalQuery)
+	// TODO: coalesce all meanings of word into same entry and query by doc ID instead
 	searchRequest.Size = 500 // A reasonable limit
-	searchRequest.Fields = []string{"*"}
-	searchRequest.SortBy([]string{"htag", "word", "_id"})
+	searchRequest.Fields = []string{"word", "_id", "e"}
+	searchRequest.SortBy([]string{"word", "_id"})
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {
@@ -137,11 +139,13 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 	finalQuery := bleve.NewConjunctionQuery(dictQuery, wordQuery)
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 100
-	searchRequest.Fields = []string{"*"}
+	searchRequest.Fields = []string{"_id", "e"}
 	if s.Mode == "fuzzy" {
-		searchRequest.SortBy([]string{"-_score", "htag", "_id"})
+		// TODO: add htag
+		searchRequest.SortBy([]string{"-_score", "_id"})
 	} else {
-		searchRequest.SortBy([]string{"htag", "_id"})
+		// TODO: add htag
+		searchRequest.SortBy([]string{"_id"})
 	}
 
 	searchResults, err := b.idx.Search(searchRequest)
@@ -151,11 +155,16 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 
 	var items []DictSearchResult
 	for _, hit := range searchResults.Hits {
+		ent, err := docToDictEntry(hit.Fields)
+		if err != nil {
+			return SearchResults{}, err
+		}
+		// TODO: store these fields separately and fetch them only
 		items = append(items, DictSearchResult{
-			IAST:    hit.Fields["iast"].(string),
-			Word:    hit.Fields["word"].(string),
-			Nagari:  hit.Fields["devanagari"].(string),
-			Preview: hit.Fields["body.plain"].(string),
+			IAST:    ent.IAST,
+			Word:    ent.Word,
+			Nagari:  ent.Devanagari,
+			Preview: ent.Body.Plain,
 		})
 	}
 
@@ -198,83 +207,12 @@ func NewBleveDictStore(idx bleve.Index, conf *config.DheeConfig) *BleveDictStore
 	return &BleveDictStore{idx: idx, conf: conf}
 }
 
-func docToDictEntry(fields map[string]interface{}) (DictionaryEntry, error) {
-	var entry DictionaryEntry
-	var err error
-
-	// Helper function for safe type assertion
-	getString := func(key string) string {
-		if val, ok := fields[key].(string); ok {
-			return val
-		}
-		return ""
+func docToDictEntry(fields map[string]any) (DictionaryEntry, error) {
+	raw, ok := fields["e"].(string)
+	if !ok {
+		return DictionaryEntry{}, fmt.Errorf("missing field e in document")
 	}
-
-	getBool := func(key string) bool {
-		if val, ok := fields[key].(bool); ok {
-			return val
-		}
-		return false
-	}
-
-	getInt := func(key string) int {
-		if val, ok := fields[key].(float64); ok { // Numbers from JSON are often float64
-			return int(val)
-		}
-		return 0
-	}
-
-	getStringSlice := func(key string) []string {
-		if val, ok := fields[key].([]interface{}); ok {
-			var slice []string
-			for _, item := range val {
-				if str, ok := item.(string); ok {
-					slice = append(slice, str)
-				}
-			}
-			return slice
-		}
-		return nil
-	}
-
-	entry.DictName = getString("dict_name")
-	entry.Word = getString("word")
-	entry.HTag = getString("htag")
-	entry.Id = getString("id")
-	entry.IAST = getString("iast")
-	entry.HK = getString("hk")
-	entry.Devanagari = getString("devanagari")
-	entry.PrintedPageNum = getString("print_page")
-	entry.LexicalGender = getString("lexical_gender")
-	entry.Stem = getString("stem")
-
-	entry.Variants = getStringSlice("variants")
-	entry.Cognates = getStringSlice("cognates")
-	entry.LitRefs = getStringSlice("lit_refs")
-
-	entry.HomonymNumber = getInt("homonym_number")
-	entry.IsAnimalName = getBool("is_animal_name")
-	entry.IsPlantName = getBool("is_plant_name")
-
-	// Nested objects - assuming they are stored as JSON strings or flattened
-	if plain, ok := fields["body.plain"].(string); ok {
-		entry.Body.Plain = plain
-	}
-	if markup, ok := fields["body.markup"].(string); ok {
-		entry.Body.Markup = markup
-	}
-
-	// For LexCat and Verb, Bleve flattens them.
-	entry.LexCat.LexID = getString("lexcat.lex_id")
-	entry.LexCat.Stem = getString("lexcat.stem")
-	entry.LexCat.RootClass = getString("lexcat.root_class")
-	entry.LexCat.IsLoan = getBool("lexcat.is_loan")
-	entry.LexCat.InflictType = getString("lexcat.inflict_type")
-
-	entry.Verb.VerbType = getString("verb.verb_type")
-	entry.Verb.VerbClass = getInt("verb.verb_class")
-	entry.Verb.Pada = getString("verb.pada")
-	entry.Verb.Parse = getStringSlice("verb.parse")
-
-	return entry, err
+	var d DictionaryEntry
+	err := json.Unmarshal([]byte(raw), &d)
+	return d, err
 }

@@ -3,3 +3,5 @@ bin/*
 TODO.md
 /data/
 __debug_bin*
+*.env
+

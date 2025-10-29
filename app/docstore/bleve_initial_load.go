@@ -26,10 +26,14 @@ import (
 	"github.com/blevesearch/bleve/v2/registry"
 )
 
+// Possible auxiliaries from all texts we know
+// TODO: loop over config
+var possibleAuxiliaries = []string{"griffith", "oldenberg", "pada"}
+
+// --- accent folding char filter ---
 type AccentFoldingCharFilter struct{}
 
 func (ac AccentFoldingCharFilter) Filter(input []byte) []byte {
-	// TODO: do this in-place
 	replacer := strings.NewReplacer(common.FoldableAccentsList...)
 	replaced := replacer.Replace(string(input))
 	return []byte(replaced)
@@ -41,6 +45,79 @@ func init() {
 	})
 }
 
+var replacer = strings.NewReplacer(common.FoldableAccentsList...)
+
+func normalizeRomanTextForKwStorage(txt []string) string {
+	var result []string
+	for _, t := range txt {
+		// Why would we do this?
+		// short vowels in the dataset have accented chars which do not match while searching.
+		result = append(result, replacer.Replace(t))
+	}
+	return strings.Join(result, " ")
+}
+
+func prepareDictEntryForDb(e *dictionary.DictionaryEntry) dictionary.DictionaryEntryInDB {
+	// Marshal full entry
+	entryJSON, err := json.Marshal(e)
+	if err != nil {
+		slog.Error("unexpected error", "err", err)
+		panic(err)
+	}
+
+	bodyText := e.Body.Plain
+	return dictionary.DictionaryEntryInDB{
+		DictName:       e.DictName,
+		Word:           e.Word,
+		SId:            e.Id,
+		Entry:          string(entryJSON),
+		Variants:       e.Variants,
+		LitRefs:        e.LitRefs,
+		PrintedPageNum: e.PrintedPageNum,
+		BodyText:       bodyText,
+	}
+}
+
+func prepareExcerptForDb(e *scripture.Excerpt) scripture.ExcerptInDB {
+	entryJSON, err := json.Marshal(e)
+	if err != nil {
+		slog.Error("unexpected error", "err", err)
+		panic(err)
+	}
+
+	aux := make(map[string]string)
+	for name, auxObj := range e.Auxiliaries {
+		aux[name] = strings.Join(auxObj.Text, " ")
+	}
+
+	var surfaces []string
+	for _, glossGroup := range e.Glossings {
+		for _, g := range glossGroup {
+			if g.Surface != "" {
+				surfaces = append(surfaces, g.Surface)
+			}
+		}
+	}
+
+	return scripture.ExcerptInDB{
+		E:           string(entryJSON),
+		Scripture:   e.Scripture,
+		SourceT:     strings.Join(e.SourceText, " "),
+		RomanT:      strings.Join(e.RomanText, " "),
+		RomanK:      normalizeRomanTextForKwStorage(e.RomanText),
+		RomanF:      normalizeRomanTextForKwStorage(e.RomanText),
+		ViewIndex:   common.PathToString(e.Path),
+		SortIndex:   common.PathToSortString(e.Path),
+		Auxiliaries: aux,
+		Addressees:  e.Addressees,
+		Notes:       strings.Join(e.Notes, " "),
+		Authors:     e.Authors,
+		Meter:       e.Meter,
+		Surfaces:    surfaces,
+	}
+}
+
+// --- bleve mappings ---
 func GetBleveIndexMappings() mapping.IndexMapping {
 	// Base index mapping
 	indexMapping := mapping.NewIndexMapping()
@@ -68,36 +145,34 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 		os.Exit(1)
 	}
 
-	// ----- Excerpt mapping -----
+	// ----- ExcerptInDB mapping -----
 	excerptMapping := mapping.NewDocumentMapping()
+	eField := mapping.NewKeywordFieldMapping()
+	eField.Store = true
+	eField.Index = false
+	excerptMapping.AddFieldMappingsAt("e", eField) // stored only
 
-	// ReadableIndex
-	excerptMapping.AddFieldMappingsAt("readable_index", mapping.NewKeywordFieldMapping())
 	excerptMapping.AddFieldMappingsAt("scripture", mapping.NewKeywordFieldMapping())
 
-	// Path
-	excerptMapping.AddFieldMappingsAt("path", mapping.NewNumericFieldMapping())
+	sField := mapping.NewTextFieldMapping()
+	sField.Analyzer = "sanskrit_ws"
+	excerptMapping.AddFieldMappingsAt("source_t", sField)
 
-	// Source & roman text (use sanskrit_ws analyzer)
-	sourceField := mapping.NewTextFieldMapping()
-	sourceField.Analyzer = "sanskrit_ws"
-	excerptMapping.AddFieldMappingsAt("source_text", sourceField)
+	rField := mapping.NewTextFieldMapping()
+	rField.Analyzer = "sanskrit_ws"
+	excerptMapping.AddFieldMappingsAt("roman_t", rField)
 
-	// Ideally we should store 3 versions of roman text
-	// 1. ASCII folded
-	// 2. Accent characters folded
-	// 3. Original
-	// and search across all 3, instead of forcing unintuitive substring search on our users.
-	romanField := mapping.NewTextFieldMapping()
-	romanField.Analyzer = "sanskrit_ws"
-	excerptMapping.AddFieldMappingsAt("roman_text", romanField)
+	// -- roman text as keyword for regex search --
+	rkField := mapping.NewKeywordFieldMapping()
+	excerptMapping.AddFieldMappingsAt("roman_k", rkField)
 
-	romanKField := mapping.NewKeywordFieldMapping()
-	excerptMapping.AddFieldMappingsAt("roman_text_k", romanKField)
+	// -- roman text ascii folded --
+	rfField := mapping.NewTextFieldMapping()
+	rfField.Analyzer = "ascii_folding"
+	excerptMapping.AddFieldMappingsAt("roman_f", rfField)
 
-	romanFField := mapping.NewTextFieldMapping()
-	romanFField.Analyzer = "ascii_folding"
-	excerptMapping.AddFieldMappingsAt("roman_text_f", romanFField)
+	excerptMapping.AddFieldMappingsAt("view_index", mapping.NewKeywordFieldMapping())
+	excerptMapping.AddFieldMappingsAt("sort_index", mapping.NewKeywordFieldMapping())
 
 	// Authors
 	excerptMapping.AddFieldMappingsAt("authors", mapping.NewTextFieldMapping())
@@ -111,121 +186,43 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 
 	// Notes
 	excerptMapping.AddFieldMappingsAt("notes", mapping.NewTextFieldMapping())
+	excerptMapping.AddFieldMappingsAt("surfaces", mapping.NewKeywordFieldMapping())
 
-	// Links
-	linkMapping := mapping.NewDocumentMapping()
-	linkMapping.AddFieldMappingsAt("url", mapping.NewKeywordFieldMapping())
-	linkMapping.AddFieldMappingsAt("name", mapping.NewTextFieldMapping())
-	excerptMapping.AddSubDocumentMapping("links", linkMapping)
-
-	// Glossings
-	glossingMapping := mapping.NewDocumentMapping()
-	glossingMapping.AddFieldMappingsAt("surface", mapping.NewTextFieldMapping())
-	glossingMapping.AddFieldMappingsAt("lemma", mapping.NewTextFieldMapping())
-	glossingMapping.AddFieldMappingsAt("gramm", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("case", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("number", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("gender", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("tense", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("voice", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("person", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("mood", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("root", mapping.NewTextFieldMapping())
-	glossingMapping.AddFieldMappingsAt("modifiers", mapping.NewKeywordFieldMapping())
-	glossingMapping.AddFieldMappingsAt("constituents", mapping.NewTextFieldMapping())
-	excerptMapping.AddSubDocumentMapping("glossings", glossingMapping)
-
-	// Auxiliaries
-	auxMapping := func(analyzer string) *mapping.DocumentMapping {
-		m := mapping.NewDocumentMapping()
-		pathField := mapping.NewNumericFieldMapping()
-		pathField.Store = true
-		m.AddFieldMappingsAt("path", pathField)
-		textField := mapping.NewTextFieldMapping()
-		textField.Store = true
-		textField.Analyzer = analyzer
-		m.AddFieldMappingsAt("text", textField)
-		return m
+	auxMap := mapping.NewDocumentMapping()
+	for _, ax := range possibleAuxiliaries {
+		auxMap.AddFieldMappingsAt(ax, mapping.NewTextFieldMapping())
 	}
+	excerptMapping.AddSubDocumentMapping("auxiliaries", auxMap)
 
-	excerptMapping.AddSubDocumentMapping("auxiliaries.griffith", auxMapping("en"))
-	excerptMapping.AddSubDocumentMapping("auxiliaries.oldenberg", auxMapping("en"))
-	excerptMapping.AddSubDocumentMapping("auxiliaries.pada", auxMapping("sanskrit_ws"))
-
-	// ----- DictionaryEntry mapping -----
+	// ----- DictionaryEntryInDB mapping -----
 	dictMapping := mapping.NewDocumentMapping()
 
-	wordField := mapping.NewKeywordFieldMapping()
-	dictMapping.AddFieldMappingsAt("word", wordField)
-
-	dictMapping.AddFieldMappingsAt("htag", mapping.NewKeywordFieldMapping())
-	dictMapping.AddFieldMappingsAt("id", mapping.NewKeywordFieldMapping())
-	dictMapping.AddFieldMappingsAt("iast", mapping.NewKeywordFieldMapping())
-	dictMapping.AddFieldMappingsAt("hk", mapping.NewKeywordFieldMapping())
 	dictMapping.AddFieldMappingsAt("dict_name", mapping.NewKeywordFieldMapping())
+	dictMapping.AddFieldMappingsAt("word", mapping.NewKeywordFieldMapping())
 
-	devField := mapping.NewTextFieldMapping()
-	devField.Analyzer = "sanskrit_ws"
-	dictMapping.AddFieldMappingsAt("devanagari", devField)
+	ef := mapping.NewKeywordFieldMapping()
+	ef.Store, ef.Index = true, false
+	dictMapping.AddFieldMappingsAt("e", ef)
 
-	varField := mapping.NewKeywordFieldMapping()
-	dictMapping.AddFieldMappingsAt("variants", varField)
-
-	varIastField := mapping.NewTextFieldMapping()
-	varIastField.Analyzer = "sanskrit_ws"
-	dictMapping.AddFieldMappingsAt("variants_iast", varIastField)
-
-	dictMapping.AddFieldMappingsAt("print_page", mapping.NewKeywordFieldMapping())
-	dictMapping.AddFieldMappingsAt("cognates", mapping.NewTextFieldMapping())
+	dictMapping.AddFieldMappingsAt("sid", mapping.NewKeywordFieldMapping())
+	dictMapping.AddFieldMappingsAt("variants", mapping.NewKeywordFieldMapping())
 	dictMapping.AddFieldMappingsAt("lit_refs", mapping.NewTextFieldMapping())
-	dictMapping.AddFieldMappingsAt("lexical_gender", mapping.NewKeywordFieldMapping())
+	dictMapping.AddFieldMappingsAt("print_page", mapping.NewKeywordFieldMapping())
 
-	stemField := mapping.NewTextFieldMapping()
-	stemField.Analyzer = "sanskrit_ws"
-	dictMapping.AddFieldMappingsAt("stem", stemField)
-
-	dictMapping.AddFieldMappingsAt("is_animal_name", mapping.NewBooleanFieldMapping())
-	dictMapping.AddFieldMappingsAt("is_plant_name", mapping.NewBooleanFieldMapping())
-
-	// Body
-	bodyMapping := mapping.NewDocumentMapping()
 	bodyField := mapping.NewTextFieldMapping()
-	bodyField.Analyzer = "sanskrit_ws"
-	bodyMapping.AddFieldMappingsAt("plain", bodyField)
-	dictMapping.AddSubDocumentMapping("body", bodyMapping)
+	dictMapping.AddFieldMappingsAt("body_text", bodyField)
 
-	// LexCat
-	lexcatMapping := mapping.NewDocumentMapping()
-	lexcatMapping.AddFieldMappingsAt("lex_id", mapping.NewKeywordFieldMapping())
-	lexcatMapping.AddFieldMappingsAt("stem", stemField)
-	lexcatMapping.AddFieldMappingsAt("root_class", mapping.NewKeywordFieldMapping())
-	lexcatMapping.AddFieldMappingsAt("is_loan", mapping.NewBooleanFieldMapping())
-	lexcatMapping.AddFieldMappingsAt("inflict_type", mapping.NewKeywordFieldMapping())
-	dictMapping.AddSubDocumentMapping("lexcat", lexcatMapping)
-
-	// Verb
-	verbMapping := mapping.NewDocumentMapping()
-	verbMapping.AddFieldMappingsAt("verb_type", mapping.NewKeywordFieldMapping())
-	verbMapping.AddFieldMappingsAt("verb_class", mapping.NewNumericFieldMapping())
-	verbMapping.AddFieldMappingsAt("pada", mapping.NewKeywordFieldMapping())
-	verbMapping.AddFieldMappingsAt("parse", mapping.NewTextFieldMapping())
-	dictMapping.AddSubDocumentMapping("verb", verbMapping)
-
-	// Register types
 	indexMapping.AddDocumentMapping("excerpt", excerptMapping)
 	indexMapping.AddDocumentMapping("dictionary_entry", dictMapping)
-
-	// Defaults
-	indexMapping.DefaultMapping = excerptMapping
 	indexMapping.TypeField = "_type"
 
 	return indexMapping
 }
 
+// --- data loading ---
 const batchSize = 1024
 
-// loadJSONL is a generic helper to load data from a JSONL file into a bleve index.
-func loadJSONL[T mapping.Classifier](index bleve.Index, dataFile string, idFunc func(T) string, enrichFunc func(T)) error {
+func loadJSONL[T any, R any](index bleve.Index, dataFile string, idFunc func(T) string, enrichFunc func(T) R) error {
 	file, err := os.Open(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to open data file %s: %w", dataFile, err)
@@ -243,12 +240,10 @@ func loadJSONL[T mapping.Classifier](index bleve.Index, dataFile string, idFunc 
 			continue
 		}
 
-		if enrichFunc != nil {
-			enrichFunc(entry)
-		}
-
 		id := idFunc(entry)
-		if err := batch.Index(id, entry); err != nil {
+		enriched := enrichFunc(entry)
+
+		if err := batch.Index(id, enriched); err != nil {
 			return fmt.Errorf("failed to add item to batch: %w", err)
 		}
 		count++
@@ -278,16 +273,7 @@ func loadJSONL[T mapping.Classifier](index bleve.Index, dataFile string, idFunc 
 	return nil
 }
 
-var replacer = strings.NewReplacer(common.FoldableAccentsList...)
-
-func normalizeRomanTextForKwStorage(txt []string) string {
-	var result []string
-	for _, t := range txt {
-		result = append(result, replacer.Replace(t))
-	}
-	return strings.Join(result, " ")
-}
-
+// --- LoadData with conversions ---
 func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) error {
 	// Load scriptures
 	for _, sc := range config.Scriptures {
@@ -296,10 +282,10 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 			func(e *scripture.Excerpt) string {
 				return fmt.Sprintf("%s:%s", sc.Name, common.PathToString(e.Path))
 			},
-			func(e *scripture.Excerpt) {
+			func(e *scripture.Excerpt) *scripture.ExcerptInDB {
 				e.Scripture = sc.Name
-				e.RomanTextK = normalizeRomanTextForKwStorage(e.RomanText)
-				e.RomanTextF = e.RomanTextK
+				dbObj := prepareExcerptForDb(e)
+				return &dbObj
 			},
 		)
 		if err != nil {
@@ -312,10 +298,12 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 		slog.Info("Loading dictionary", "name", dict.Name)
 		err := loadJSONL(index, path.Join(dataDir, dict.DataFile),
 			func(e *dictionary.DictionaryEntry) string {
-				return fmt.Sprintf("%s:%s", dict.Name, e.Id)
+				return fmt.Sprintf("%s:%s:%s", dict.Name, e.Word, e.Id)
 			},
-			func(e *dictionary.DictionaryEntry) {
+			func(e *dictionary.DictionaryEntry) *dictionary.DictionaryEntryInDB {
 				e.DictName = dict.Name
+				dbObj := prepareDictEntryForDb(e)
+				return &dbObj
 			},
 		)
 		if err != nil {

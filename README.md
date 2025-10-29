@@ -16,6 +16,7 @@ Design goals
 - [X] Hierarchical navigation (i.e show the mandala/sukta/rik hierarchy).
 - [X] Show Monier-Williams dictionary hints along with Padapatha text.
 - [ ] Integrate the [Multi-layer annotation of rigveda](https://ashutosh-modi.github.io/publications/papers/lrec18/Multi-layer%20Annotation%20of%20the%20Rigveda.pdf) to show shorter lexicon meanings before the dictionary entries.
+- [ ] Integrate Anukramani data on verse authors for rigveda.
 
 ### Long term
 - [ ] Semantic search and similarity scores (hybrid embeddings + BM25, embeddings generated at build time; It's an open question how to do embeddings in Go at runtime. I'd avoid writing cgo wrappers if possible.)

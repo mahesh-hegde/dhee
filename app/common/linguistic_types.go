@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -31,6 +32,14 @@ const (
 	SearchFuzzy  SearchMode = "fuzzy"
 	SearchASCII  SearchMode = "ascii"
 )
+
+func PathToSortString(path []int) string {
+	var parts []string
+	for _, p := range path {
+		parts = append(parts, fmt.Sprintf("%05d", p))
+	}
+	return strings.Join(parts, ".")
+}
 
 func PathToString(path []int) string {
 	var parts []string

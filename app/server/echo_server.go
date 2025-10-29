@@ -18,6 +18,7 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 	e.Renderer = NewTemplateRenderer(conf)
 
 	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
 	if conf.TimeoutSeconds != 0 {
 		e.Use(middleware.ContextTimeout(time.Duration(conf.TimeoutSeconds) * time.Second))

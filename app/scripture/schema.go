@@ -8,7 +8,7 @@ import (
 
 type Modifier string
 
-type ExcerptGlossing struct {
+type WordGlossing struct {
 	Surface      string     `json:"surface"`
 	Lemma        string     `json:"lemma"`
 	Gramm        string     `json:"gramm"`
@@ -27,7 +27,7 @@ type ExcerptGlossing struct {
 type PadaElement struct {
 	Word            string
 	Found           bool
-	G               ExcerptGlossing
+	G               WordGlossing
 	Slp1NormLemma   string
 	Slp1NormSurface string
 	SurfaceMeanings []dictionary.DictionaryEntry
@@ -80,7 +80,7 @@ type Excerpt struct {
 	Authors []string `json:"authors,omitempty"`
 	Meter   string   `json:"meter,omitempty"`
 	// Complex type. 2D array with each row corresponding to one division of the verse.
-	Glossings [][]ExcerptGlossing `json:"glossings,omitempty"`
+	Glossings [][]WordGlossing `json:"glossings,omitempty"`
 	// Translations and alternative renderings
 	Auxiliaries   map[string]Auxiliary `json:"auxiliaries,omitempty"`
 	Notes         []string             `json:"notes,omitempty"`
@@ -89,6 +89,38 @@ type Excerpt struct {
 	Links         []ExternalLink       `json:"links,omitempty"`
 	Suggested     []Related            `json:"suggested,omitempty"`
 	SuggestedAuto []Related            `json:"suggested_auto,omitempty"`
+}
+
+// ExcerptInDB is the type sent to bleve, with the content of main excerpt serialized without indexing,
+// and only the fields we want to index being added as separate fields at top level.
+//
+// This lets us keep the bleve index small in both size and complexity, as well as potentially speeding up the queries.
+type ExcerptInDB struct {
+	// Excerpt serialized & stored as JSON but not indexed
+	E         string `json:"e"`
+	Scripture string `json:"scripture"`
+	SourceT   string `json:"source_t"`
+	RomanT    string `json:"roman_t"`
+	// Roman/IAST text stored as keyword to facilitate full regex searches
+	RomanK string `json:"roman_k"`
+	// Roman text but completely ASCII folded
+	RomanF string `json:"roman_f"`
+
+	// i.e readable index 1.1.4
+	ViewIndex string `json:"view_index"`
+	// Index with each number padded to 4 zeros
+	SortIndex string `json:"sort_index"`
+
+	// Auxiliary texts joined by space and other details omitted if any.
+	Auxiliaries map[string]string `json:"auxiliaries"`
+
+	// stuff we would want to do facetted search / query strings on. Keyword format.
+	Addressees []string
+	Notes      string
+	Authors    []string
+	Meter      string
+	// All surfaces that have occurred in excerpt glossings. keyword analyzer again.
+	Surfaces []string
 }
 
 type HierParent struct {
@@ -114,7 +146,7 @@ type HighlightedExcerpt struct {
 }
 
 // Type implements mapping.Classifier.
-func (e *Excerpt) Type() string {
+func (e *ExcerptInDB) Type() string {
 	return "excerpt"
 }
 
@@ -128,7 +160,7 @@ type ExcerptWithWords struct {
 type ExcerptTemplateData struct {
 	Excerpts        []ExcerptWithWords
 	Scripture       config.ScriptureDefn
-	GlossingMap     map[string]ExcerptGlossing
+	GlossingMap     map[string]WordGlossing
 	AddressedTo     string
 	Next            string
 	Previous        string
