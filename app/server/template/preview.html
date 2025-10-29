@@ -1,0 +1,5 @@
+{{ if (eq .Page "dictionary_search") }}
+{{- template "dictionary_search" .Data -}}
+{{ else }}
+<p>Page not supported for preview</p>
+{{ end }}

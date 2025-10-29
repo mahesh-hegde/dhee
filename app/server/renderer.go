@@ -16,19 +16,15 @@ type TemplateRenderer struct {
 
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	baseName, modifier, found := strings.Cut(name, ".")
-	var wrappedData any
+	wrappedData := map[string]any{
+		"Page": baseName,
+		"Conf": t.conf,
+		"Data": data,
+	}
 	var tName string
 	if found && modifier == "preview" {
-		wrappedData = data
-		// this is a hack which works since all conditions checked in
-		// layout.html correspond to filenames
-		tName = name + ".html"
+		tName = "preview.html"
 	} else {
-		wrappedData = map[string]any{
-			"Page": baseName,
-			"Conf": t.conf,
-			"Data": data,
-		}
 		tName = "layout.html"
 	}
 	err := t.tmpl.ExecuteTemplate(w, tName, wrappedData)
