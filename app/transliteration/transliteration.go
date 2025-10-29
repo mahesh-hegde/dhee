@@ -50,12 +50,13 @@ type SchemeKeyMap map[common.Transliteration]KeyMap
 
 // Transliterator provides sanskrit transliteration functionality.
 type Transliterator struct {
-	options        TlOptions
-	fromSlp1       map[common.Transliteration]map[string]string
-	toSlp1         map[common.Transliteration]map[string]string
-	keys           SchemeKeyMap // For longest-match search
-	slp1Vowels     map[string]bool
-	slp1Consonants map[string]bool
+	options                  TlOptions
+	fromSlp1                 map[common.Transliteration]map[string]string
+	toSlp1                   map[common.Transliteration]map[string]string
+	keys                     SchemeKeyMap // For longest-match search
+	slp1Vowels               map[string]bool
+	slp1Consonants           map[string]bool
+	devanagariAccentReplacer *strings.Replacer
 }
 
 // Convert converts a string between defined transliteration formats.
@@ -99,6 +100,14 @@ func (t *Transliterator) Convert(source string, sourceTl common.Transliteration,
 	}
 
 	return result, err
+}
+
+// FoldDevanagariAccents removes accent characters from a Devanagari string.
+func (t *Transliterator) FoldDevanagariAccents(source string) string {
+	if t.devanagariAccentReplacer == nil {
+		return source
+	}
+	return t.devanagariAccentReplacer.Replace(source)
 }
 
 // findLongestMatch finds the longest key from the KeyMap that is a prefix of the source string at the given offset.
@@ -283,6 +292,15 @@ func NewTransliterator(options TlOptions) (*Transliterator, error) {
 		keys:           make(SchemeKeyMap),
 		slp1Vowels:     make(map[string]bool),
 		slp1Consonants: make(map[string]bool),
+	}
+
+	// Create a replacer for Devanagari accents
+	if devanagariMap, ok := mappingsData.Mappings["slp1_to_devanagari"]; ok {
+		var accentReplacements []string
+		for _, accentChar := range devanagariMap.Accents {
+			accentReplacements = append(accentReplacements, accentChar, "")
+		}
+		t.devanagariAccentReplacer = strings.NewReplacer(accentReplacements...)
 	}
 
 	// Add SLP1 to itself mapping
