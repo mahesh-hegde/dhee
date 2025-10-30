@@ -2,6 +2,7 @@ package docstore
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -24,6 +25,7 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/registry"
+	"github.com/yuin/goldmark"
 )
 
 // Possible auxiliaries from all texts we know
@@ -55,6 +57,56 @@ func normalizeRomanTextForKwStorage(txt []string) string {
 		result = append(result, replacer.Replace(t))
 	}
 	return strings.Join(result, " ")
+}
+
+func parseNotesFile(filePath string) (map[string]string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("opening notes file: %w", err)
+	}
+	defer file.Close()
+
+	notes := make(map[string]string)
+	scanner := bufio.NewScanner(file)
+	var currentID string
+	var currentContent strings.Builder
+
+	md := goldmark.New()
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "## ") {
+			if currentID != "" && currentContent.Len() > 0 {
+				var buf bytes.Buffer
+				if err := md.Convert([]byte(currentContent.String()), &buf); err != nil {
+					slog.Warn("failed to convert markdown to html", "id", currentID, "err", err)
+				} else {
+					notes[currentID] = buf.String()
+				}
+			}
+			currentID = strings.TrimSpace(strings.TrimPrefix(line, "## "))
+			currentContent.Reset()
+		} else {
+			if currentID != "" {
+				currentContent.WriteString(line)
+				currentContent.WriteString("\n")
+			}
+		}
+	}
+	if currentID != "" && currentContent.Len() > 0 {
+		var buf bytes.Buffer
+		if err := md.Convert([]byte(currentContent.String()), &buf); err != nil {
+			slog.Warn("failed to convert markdown to html", "id", currentID, "err", err)
+		} else {
+			notes[currentID] = buf.String()
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("scanning notes file: %w", err)
+	}
+
+	return notes, nil
 }
 
 func prepareDictEntryForDb(e *dictionary.DictionaryEntry) dictionary.DictionaryEntryInDB {
@@ -278,12 +330,28 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 	// Load scriptures
 	for _, sc := range config.Scriptures {
 		slog.Info("Loading scripture", "name", sc.Name)
+
+		var notes map[string]string
+		if sc.NotesFile != "" {
+			var err error
+			notes, err = parseNotesFile(path.Join(dataDir, sc.NotesFile))
+			if err != nil {
+				return fmt.Errorf("failed to parse notes for %s: %w", sc.Name, err)
+			}
+			slog.Info("loaded notes", "count", len(notes), "scripture", sc.Name)
+		}
+
 		err := loadJSONL(index, path.Join(dataDir, sc.DataFile),
 			func(e *scripture.Excerpt) string {
 				return fmt.Sprintf("%s:%s", sc.Name, common.PathToString(e.Path))
 			},
 			func(e *scripture.Excerpt) *scripture.ExcerptInDB {
 				e.Scripture = sc.Name
+				if notes != nil {
+					if note, ok := notes[e.ReadableIndex]; ok {
+						e.Notes = []string{note}
+					}
+				}
 				dbObj := prepareExcerptForDb(e)
 				return &dbObj
 			},

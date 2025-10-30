@@ -22,6 +22,7 @@ type ScriptureDefn struct {
 	Hierarchy        []string              `json:"hierarchy"`
 	Auxiliaries      []AuxiliaryDefinition `json:"auxiliaries"`
 	DataFile         string                `json:"data_file"`
+	NotesFile        string                `json:"notes_file,omitempty"`
 }
 
 type DictDefn struct {
