@@ -19,7 +19,10 @@
             "name": "rigveda",
             "readable_name": "Rig Veda",
             "description": "The Rig Veda with linguistic data",
-            "collector": "VedaWeb project",
+            "attribution": "VedaWeb project",
+            "attribution_links": {
+                "VedaWeb": "https://vedaweb.uni-koeln.de/"
+            },
             "hierarchy": [
                 "Mandala",
                 "Sukta",
