@@ -499,32 +499,9 @@ func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 	// Read and parse XML entries
 	decoder := xml.NewDecoder(inFile)
 	lastPageNum := ""
-	entryCount := 0
+	entries := make(map[string]*DictionaryEntry)
 
-	var lastEntry *DictionaryEntry
-
-	writeLastEntry := func() error {
-		if lastEntry != nil {
-			// Write as JSON line
-			jsonBytes, err := json.Marshal(lastEntry)
-			lastEntry = nil
-			if err != nil {
-				return fmt.Errorf("error marshaling JSON: %w", err)
-			}
-			if _, err := writer.Write(jsonBytes); err != nil {
-				return fmt.Errorf("error writing JSON: %w", err)
-			}
-			if _, err := writer.WriteString("\n"); err != nil {
-				return fmt.Errorf("error writing newline: %w", err)
-			}
-
-			entryCount++
-			if entryCount%1000 == 0 {
-				slog.Info("processing entries", "done", entryCount)
-			}
-		}
-		return nil
-	}
+	slog.Info("parsing XML and collecting entries")
 
 	for {
 		token, err := decoder.Token()
@@ -540,7 +517,8 @@ func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 			if isEntryTag(startElem.Name.Local) {
 				var entry MwXmlEntry
 				if err := decoder.DecodeElement(&entry, &startElem); err != nil {
-					return fmt.Errorf("error decoding entry: %w", err)
+					slog.Warn("error decoding entry", "err", err)
+					continue
 				}
 
 				entry.Tag = startElem.Name.Local
@@ -553,22 +531,42 @@ func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 					lastPageNum = meaning.PrintedPageNum
 				}
 
-				if lastEntry != nil && lastEntry.Word == dictEntry.Word {
-					lastEntry.Meanings = append(lastEntry.Meanings, meaning)
+				if existingEntry, ok := entries[dictEntry.Word]; ok {
+					existingEntry.Meanings = append(existingEntry.Meanings, meaning)
 				} else {
-					if err := writeLastEntry(); err != nil {
-						return err
-					}
-					lastEntry = &dictEntry
-					lastEntry.Meanings = append(lastEntry.Meanings, meaning)
+					dictEntry.Meanings = append(dictEntry.Meanings, meaning)
+					entries[dictEntry.Word] = &dictEntry
 				}
 			}
 		}
 	}
-	if err := writeLastEntry(); err != nil {
-		return err
+	// For deterministic output, get keys and sort them.
+	keys := make([]string, 0, len(entries))
+	for k := range entries {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+
+	entryCount := 0
+	for _, key := range keys {
+		entry := entries[key]
+		// Write as JSON line
+		jsonBytes, err := json.Marshal(entry)
+		if err != nil {
+			return fmt.Errorf("error marshaling JSON: %w", err)
+		}
+		if _, err := writer.Write(jsonBytes); err != nil {
+			return fmt.Errorf("error writing JSON: %w", err)
+		}
+		if _, err := writer.WriteString("\n"); err != nil {
+			return fmt.Errorf("error writing newline: %w", err)
+		}
+		entryCount++
+		if entryCount%1000 == 0 {
+			slog.Info("writing entries", "done", entryCount)
+		}
 	}
 
-	fmt.Printf("Conversion complete. Processed %d entries.\n", entryCount)
+	fmt.Printf("Conversion complete. Processed %d entries.\n", len(entries))
 	return nil
 }
