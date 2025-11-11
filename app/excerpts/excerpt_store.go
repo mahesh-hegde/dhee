@@ -53,7 +53,7 @@ func (b *BleveExcerptStore) GetHier(ctx context.Context, scripture *config.Scrip
 	searchRequest := bleve.NewSearchRequest(qFinal)
 	searchRequest.Size = 10000 // Max verses I'd expect anywhere
 	searchRequest.Fields = []string{"_id"}
-	searchResults, err := b.idx.Search(searchRequest)
+	searchResults, err := b.idx.SearchInContext(ctx, searchRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (b *BleveExcerptStore) FindBeforeAndAfter(ctx context.Context, scripture st
 	searchRequest.Size = len(ids)
 	searchRequest.Fields = []string{"_id"}
 
-	searchResults, err := b.idx.Search(searchRequest)
+	searchResults, err := b.idx.SearchInContext(ctx, searchRequest)
 	if err != nil {
 		slog.Error("error when querying existence of IDs")
 		return "", ""
@@ -173,7 +173,7 @@ func (b *BleveExcerptStore) Get(ctx context.Context, paths []QualifiedPath) ([]E
 	searchRequest.Size = len(ids)
 	searchRequest.Fields = []string{"*"}
 
-	searchResults, err := b.idx.Search(searchRequest)
+	searchResults, err := b.idx.SearchInContext(ctx, searchRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +262,7 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 		searchRequest.SortBy([]string{"-_score", "_id"})
 	}
 
-	searchResults, err := b.idx.Search(searchRequest)
+	searchResults, err := b.idx.SearchInContext(ctx, searchRequest)
 	if err != nil {
 		return nil, err
 	}

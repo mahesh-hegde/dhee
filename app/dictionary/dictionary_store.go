@@ -71,7 +71,7 @@ func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []strin
 	searchRequest.Fields = []string{"word", "_id", "e"}
 	searchRequest.SortBy([]string{"_id"})
 
-	searchResults, err := b.idx.Search(searchRequest)
+	searchResults, err := b.idx.SearchInContext(ctx, searchRequest)
 	if err != nil {
 		return nil, fmt.Errorf("bleve search failed: %w", err)
 	}
@@ -146,7 +146,7 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 		searchRequest.SortBy([]string{"_id"})
 	}
 
-	searchResults, err := b.idx.Search(searchRequest)
+	searchResults, err := b.idx.SearchInContext(ctx, searchRequest)
 	if err != nil {
 		return SearchResults{}, fmt.Errorf("bleve search failed: %w", err)
 	}
@@ -184,7 +184,7 @@ func (b *BleveDictStore) Suggest(ctx context.Context, dictName string, s Suggest
 	searchRequest.Size = 20 // Limit suggestions
 	searchRequest.Fields = []string{"iast", "body.plain"}
 
-	searchResults, err := b.idx.Search(searchRequest)
+	searchResults, err := b.idx.SearchInContext(ctx, searchRequest)
 	if err != nil {
 		return Suggestions{}, fmt.Errorf("bleve search failed: %w", err)
 	}

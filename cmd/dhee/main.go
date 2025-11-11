@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
 	"path"
+	"runtime"
+	"runtime/pprof"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/mahesh-hegde/dhee/app/config"
@@ -111,12 +114,59 @@ func runServer() {
 	flags := pflag.NewFlagSet("server", pflag.ExitOnError)
 	var address, dataDir string
 	var port int
+	var cpuProfile, memProfile string
 	flags.StringVarP(&address, "address", "a", "localhost", "Server address to bind")
 	flags.IntVarP(&port, "port", "p", 8080, "Server port to bind")
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
+	flags.StringVar(&cpuProfile, "cpu-profile", "", "write cpu profile to file")
+	flags.StringVar(&memProfile, "mem-profile", "", "write memory profile to file")
 
 	flags.Parse(os.Args[2:])
+
+	var cpuProfFile *os.File
+	if cpuProfile != "" {
+		var err error
+		cpuProfFile, err = os.Create(cpuProfile)
+		if err != nil {
+			slog.Error("could not create CPU profile", "err", err)
+			os.Exit(1)
+		}
+		if err := pprof.StartCPUProfile(cpuProfFile); err != nil {
+			slog.Error("could not start CPU profile", "err", err)
+			os.Exit(1)
+		}
+	}
+
+	if cpuProfile != "" || memProfile != "" {
+		go func() {
+			sigs := make(chan os.Signal, 1)
+			signal.Notify(sigs, os.Interrupt)
+			<-sigs
+			slog.Info("interrupt received, writing profiles and shutting down")
+
+			if memProfile != "" {
+				f, err := os.Create(memProfile)
+				if err != nil {
+					slog.Error("could not create memory profile", "err", err)
+				} else {
+					runtime.GC()
+					if err := pprof.WriteHeapProfile(f); err != nil {
+						slog.Error("could not write memory profile", "err", err)
+					}
+					f.Close()
+					slog.Info("memory profile written", "file", memProfile)
+				}
+			}
+
+			if cpuProfile != "" {
+				pprof.StopCPUProfile()
+				cpuProfFile.Close()
+				slog.Info("cpu profile written", "file", cpuProfile)
+			}
+			os.Exit(0)
+		}()
+	}
 
 	if dataDir == "" {
 		slog.Error("--data-dir not provided, stopping")
