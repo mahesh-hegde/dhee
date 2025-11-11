@@ -18,7 +18,7 @@ type DictionaryService struct {
 
 // GetEntries takes a list of words and returns the full dictionary
 // data about those words
-func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName string, words []string, tl common.Transliteration) (map[string][]DictionaryEntry, error) {
+func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName string, words []string, tl common.Transliteration) (map[string]DictionaryEntry, error) {
 	slp1Words := make([]string, len(words))
 	for i, word := range words {
 		slp1Words[i] = word
@@ -41,15 +41,7 @@ func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName strin
 		return nil, err
 	}
 
-	// The store returns a slice of entries for each word. For the service layer,
-	// we'll just return the first one for now.
-	finalResults := make(map[string][]DictionaryEntry)
-	for word, entries := range results {
-		if len(entries) > 0 {
-			finalResults[word] = entries
-		}
-	}
-	return finalResults, nil
+	return results, nil
 }
 
 func (s *DictionaryService) Suggest(ctx context.Context, dictName string, partialWord string, tl common.Transliteration) (Suggestions, error) {
@@ -78,7 +70,18 @@ func (s *DictionaryService) Search(ctx context.Context, dictionaryName string, s
 	}
 	searchParams.Query = slp1Query
 
-	return s.store.Search(ctx, dictionaryName, searchParams)
+	res, err := s.store.Search(ctx, dictionaryName, searchParams)
+	if err != nil {
+		return SearchResults{}, err
+	}
+	for idx, itm := range res.Items {
+		nagari, err := s.transliterator.Convert(itm.Word, common.TlSLP1, common.TlNagari)
+		if err != nil {
+			slog.Debug("error converting searched entry to devanagari", "word", itm.Word, "err", err)
+		}
+		res.Items[idx].Nagari = nagari
+	}
+	return res, nil
 }
 
 func (s *DictionaryService) Related(ctx context.Context, dictName string, word string) (SearchResults, error) {

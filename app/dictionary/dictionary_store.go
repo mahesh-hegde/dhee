@@ -17,7 +17,7 @@ type DictStore interface {
 	Add(ctx context.Context, dictName string, es []DictionaryEntry) error
 
 	// Get returns one more dictionary entries per word
-	Get(ctx context.Context, dictName string, words []string) (map[string][]DictionaryEntry, error)
+	Get(ctx context.Context, dictName string, words []string) (map[string]DictionaryEntry, error)
 
 	// Search does exact-word/prefix/regex/fuzzy search according to searchParams. transliteration
 	// is ignored for now and assumed to be SLP1 (same as `word` field in the data).
@@ -41,7 +41,7 @@ func (b *BleveDictStore) Add(ctx context.Context, dictName string, es []Dictiona
 	batch := b.idx.NewBatch()
 	for _, e := range es {
 		e.DictName = dictName
-		id := fmt.Sprintf("%s:%s", dictName, e.Id)
+		id := fmt.Sprintf("%s:%s", dictName, e.Word)
 		if err := batch.Index(id, e); err != nil {
 			return fmt.Errorf("failed to add item to batch: %w", err)
 		}
@@ -54,31 +54,29 @@ func (b *BleveDictStore) Add(ctx context.Context, dictName string, es []Dictiona
 }
 
 // Get implements DictStore.
-func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []string) (map[string][]DictionaryEntry, error) {
+func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []string) (map[string]DictionaryEntry, error) {
 	dictQuery := bleve.NewTermQuery(dictName)
 	dictQuery.SetField("dict_name")
 
-	wordQueries := make([]query.Query, len(words))
+	wordQueries := make([]string, len(words))
 	for i, word := range words {
-		q := bleve.NewTermQuery(word)
-		q.SetField("word")
-		wordQueries[i] = q
+		wordQueries[i] = fmt.Sprintf("%s:%s", dictName, word)
 	}
-	wordsQuery := bleve.NewDisjunctionQuery(wordQueries...)
+	wordsQuery := bleve.NewDocIDQuery(wordQueries)
 
 	finalQuery := bleve.NewConjunctionQuery(dictQuery, wordsQuery)
 	searchRequest := bleve.NewSearchRequest(finalQuery)
-	// TODO: coalesce all meanings of word into same entry and query by doc ID instead
+
 	searchRequest.Size = 500 // A reasonable limit
 	searchRequest.Fields = []string{"word", "_id", "e"}
-	searchRequest.SortBy([]string{"word", "_id"})
+	searchRequest.SortBy([]string{"_id"})
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {
 		return nil, fmt.Errorf("bleve search failed: %w", err)
 	}
 
-	results := make(map[string][]DictionaryEntry)
+	results := make(map[string]DictionaryEntry)
 	for _, hit := range searchResults.Hits {
 		word := hit.Fields["word"].(string)
 		entry, err := docToDictEntry(hit.Fields)
@@ -86,7 +84,7 @@ func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []strin
 			slog.Warn("failed to convert doc to dict entry", "err", err)
 			continue
 		}
-		results[word] = append(results[word], entry)
+		results[word] = entry
 	}
 
 	return results, nil
@@ -159,12 +157,14 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 		if err != nil {
 			return SearchResults{}, err
 		}
-		// TODO: store these fields separately and fetch them only
+		previews := make([]string, 0, len(ent.Meanings))
+		for _, meaning := range ent.Meanings {
+			previews = append(previews, meaning.Body.Plain)
+		}
 		items = append(items, DictSearchResult{
-			IAST:    ent.IAST,
-			Word:    ent.Word,
-			Nagari:  ent.Devanagari,
-			Preview: ent.Body.Plain,
+			IAST:     ent.IAST,
+			Word:     ent.Word,
+			Previews: previews,
 		})
 	}
 
@@ -182,7 +182,7 @@ func (b *BleveDictStore) Suggest(ctx context.Context, dictName string, s Suggest
 	finalQuery := bleve.NewConjunctionQuery(dictQuery, wordQuery)
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 20 // Limit suggestions
-	searchRequest.Fields = []string{"iast", "devanagari", "body.plain"}
+	searchRequest.Fields = []string{"iast", "body.plain"}
 
 	searchResults, err := b.idx.Search(searchRequest)
 	if err != nil {

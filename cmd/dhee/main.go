@@ -11,7 +11,7 @@ import (
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/docstore"
-	"github.com/mahesh-hegde/dhee/app/scripture"
+	"github.com/mahesh-hegde/dhee/app/excerpts"
 	"github.com/mahesh-hegde/dhee/app/server"
 	"github.com/mahesh-hegde/dhee/app/transliteration"
 	"github.com/spf13/pflag"
@@ -101,7 +101,7 @@ func runPreprocess() {
 		os.Exit(1)
 	}
 
-	if err := scripture.PreprocessRvDataset(path.Join(input, "tei"), output); err != nil {
+	if err := excerpts.PreprocessRvDataset(path.Join(input, "tei"), output); err != nil {
 		slog.Error("error when preprocessing rigveda dataset", "error", err)
 		os.Exit(1)
 	}

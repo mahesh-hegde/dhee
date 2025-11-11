@@ -80,10 +80,10 @@
             {{ if $pada.Found }}
             {{/* Word with dictionary entries */}}
             {{ $dictLink := "" }}
-            {{ if gt (len $pada.SurfaceMeanings) 0 }}
-            {{ $dictLink = (index $pada.SurfaceMeanings 0).Word }}
-            {{ else if gt (len $pada.LemmaMeanings) 0 }}
-            {{ $dictLink = (index $pada.LemmaMeanings 0).Word }}
+            {{ if $pada.SurfaceMeaning.Word }}
+            {{ $dictLink = $pada.SurfaceMeaning.Word }}
+            {{ else if $pada.LemmaMeaning.Word }}
+            {{ $dictLink = $pada.LemmaMeaning.Word }}
             {{- end -}}
             <span class="pada-word" data-pada-id="pada-{{ $eidx }}-{{ $pidx }}">
                 {{ if ne $dictLink "" }}
@@ -105,21 +105,23 @@
                     <p>from <i>{{$pada.G.Lemma}}</i></p>
                     <hr />
                     {{- end -}}
-                    {{ if gt (len $pada.SurfaceMeanings) 0 }}
+                    {{ if gt (len $pada.SurfaceMeaning.Meanings) 0 }}
                     <div class="mb-2">
-                        {{ range $smidx, $entry := $pada.SurfaceMeanings }}
+                        {{ $iast := $pada.SurfaceMeaning.IAST }}
+                        {{ range $smidx, $entry := $pada.SurfaceMeaning.Meanings }}
                         <div class="mt-1">
-                            <span class="dict-iast-surface"><em>{{ $entry.IAST }}</em></span>: {{ $entry.Body.Plain }}
+                            <span class="dict-iast-surface"><em>{{ $iast }}</em></span>: {{ $entry.Body.Plain }}
                         </div>
                         {{ end }}
                         <hr />
                     </div>
                     {{ end }}
-                    {{ if gt (len $pada.LemmaMeanings) 0 }}
+                    {{ if $pada.LemmaMeaning.Word }}
                     <div class="mb-2">
-                        {{ range $lmidx, $entry := $pada.LemmaMeanings }}
+                        {{ $iast := $pada.LemmaMeaning.IAST }}
+                        {{ range $lmidx, $entry := $pada.LemmaMeaning.Meanings }}
                         <div class="mt-1">
-                            <span class="dict-iast-lemma"><em>{{ $entry.IAST }}</em></span>: {{ $entry.Body.Plain }}
+                            <span class="dict-iast-lemma"><em>{{ $iast }}</em></span>: {{ $entry.Body.Plain }}
                         </div>
                         <hr />
                         {{ end }}
@@ -178,7 +180,7 @@
             {{ if .Notes }}
             <p><strong>{{ .ReadableIndex }}</strong></p>
             {{ range .Notes }}
-            <div>{{ . | safeHTML }}</div>
+            <div>{{ . }}</div>
             {{ end }}
             {{ end }}
             {{ end }}
@@ -218,9 +220,9 @@
                             <td class="text-muted small">{{ $idx }}</td>
 
                             {{/* Surface cell: always show hover card with search link */}}
-                            {{ $surfEntries := index $ew.Words $g.Surface }}
+                            {{ $surfEntry := index $ew.Words $g.Surface }}
                             <td>
-                                {{ if gt (len $surfEntries) 0 }}
+                                {{ if $surfEntry.IAST }}
                                 <span class="table-word table-word-underline"
                                     data-word-id="surf-{{ $rindex }}-{{ $windex }}">{{ $g.Surface }}</span>
                                 {{ else }}
@@ -230,13 +232,14 @@
                                 <div id="surf-{{ $rindex }}-{{ $windex }}" class="table-word-data"
                                     style="display: none;">
                                     <div class="table-word-popup-content">
-                                        {{ if gt (len $surfEntries) 0 }}
-                                        {{ range $i, $e := $surfEntries }}
+                                        {{ if $surfEntry.IAST }}
+                                        {{ $iast := $surfEntry.IAST }}
+                                        {{ range $i, $e := $surfEntry.Meanings }}
                                         <div class="mb-2">
-                                            <span class="dict-iast-surface"><em>{{ $e.IAST }}</em></span>: {{
+                                            <span class="dict-iast-surface"><em>{{ $iast }}</em></span>: {{
                                             $e.Body.Plain }}
                                         </div>
-                                        {{ if lt $i (sub (len $surfEntries) 1) }}
+                                        {{ if lt $i (sub (len $surfEntry.Meanings) 1) }}
                                         <hr />{{ end }}
                                         {{ end }}
                                         <hr />
@@ -248,10 +251,10 @@
                             </td>
 
                             {{/* Lemma cell: always show hover card with search link */}}
-                            {{ $lemmaEntries := index $ew.Words $g.Lemma }}
+                            {{ $lemmaEntry := index $ew.Words $g.Lemma }}
                             <td>
                                 {{ if ne $g.Lemma "" }}
-                                {{ if gt (len $lemmaEntries) 0 }}
+                                {{ if $lemmaEntry.Word }}
                                 <span class="table-word table-word-underline"
                                     data-word-id="lemma-{{ $rindex }}-{{ $windex }}">{{ $g.Lemma }}</span>
                                 {{ else }}
@@ -261,13 +264,14 @@
                                 <div id="lemma-{{ $rindex }}-{{ $windex }}" class="table-word-data"
                                     style="display: none;">
                                     <div class="table-word-popup-content">
-                                        {{ if gt (len $lemmaEntries) 0 }}
-                                        {{ range $i, $e := $lemmaEntries }}
+                                        {{ if $lemmaEntry.Word }}
+                                        {{ $iast := $lemmaEntry.IAST}}
+                                        {{ range $i, $e := $lemmaEntry.Meanings }}
                                         <div class="mb-2">
-                                            <span class="dict-iast-lemma"><em>{{ $e.IAST }}</em></span>: {{
+                                            <span class="dict-iast-lemma"><em>{{ $iast }}</em></span>: {{
                                             $e.Body.Plain }}
                                         </div>
-                                        {{ if lt $i (sub (len $lemmaEntries) 1) }}
+                                        {{ if lt $i (sub (len $lemmaEntry.Meanings) 1) }}
                                         <hr />{{ end }}
                                         {{ end }}
                                         <hr />

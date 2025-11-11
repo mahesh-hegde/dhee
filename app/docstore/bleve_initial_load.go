@@ -19,7 +19,7 @@ import (
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
-	"github.com/mahesh-hegde/dhee/app/scripture"
+	"github.com/mahesh-hegde/dhee/app/excerpts"
 
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
@@ -57,6 +57,22 @@ func normalizeRomanTextForKwStorage(txt []string) string {
 		result = append(result, replacer.Replace(t))
 	}
 	return strings.Join(result, " ")
+}
+
+func getAllVariants(entry *dictionary.DictionaryEntry) []string {
+	res := make([]string, 0)
+	for _, meaning := range entry.Meanings {
+		res = append(res, meaning.Variants...)
+	}
+	return res
+}
+
+func getAllLitRefs(entry *dictionary.DictionaryEntry) []string {
+	res := make([]string, 0)
+	for _, meaning := range entry.Meanings {
+		res = append(res, meaning.LitRefs...)
+	}
+	return res
 }
 
 func parseNotesFile(filePath string) (map[string]string, error) {
@@ -117,20 +133,22 @@ func prepareDictEntryForDb(e *dictionary.DictionaryEntry) dictionary.DictionaryE
 		panic(err)
 	}
 
-	bodyText := e.Body.Plain
+	bodyText := []string{}
+	for _, meaning := range e.Meanings {
+		bodyText = append(bodyText, meaning.Body.Plain)
+	}
+
 	return dictionary.DictionaryEntryInDB{
-		DictName:       e.DictName,
-		Word:           e.Word,
-		SId:            e.Id,
-		Entry:          string(entryJSON),
-		Variants:       e.Variants,
-		LitRefs:        e.LitRefs,
-		PrintedPageNum: e.PrintedPageNum,
-		BodyText:       bodyText,
+		DictName: e.DictName,
+		Word:     e.Word,
+		Entry:    string(entryJSON),
+		Variants: getAllVariants(e),
+		LitRefs:  getAllLitRefs(e),
+		BodyText: bodyText,
 	}
 }
 
-func prepareExcerptForDb(e *scripture.Excerpt) scripture.ExcerptInDB {
+func prepareExcerptForDb(e *excerpts.Excerpt) excerpts.ExcerptInDB {
 	entryJSON, err := json.Marshal(e)
 	if err != nil {
 		slog.Error("unexpected error", "err", err)
@@ -151,7 +169,7 @@ func prepareExcerptForDb(e *scripture.Excerpt) scripture.ExcerptInDB {
 		}
 	}
 
-	return scripture.ExcerptInDB{
+	return excerpts.ExcerptInDB{
 		E:           string(entryJSON),
 		Scripture:   e.Scripture,
 		SourceT:     strings.Join(e.SourceText, " "),
@@ -259,7 +277,6 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	dictMapping.AddFieldMappingsAt("sid", mapping.NewKeywordFieldMapping())
 	dictMapping.AddFieldMappingsAt("variants", mapping.NewKeywordFieldMapping())
 	dictMapping.AddFieldMappingsAt("lit_refs", mapping.NewTextFieldMapping())
-	dictMapping.AddFieldMappingsAt("print_page", mapping.NewKeywordFieldMapping())
 
 	bodyField := mapping.NewTextFieldMapping()
 	dictMapping.AddFieldMappingsAt("body_text", bodyField)
@@ -342,10 +359,10 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 		}
 
 		err := loadJSONL(index, path.Join(dataDir, sc.DataFile),
-			func(e *scripture.Excerpt) string {
+			func(e *excerpts.Excerpt) string {
 				return fmt.Sprintf("%s:%s", sc.Name, common.PathToString(e.Path))
 			},
-			func(e *scripture.Excerpt) *scripture.ExcerptInDB {
+			func(e *excerpts.Excerpt) *excerpts.ExcerptInDB {
 				e.Scripture = sc.Name
 				if notes != nil {
 					if note, ok := notes[e.ReadableIndex]; ok {
@@ -366,7 +383,7 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 		slog.Info("Loading dictionary", "name", dict.Name)
 		err := loadJSONL(index, path.Join(dataDir, dict.DataFile),
 			func(e *dictionary.DictionaryEntry) string {
-				return fmt.Sprintf("%s:%s:%s", dict.Name, e.Word, e.Id)
+				return fmt.Sprintf("%s:%s", dict.Name, e.Word)
 			},
 			func(e *dictionary.DictionaryEntry) *dictionary.DictionaryEntryInDB {
 				e.DictName = dict.Name

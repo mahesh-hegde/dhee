@@ -2,7 +2,7 @@ package docstore
 
 import (
 	"github.com/mahesh-hegde/dhee/app/dictionary"
-	"github.com/mahesh-hegde/dhee/app/scripture"
+	"github.com/mahesh-hegde/dhee/app/excerpts"
 )
 
 // DocStore is a storage instrument (eg: a database) which allows efficient bulk
@@ -11,5 +11,5 @@ import (
 // Can all instruments provide same interface?
 type DocStore interface {
 	DictionaryStore() dictionary.DictStore
-	ExcerptStore() scripture.ExcerptStore
+	ExcerptStore() excerpts.ExcerptStore
 }

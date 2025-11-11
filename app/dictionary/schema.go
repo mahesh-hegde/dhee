@@ -26,10 +26,10 @@ type Suggestions struct {
 }
 
 type DictSearchResult struct {
-	IAST    string
-	Word    string
-	Nagari  string
-	Preview string
+	IAST     string
+	Word     string
+	Nagari   string
+	Previews []string
 }
 
 type SearchResults struct {
@@ -57,17 +57,10 @@ type Verb struct {
 	Parse     []string `json:"parse,omitempty"` // [prefix, root]
 }
 
-// DictionaryEntry represents the processed dictionary entry
-type DictionaryEntry struct {
-	// Not written to JSONL data but computed based on which file we read,
-	// and stored in DB to distinguish.
-	DictName       string              `json:"dict_name,omitempty"`
+type Meaning struct {
 	Word           string              `json:"word"`
 	HTag           string              `json:"htag"`
-	Id             string              `json:"id"`
-	IAST           string              `json:"iast"`
-	Devanagari     string              `json:"devanagari"`
-	HK             string              `json:"hk"`
+	SId            string              `json:"id"`
 	Variants       []string            `json:"variants,omitempty"`
 	VariantsIAST   []string            `json:"variants_iast,omitempty"`
 	PrintedPageNum string              `json:"print_page"`
@@ -85,13 +78,20 @@ type DictionaryEntry struct {
 	Referenced []string `json:"referenced,omitempty"`
 }
 
+// DictionaryEntry represents the processed dictionary entry
+type DictionaryEntry struct {
+	// Not written to JSONL data but computed based on which file we read,
+	// and stored in DB to distinguish.
+	DictName string    `json:"dict_name,omitempty"`
+	Word     string    `json:"word"`
+	IAST     string    `json:"iast"`
+	Meanings []Meaning `json:"meanings"`
+}
+
 type DictionaryEntryInDB struct {
 	DictName string `json:"dict_name"`
 
 	Word string `json:"word"`
-
-	// numeric ID from source data
-	SId string `json:"sid"`
 
 	// JSON serialized entry on which no searching is performed
 	Entry string `json:"e"`
@@ -100,11 +100,10 @@ type DictionaryEntryInDB struct {
 	Variants []string `json:"variants"`
 
 	// keyword fields
-	LitRefs        []string `json:"lit_refs"`
-	PrintedPageNum string   `json:"print_page"`
+	LitRefs []string `json:"lit_refs"`
 
 	// Body text indexed using standard english analyzer for full text searches
-	BodyText string `json:"body_text"`
+	BodyText []string `json:"body_text"`
 }
 
 // Type implements mapping.Classifier.

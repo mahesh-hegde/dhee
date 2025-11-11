@@ -11,20 +11,20 @@ import (
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
-	"github.com/mahesh-hegde/dhee/app/scripture"
+	excerpts "github.com/mahesh-hegde/dhee/app/excerpts"
 	"github.com/mahesh-hegde/dhee/app/transliteration"
 )
 
 type DheeController struct {
 	ds   *dictionary.DictionaryService
-	es   *scripture.ExcerptService
+	es   *excerpts.ExcerptService
 	conf *config.DheeConfig
 }
 
 func NewDheeController(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DheeController {
 	return &DheeController{
 		ds:   dictionary.NewDictionaryService(index, conf, transliterator),
-		es:   scripture.NewScriptureService(index, conf, transliterator),
+		es:   excerpts.NewExcerptService(index, conf, transliterator),
 		conf: conf,
 	}
 }
@@ -58,7 +58,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 
 	lastPart := parts[len(parts)-1]
 
-	var paths []scripture.QualifiedPath
+	var paths []excerpts.QualifiedPath
 	if strings.Contains(lastPart, "-") {
 		rangeParts := strings.Split(lastPart, "-")
 		start, err := strconv.Atoi(rangeParts[0])
@@ -82,7 +82,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 
 		for i := start; i <= end; i++ {
 			pathInts := append(basePathInts, i)
-			paths = append(paths, scripture.QualifiedPath{
+			paths = append(paths, excerpts.QualifiedPath{
 				Scripture: scriptureName,
 				Path:      pathInts,
 			})
@@ -96,7 +96,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 			}
 			pathInts = append(pathInts, i)
 		}
-		paths = append(paths, scripture.QualifiedPath{
+		paths = append(paths, excerpts.QualifiedPath{
 			Scripture: scriptureName,
 			Path:      pathInts,
 		})
@@ -152,7 +152,7 @@ func (c *DheeController) SearchScripture(ctx echo.Context) error {
 
 	scriptures := ctx.QueryParam("scriptures")
 
-	params := scripture.SearchParams{
+	params := excerpts.SearchParams{
 		Q:          query,
 		Tl:         tl,
 		Mode:       common.SearchMode(modeStr),

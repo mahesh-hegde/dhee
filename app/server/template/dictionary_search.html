@@ -18,7 +18,8 @@
             <tr>
                 <td><a href="/dictionaries/{{ $dictionary }}/words/{{ .Word }}">{{ .IAST }}</a></td>
                 <td>{{ .Nagari }}</td>
-                <td>{{ .Preview }}</td>
+                <!-- TODO: show main H1, H2, H3 entries -->
+                <td>{{ index .Previews 0 }}</td>
             </tr>
             {{ end }}
         </tbody>

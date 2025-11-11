@@ -5,8 +5,8 @@
         {{ range . }}
         <div class="card mb-3">
             <div class="card-body">
-                <h3 class="card-title">{{ (index . 0).IAST }}</h3>
-                {{ range . }}
+                <h3 class="card-title">{{ .IAST }}</h3>
+                {{ range .Meanings }}
                 <p class="card-text">{{ .Body.Plain }}</p>
                 <hr />
                 {{ end }}

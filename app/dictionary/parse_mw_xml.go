@@ -59,14 +59,17 @@ func isEntryTag(tag string) bool {
 	return matched
 }
 
-func xmlToDictionaryEntry(xml MwXmlEntry, lastPageNum string) DictionaryEntry {
+func xmlToDictionaryEntry(xml MwXmlEntry, lastPageNum string) (DictionaryEntry, Meaning) {
 	tl := standardTl
 
 	entry := DictionaryEntry{
-		Word:           xml.Header.Key1,
+		Word: xml.Header.Key1,
+	}
+	meaning := Meaning{
+		Word:           entry.Word,
 		PrintedPageNum: xml.Tail.PC,
 		HTag:           xml.Tag,
-		Id:             xml.Tail.L,
+		SId:            xml.Tail.L,
 	}
 
 	iast, err := tl.Convert(entry.Word, common.TlSLP1, common.TlIAST)
@@ -76,54 +79,40 @@ func xmlToDictionaryEntry(xml MwXmlEntry, lastPageNum string) DictionaryEntry {
 		slog.Debug("unable to convert word to IAST", "word", entry.Word)
 	}
 
-	hk, err := tl.Convert(entry.Word, common.TlSLP1, common.TlHK)
-	if err == nil {
-		entry.HK = hk
-	} else {
-		slog.Debug("unable to convert word to kyoto-harvard", "word", entry.Word)
-	}
-
-	dn, err := tl.Convert(entry.Word, common.TlSLP1, common.TlNagari)
-	if err == nil {
-		entry.Devanagari = dn
-	} else {
-		slog.Debug("unable to convert word to devanagari", "word", entry.Word)
-	}
-
 	if xml.Header.Key2 != "" && xml.Header.Key2 != entry.Word {
-		entry.Variants = []string{xml.Header.Key2}
+		meaning.Variants = []string{xml.Header.Key2}
 	}
 
 	// Use last page number if current entry doesn't have one
-	if entry.PrintedPageNum == "" {
-		entry.PrintedPageNum = lastPageNum
+	if meaning.PrintedPageNum == "" {
+		meaning.PrintedPageNum = lastPageNum
 	}
 
 	// Parse homonym number
 	if xml.Header.Hom != "" {
 		if num, err := strconv.Atoi(xml.Header.Hom); err == nil {
-			entry.HomonymNumber = num
+			meaning.HomonymNumber = num
 		}
 	}
 
-	// Parse body into segments
-	parseBody(xml.Body.Content, &entry)
+	//	 Parse body into segments
+	parseBody(xml.Body.Content, &meaning)
 
 	// convert otherspellins to IAST for ease of lookup from canonical scriptures
-	for _, va := range entry.Variants {
+	for _, va := range meaning.Variants {
 		iast, err := tl.Convert(va, common.TlSLP1, common.TlIAST)
 		if err != nil {
 			slog.Debug("cannot convert variant to IAST", "word", va)
 		} else {
-			entry.VariantsIAST = append(entry.VariantsIAST, iast)
+			meaning.VariantsIAST = append(meaning.VariantsIAST, iast)
 		}
 	}
 
-	return entry
+	return entry, meaning
 }
 
-func parseBody(body string, entry *DictionaryEntry) {
-	entry.Body.Markup = body
+func parseBody(body string, meaning *Meaning) {
+	meaning.Body.Markup = body
 
 	// Wrap in root element to create valid XML
 	wrapped := "<root>" + body + "</root>"
@@ -134,14 +123,14 @@ func parseBody(body string, entry *DictionaryEntry) {
 
 	var plainText strings.Builder
 
-	if err := walkXMLTree(decoder, &plainText, entry, 0); err != nil {
-		slog.Warn("error parsing body", "error", err, "id", entry.Id)
+	if err := walkXMLTree(decoder, &plainText, meaning, 0); err != nil {
+		slog.Warn("error parsing body", "error", err, "id", meaning.SId)
 	}
 
-	entry.Body.Plain = strings.TrimSpace(plainText.String())
+	meaning.Body.Plain = strings.TrimSpace(plainText.String())
 }
 
-func walkXMLTree(decoder *xml.Decoder, plainText *strings.Builder, entry *DictionaryEntry, depth int) error {
+func walkXMLTree(decoder *xml.Decoder, plainText *strings.Builder, meaning *Meaning, depth int) error {
 	if depth > 5 {
 		return nil
 	}
@@ -157,7 +146,7 @@ func walkXMLTree(decoder *xml.Decoder, plainText *strings.Builder, entry *Dictio
 
 		switch elem := token.(type) {
 		case xml.StartElement:
-			if err := handleStartElement(elem, decoder, plainText, entry, depth); err != nil {
+			if err := handleStartElement(elem, decoder, plainText, meaning, depth); err != nil {
 				if !errors.Is(err, io.EOF) {
 					slog.Warn("error handling element", "tag", elem.Name.Local, "error", err)
 				}
@@ -172,29 +161,29 @@ func walkXMLTree(decoder *xml.Decoder, plainText *strings.Builder, entry *Dictio
 	}
 }
 
-func handleStartElement(elem xml.StartElement, decoder *xml.Decoder, plainText *strings.Builder, entry *DictionaryEntry, depth int) error {
+func handleStartElement(elem xml.StartElement, decoder *xml.Decoder, plainText *strings.Builder, meaning *Meaning, depth int) error {
 	tagName := elem.Name.Local
 	switch tagName {
 	case "ab":
 		return handleAb(elem, decoder, plainText)
 
 	case "s1":
-		return handleS1(elem, decoder, plainText, entry)
+		return handleS1(elem, decoder, plainText, meaning)
 
 	case "s":
-		return handleS(elem, decoder, plainText, entry)
+		return handleS(elem, decoder, plainText, meaning)
 
 	case "ls":
-		return handleLs(decoder, plainText, entry)
+		return handleLs(decoder, plainText, meaning)
 
 	case "hom":
-		return handleHom(decoder, plainText, entry)
+		return handleHom(decoder, plainText, meaning)
 
 	case "etym", "lang", "bot", "bio", "ns", "i", "lex":
 		return handleStripTag(decoder, plainText)
 
 	case "info":
-		return handleInfo(elem, entry)
+		return handleInfo(elem, meaning)
 
 	case "pb", "div", "pcol":
 		return handlePcol(decoder, plainText)
@@ -205,7 +194,7 @@ func handleStartElement(elem xml.StartElement, decoder *xml.Decoder, plainText *
 
 	default:
 		// Recurse into unknown tags
-		return walkXMLTree(decoder, plainText, entry, depth+1)
+		return walkXMLTree(decoder, plainText, meaning, depth+1)
 	}
 }
 
@@ -238,10 +227,11 @@ func handleAb(elem xml.StartElement, decoder *xml.Decoder, plainText *strings.Bu
 	return nil
 }
 
-func handleS1(el xml.StartElement, decoder *xml.Decoder, plainText *strings.Builder, entry *DictionaryEntry) error {
+func handleS1(el xml.StartElement, decoder *xml.Decoder, plainText *strings.Builder, meaning *Meaning) error {
 	if slp1Attr := attrVal(el, "slp1"); slp1Attr != "" {
-		entry.Referenced = append(entry.Referenced, slp1Attr)
+		meaning.Referenced = append(meaning.Referenced, slp1Attr)
 	}
+
 	content, err := readElementText(decoder)
 	if err != nil {
 		return err
@@ -250,16 +240,16 @@ func handleS1(el xml.StartElement, decoder *xml.Decoder, plainText *strings.Buil
 	return nil
 }
 
-func handleS(_ xml.StartElement, decoder *xml.Decoder, plainText *strings.Builder, entry *DictionaryEntry) error {
+func handleS(_ xml.StartElement, decoder *xml.Decoder, plainText *strings.Builder, meaning *Meaning) error {
 	content, err := readElementText(decoder)
 	if err != nil {
 		return err
 	}
 	// Remove if equal to word or in otherSpellings
-	if content != entry.Word {
-		found := slices.Contains(entry.Variants, content)
+	if content != meaning.Word {
+		found := slices.Contains(meaning.Variants, content)
 		if !found {
-			entry.Referenced = append(entry.Referenced, content)
+			meaning.Referenced = append(meaning.Referenced, content)
 		}
 		iast, err := standardTl.Convert(content, common.TlSLP1, common.TlIAST)
 		if err != nil {
@@ -271,7 +261,7 @@ func handleS(_ xml.StartElement, decoder *xml.Decoder, plainText *strings.Builde
 	return nil
 }
 
-func handleLs(decoder *xml.Decoder, plainText *strings.Builder, entry *DictionaryEntry) error {
+func handleLs(decoder *xml.Decoder, plainText *strings.Builder, meaning *Meaning) error {
 	content, err := readElementText(decoder)
 	if err != nil {
 		return err
@@ -279,11 +269,11 @@ func handleLs(decoder *xml.Decoder, plainText *strings.Builder, entry *Dictionar
 	plainText.WriteRune('[')
 	plainText.WriteString(content)
 	plainText.WriteRune(']')
-	entry.LitRefs = append(entry.LitRefs, content)
+	meaning.LitRefs = append(meaning.LitRefs, content)
 	return nil
 }
 
-func handleHom(decoder *xml.Decoder, plainText *strings.Builder, entry *DictionaryEntry) error {
+func handleHom(decoder *xml.Decoder, plainText *strings.Builder, meaning *Meaning) error {
 	content, err := readElementText(decoder)
 	if err != nil {
 		return err
@@ -291,7 +281,7 @@ func handleHom(decoder *xml.Decoder, plainText *strings.Builder, entry *Dictiona
 
 	// Remove if at beginning and matches HomonymNumber
 	trimmed := strings.TrimSuffix(strings.TrimSpace(content), ".")
-	if entry.HomonymNumber > 0 && trimmed == strconv.Itoa(entry.HomonymNumber) {
+	if meaning.HomonymNumber > 0 && trimmed == strconv.Itoa(meaning.HomonymNumber) {
 		// Skip it
 		return nil
 	}
@@ -320,29 +310,29 @@ func handlePcol(decoder *xml.Decoder, plainText *strings.Builder) error {
 	return nil
 }
 
-func handleInfo(elem xml.StartElement, entry *DictionaryEntry) error {
+func handleInfo(elem xml.StartElement, meaning *Meaning) error {
 	for _, attr := range elem.Attr {
 		switch attr.Name.Local {
 		case "lex":
-			entry.LexicalGender = attr.Value
+			meaning.LexicalGender = attr.Value
 
 		case "lexcat":
-			parseLexCat(attr.Value, entry)
+			parseLexCat(attr.Value, meaning)
 
 		case "verb":
-			parseVerb(elem.Attr, entry)
+			parseVerb(elem.Attr, meaning)
 
 		case "or", "and", "orsl", "orwr":
-			parseOtherSpellings(attr.Value, entry)
+			parseOtherSpellings(attr.Value, meaning)
 		}
 	}
 
 	return skipElement(xml.NewDecoder(strings.NewReader("<dummy/>")))
 }
 
-func parseLexCat(value string, entry *DictionaryEntry) {
+func parseLexCat(value string, meaning *Meaning) {
 	if value == "loan" {
-		entry.LexCat = LexCat{IsLoan: true}
+		meaning.LexCat = LexCat{IsLoan: true}
 		return
 	}
 
@@ -368,10 +358,10 @@ func parseLexCat(value string, entry *DictionaryEntry) {
 		}
 	}
 
-	entry.LexCat = lexCat
+	meaning.LexCat = lexCat
 }
 
-func parseVerb(attrs []xml.Attr, entry *DictionaryEntry) {
+func parseVerb(attrs []xml.Attr, meaning *Meaning) {
 	var verb Verb
 	var cpValue, parseValue string
 
@@ -396,7 +386,7 @@ func parseVerb(attrs []xml.Attr, entry *DictionaryEntry) {
 		verb.Parse = strings.Split(parseValue, "+")
 	}
 
-	entry.Verb = verb
+	meaning.Verb = verb
 }
 
 func parseCp(cp string, verb *Verb) {
@@ -433,15 +423,15 @@ func parseCp(cp string, verb *Verb) {
 	}
 }
 
-func parseOtherSpellings(value string, entry *DictionaryEntry) {
+func parseOtherSpellings(value string, meaning *Meaning) {
 	// Format: "L1,X1;L2,X2"
 	pairs := strings.Split(value, ";")
 	for _, pair := range pairs {
 		parts := strings.SplitN(pair, ",", 2)
 		if len(parts) == 2 {
 			spelling := parts[1]
-			if spelling != entry.Word {
-				entry.Variants = append(entry.Variants, spelling)
+			if spelling != meaning.Word {
+				meaning.Variants = append(meaning.Variants, spelling)
 			}
 		}
 	}
@@ -511,6 +501,31 @@ func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 	lastPageNum := ""
 	entryCount := 0
 
+	var lastEntry *DictionaryEntry
+
+	writeLastEntry := func() error {
+		if lastEntry != nil {
+			// Write as JSON line
+			jsonBytes, err := json.Marshal(lastEntry)
+			lastEntry = nil
+			if err != nil {
+				return fmt.Errorf("error marshaling JSON: %w", err)
+			}
+			if _, err := writer.Write(jsonBytes); err != nil {
+				return fmt.Errorf("error writing JSON: %w", err)
+			}
+			if _, err := writer.WriteString("\n"); err != nil {
+				return fmt.Errorf("error writing newline: %w", err)
+			}
+
+			entryCount++
+			if entryCount%1000 == 0 {
+				slog.Info("processing entries", "done", entryCount)
+			}
+		}
+		return nil
+	}
+
 	for {
 		token, err := decoder.Token()
 		if err == io.EOF {
@@ -531,32 +546,27 @@ func ConvertMonierWilliamsDictionary(inputPath, outputPath string) error {
 				entry.Tag = startElem.Name.Local
 
 				// Convert to dictionary entry
-				dictEntry := xmlToDictionaryEntry(entry, lastPageNum)
+				dictEntry, meaning := xmlToDictionaryEntry(entry, lastPageNum)
 
 				// Update last page number
-				if dictEntry.PrintedPageNum != "" {
-					lastPageNum = dictEntry.PrintedPageNum
+				if meaning.PrintedPageNum != "" {
+					lastPageNum = meaning.PrintedPageNum
 				}
 
-				// Write as JSON line
-				jsonBytes, err := json.Marshal(dictEntry)
-				if err != nil {
-					return fmt.Errorf("error marshaling JSON: %w", err)
-				}
-
-				if _, err := writer.Write(jsonBytes); err != nil {
-					return fmt.Errorf("error writing JSON: %w", err)
-				}
-				if _, err := writer.WriteString("\n"); err != nil {
-					return fmt.Errorf("error writing newline: %w", err)
-				}
-
-				entryCount++
-				if entryCount%1000 == 0 {
-					slog.Info("processing entries", "done", entryCount)
+				if lastEntry != nil && lastEntry.Word == dictEntry.Word {
+					lastEntry.Meanings = append(lastEntry.Meanings, meaning)
+				} else {
+					if err := writeLastEntry(); err != nil {
+						return err
+					}
+					lastEntry = &dictEntry
+					lastEntry.Meanings = append(lastEntry.Meanings, meaning)
 				}
 			}
 		}
+	}
+	if err := writeLastEntry(); err != nil {
+		return err
 	}
 
 	fmt.Printf("Conversion complete. Processed %d entries.\n", entryCount)
