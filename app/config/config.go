@@ -57,3 +57,21 @@ func (c *DheeConfig) GetScriptureByName(name string) *ScriptureDefn {
 	}
 	return nil
 }
+
+func (c *DheeConfig) DictNameToId(dictName string) int {
+	for idx, d := range c.Dictionaries {
+		if d.Name == dictName {
+			return idx
+		}
+	}
+	return -1
+}
+
+func (c *DheeConfig) ScriptureNameToId(scriptureName string) int {
+	for idx, d := range c.Scriptures {
+		if d.Name == scriptureName {
+			return idx
+		}
+	}
+	return -1
+}

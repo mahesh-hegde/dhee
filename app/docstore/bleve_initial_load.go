@@ -360,7 +360,7 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 
 		err := loadJSONL(index, path.Join(dataDir, sc.DataFile),
 			func(e *excerpts.Excerpt) string {
-				return fmt.Sprintf("%s:%s", sc.Name, common.PathToString(e.Path))
+				return fmt.Sprintf("%d:%s", config.ScriptureNameToId(sc.Name), common.PathToString(e.Path))
 			},
 			func(e *excerpts.Excerpt) *excerpts.ExcerptInDB {
 				e.Scripture = sc.Name
@@ -383,7 +383,7 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 		slog.Info("Loading dictionary", "name", dict.Name)
 		err := loadJSONL(index, path.Join(dataDir, dict.DataFile),
 			func(e *dictionary.DictionaryEntry) string {
-				return fmt.Sprintf("%s:%s", dict.Name, e.Word)
+				return fmt.Sprintf("%d:%s", config.DictNameToId(dict.Name), e.Word)
 			},
 			func(e *dictionary.DictionaryEntry) *dictionary.DictionaryEntryInDB {
 				e.DictName = dict.Name

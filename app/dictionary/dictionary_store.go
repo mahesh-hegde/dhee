@@ -41,7 +41,7 @@ func (b *BleveDictStore) Add(ctx context.Context, dictName string, es []Dictiona
 	batch := b.idx.NewBatch()
 	for _, e := range es {
 		e.DictName = dictName
-		id := fmt.Sprintf("%s:%s", dictName, e.Word)
+		id := fmt.Sprintf("%d:%s", b.conf.DictNameToId(dictName), e.Word)
 		if err := batch.Index(id, e); err != nil {
 			return fmt.Errorf("failed to add item to batch: %w", err)
 		}
@@ -60,14 +60,14 @@ func (b *BleveDictStore) Get(ctx context.Context, dictName string, words []strin
 
 	wordQueries := make([]string, len(words))
 	for i, word := range words {
-		wordQueries[i] = fmt.Sprintf("%s:%s", dictName, word)
+		wordQueries[i] = fmt.Sprintf("%d:%s", b.conf.DictNameToId(dictName), word)
 	}
 	wordsQuery := bleve.NewDocIDQuery(wordQueries)
 
 	finalQuery := bleve.NewConjunctionQuery(dictQuery, wordsQuery)
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 
-	searchRequest.Size = 500 // A reasonable limit
+	searchRequest.Size = len(wordQueries) // A reasonable limit
 	searchRequest.Fields = []string{"word", "_id", "e"}
 	searchRequest.SortBy([]string{"_id"})
 

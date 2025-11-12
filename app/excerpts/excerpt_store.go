@@ -104,10 +104,10 @@ func (b *BleveExcerptStore) FindBeforeAndAfter(ctx context.Context, scripture st
 	ids := make([]string, len(idsBefore)+len(idsAfter))
 	idset := make(map[string]struct{}, 0)
 	for i, p := range idsBefore {
-		ids[i] = fmt.Sprintf("%s:%s", scripture, p)
+		ids[i] = fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(scripture), p)
 	}
 	for i, p := range idsAfter {
-		ids[i+len(idsBefore)] = fmt.Sprintf("%s:%s", scripture, p)
+		ids[i+len(idsBefore)] = fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(scripture), p)
 	}
 	if len(ids) == 0 {
 		return "", ""
@@ -127,14 +127,14 @@ func (b *BleveExcerptStore) FindBeforeAndAfter(ctx context.Context, scripture st
 	}
 	var before, after string
 	for _, id := range idsBefore {
-		fullId := fmt.Sprintf("%s:%s", scripture, id)
+		fullId := fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(scripture), id)
 		if _, found := idset[fullId]; found {
 			before = id
 			break
 		}
 	}
 	for _, id := range idsAfter {
-		fullId := fmt.Sprintf("%s:%s", scripture, id)
+		fullId := fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(scripture), id)
 		if _, found := idset[fullId]; found {
 			after = id
 			break
@@ -148,7 +148,7 @@ func (b *BleveExcerptStore) Add(ctx context.Context, scripture string, es []Exce
 	batch := b.idx.NewBatch()
 	for _, e := range es {
 		e.Scripture = scripture
-		id := fmt.Sprintf("%s:%s", scripture, e.ReadableIndex)
+		id := fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(scripture), e.ReadableIndex)
 		err := batch.Index(id, e)
 		if err != nil {
 			return err
@@ -161,7 +161,7 @@ func (b *BleveExcerptStore) Add(ctx context.Context, scripture string, es []Exce
 func (b *BleveExcerptStore) Get(ctx context.Context, paths []QualifiedPath) ([]Excerpt, error) {
 	ids := make([]string, len(paths))
 	for i, p := range paths {
-		ids[i] = fmt.Sprintf("%s:%s", p.Scripture, common.PathToString(p.Path))
+		ids[i] = fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(p.Scripture), common.PathToString(p.Path))
 	}
 
 	if len(ids) == 0 {
