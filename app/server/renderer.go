@@ -57,7 +57,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 			page = templ_template.DictionarySearch(d)
 		}
 	case "dictionary_word":
-		if d, ok := data.([]dictionary.DictionaryEntry); ok {
+		if d, ok := data.(map[string]dictionary.DictionaryEntry); ok {
 			page = templ_template.DictionaryWord(d)
 		}
 	case "hierarchy":

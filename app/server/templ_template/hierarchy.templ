@@ -24,7 +24,6 @@ templ Hierarchy(data *excerpts.Hierarchy) {
 				{{ pathPrefix = data.Path[len(data.Path)-1].FullPath + "." }}
 			}
 		}
-
 		<div class="list-group">
 			if len(data.Children) > 0 {
 				for _, child := range data.Children {

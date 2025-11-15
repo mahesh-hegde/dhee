@@ -2,7 +2,7 @@ package templ_template
 
 import "github.com/mahesh-hegde/dhee/app/dictionary"
 
-templ DictionaryWord(data []dictionary.DictionaryEntry) {
+templ DictionaryWord(data map[string]dictionary.DictionaryEntry) {
 	<div class="container">
 		if len(data) > 0 {
 			<div class="my-4">

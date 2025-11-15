@@ -2,8 +2,8 @@ package templ_template
 
 import (
 	"fmt"
-	"strings"
 	"github.com/mahesh-hegde/dhee/app/excerpts"
+	"strings"
 )
 
 templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
@@ -25,7 +25,8 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 							<td><a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", excerpt.Scripture, excerpt.ReadableIndex)) }>{ excerpt.ReadableIndex }</a></td>
 							<td class="roman-text-search">
 								for _, line := range excerpt.RomanText {
-									{ line }<br/>
+									{ line }
+									<br/>
 								}
 							</td>
 							<td class="wrap-50">

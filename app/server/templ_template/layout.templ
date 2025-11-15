@@ -1,8 +1,6 @@
 package templ_template
 
-import (
-	"github.com/mahesh-hegde/dhee/app/config"
-)
+import "github.com/mahesh-hegde/dhee/app/config"
 
 templ Layout(conf *config.DheeConfig, page templ.Component) {
 	<!DOCTYPE html>
@@ -10,7 +8,6 @@ templ Layout(conf *config.DheeConfig, page templ.Component) {
 		<head>
 			<meta charset="UTF-8"/>
 			<script>
-				{ `
         (() => {
             'use strict'
 
@@ -47,7 +44,6 @@ templ Layout(conf *config.DheeConfig, page templ.Component) {
                     })
             })
         })()
-    ` }
 			</script>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ conf.InstanceName }</title>
@@ -55,7 +51,6 @@ templ Layout(conf *config.DheeConfig, page templ.Component) {
 			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
 			<style>
-				{ `
         @import url('https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
         body {
@@ -106,7 +101,6 @@ templ Layout(conf *config.DheeConfig, page templ.Component) {
         [data-bs-theme="dark"] .accordion-header {
             --bs-accordion-active-bg: #002a00;
         }
-    ` }
 			</style>
 		</head>
 		<body>
@@ -145,17 +139,13 @@ templ Layout(conf *config.DheeConfig, page templ.Component) {
 					</span>
 				</div>
 			</nav>
-
 			@page
-
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 			<script type="text/javascript">
-				{ `
         // Init functions exported by inner template
         if (initFn != undefined) {
             initFn()
         }
-    ` }
 			</script>
 		</body>
 	</html>
