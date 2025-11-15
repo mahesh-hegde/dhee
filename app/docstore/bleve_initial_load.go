@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -400,12 +401,13 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 
 func InitDB(dataDir string, config *config.DheeConfig) (bleve.Index, error) {
 	dbPath := filepath.Join(dataDir, "docstore.bleve")
-	index, err := bleve.Open(dbPath)
 
-	if err == bleve.ErrorIndexPathDoesNotExist {
+	_, err := os.Stat(dbPath)
+
+	if errors.Is(err, os.ErrNotExist) {
 		slog.Info("Creating new bleve index", "path", dbPath)
 		mapping := GetBleveIndexMappings()
-		index, err = bleve.New(dbPath, mapping)
+		index, err := bleve.New(dbPath, mapping)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create new bleve index: %w", err)
 		}
@@ -417,11 +419,16 @@ func InitDB(dataDir string, config *config.DheeConfig) (bleve.Index, error) {
 			return nil, fmt.Errorf("failed to load data: %w", err)
 		}
 		slog.Info("Initial data loaded successfully.")
+		if err := index.Close(); err != nil {
+			return nil, err
+		}
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to open bleve index: %w", err)
-	} else {
-		slog.Info("Opened existing bleve index", "path", dbPath)
 	}
-
+	index, err := bleve.OpenUsing(dbPath, map[string]any{"read_only": true})
+	if err != nil {
+		return nil, err
+	}
+	slog.Info("Opened existing bleve index", "path", dbPath)
 	return index, nil
 }

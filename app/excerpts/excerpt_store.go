@@ -35,7 +35,7 @@ func (b *BleveExcerptStore) GetHier(ctx context.Context, scripture *config.Scrip
 	if len(path) >= len(scripture.Hierarchy) {
 		return nil, fmt.Errorf("cannot obtain hierarchy for a leaf element")
 	}
-	qs := scripture.Name + ":" + common.PathToString(path)
+	qs := fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(scripture.Name), common.PathToString(path))
 	if len(path) != 0 {
 		qs += "."
 	}
@@ -43,6 +43,7 @@ func (b *BleveExcerptStore) GetHier(ctx context.Context, scripture *config.Scrip
 	qPref.SetField("_id")
 
 	var qFinal query.Query = qPref
+
 	if len(path) < len(scripture.Hierarchy)-1 {
 		limitVerses := qs + "[^.]*(.1)*"
 		qReg := bleve.NewRegexpQuery(limitVerses)
@@ -257,9 +258,9 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	searchRequest.Size = 100
 	searchRequest.Fields = []string{"*"}
 	if params.Mode == common.SearchRegex {
-		searchRequest.SortBy([]string{"_id"})
+		searchRequest.SortBy([]string{"sort_index"})
 	} else {
-		searchRequest.SortBy([]string{"-_score", "_id"})
+		searchRequest.SortBy([]string{"-_score", "sort_index"})
 	}
 
 	searchResults, err := b.idx.SearchInContext(ctx, searchRequest)

@@ -17,6 +17,16 @@ func sliceOf(a any, others ...any) []any {
 	return slice
 }
 
+func safe(a any) any {
+	if s, ok := a.(string); ok {
+		return template.HTML(s)
+	}
+	if s, ok := a.([]byte); ok {
+		return template.HTML(string(s))
+	}
+	return a
+}
+
 func MustParseTemplates() *template.Template {
 	funcMap := template.FuncMap{
 		"join": strings.Join,
@@ -24,6 +34,7 @@ func MustParseTemplates() *template.Template {
 			return a - b
 		},
 		"sliceOf": sliceOf,
+		"safe":    safe,
 	}
 
 	return template.Must(template.New("").Funcs(funcMap).ParseFS(templateFs, "template/*.html"))

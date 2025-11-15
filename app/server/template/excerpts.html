@@ -180,7 +180,7 @@
             {{ if .Notes }}
             <p><strong>{{ .ReadableIndex }}</strong></p>
             {{ range .Notes }}
-            <div>{{ . }}</div>
+            <div>{{ . | safe }}</div>
             {{ end }}
             {{ end }}
             {{ end }}

@@ -45,7 +45,8 @@
                     "language": "english"
                 }
             ],
-            "data_file": "rv.jsonl"
+            "data_file": "rv.jsonl",
+            "notes_file": "rv_notes.md"
         }
     ]
 }
