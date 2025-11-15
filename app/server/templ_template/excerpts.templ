@@ -123,7 +123,13 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 										}
 										<span class="pada-word" data-pada-id={ fmt.Sprintf("pada-%d-%d", eidx, pidx) }>
 											if dictLink != "" {
-												<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/words/%s", dictLink)) } class="text-decoration-none">{ pada.Word }</a>
+												<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/words/%s", dictLink)) } class="text-decoration-none">
+													if pada.ExactMatched {
+														<strong>{ pada.Word }</strong>
+													} else {
+														{ pada.Word }
+													}
+												</a>
 											} else {
 												{ pada.Word }
 											}
@@ -343,7 +349,6 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
             text-decoration: none;
             cursor: help;
             color: var(--bs-body-color);
-            font-weight: bold;
         }
 
         .table-word {

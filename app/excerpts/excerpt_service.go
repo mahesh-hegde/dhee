@@ -32,6 +32,11 @@ func normalizeLemma(lemma string) string {
 	return common.FoldAccents(lemma)
 }
 
+func normalizeSurface(surface string) string {
+	surface = common.FoldAccents(surface)
+	return strings.TrimSuffix(surface, " +")
+}
+
 func normalizePadaWord(pw string) string {
 	// MW dictionary has no words containing -
 	pw = strings.ReplaceAll(pw, "-", "")
@@ -67,7 +72,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 	for eidx, e := range excerpts {
 		for _, g := range e.Glossings {
 			for _, gl := range g {
-				foldedSurface := common.FoldAccents(gl.Surface)
+				foldedSurface := normalizeSurface(gl.Surface)
 				wordsToFetch[foldedSurface] = ""
 				lemma := normalizeLemma(gl.Lemma)
 				wordsToFetch[lemma] = ""
@@ -128,12 +133,11 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 			Words:   make(map[string]dictionary.DictionaryEntry),
 			Padas:   make([]PadaElement, 0),
 		}
-		padaMap := make(map[string]PadaElement, 0)
-
+		var glossingPEs []PadaElement
 		for _, g := range e.Glossings {
 			for _, gl := range g {
 				var lemmaMeaning, surfaceMeaning dictionary.DictionaryEntry
-				foldedSurface := common.FoldAccents(gl.Surface)
+				foldedSurface := normalizeSurface(gl.Surface)
 				slpWord := wordsToFetch[foldedSurface]
 				if entry, ok := wordMap[slpWord]; ok {
 					surfaceMeaning = entry
@@ -148,7 +152,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 					ew.Words[gl.Lemma] = entry
 				}
 
-				padaMap[foldedSurface] = PadaElement{
+				glossingPEs = append(glossingPEs, PadaElement{
 					Word:            gl.Surface,
 					Found:           true,
 					G:               gl,
@@ -156,31 +160,30 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 					Slp1NormSurface: slpWord,
 					SurfaceMeaning:  surfaceMeaning,
 					LemmaMeaning:    lemmaMeaning,
-				}
+				})
 			}
 		}
 
 		padaWords := padaWordsByExcerpt[eidx]
-
+		glossingCursor := 0
 		for _, padaWord := range padaWords {
-			// MW dictionary does not contain any word with a "-"
-			normPW := normalizePadaWord(padaWord)
-			if padaElem, ok := padaMap[normPW]; ok {
-				padaElem.Word = padaWord
-				ew.Padas = append(ew.Padas, padaElem)
+			if glossingCursor >= len(glossingPEs) {
+				ew.Padas = append(ew.Padas, PadaElement{
+					Word:  padaWord,
+					Found: false,
+				})
 				continue
 			}
-			// cutPw, _, found := strings.Cut(padaWord, "-")
-			// if found && cutPw != "" {
-			// 	padaElem := padaMap[normPW]
-			// 	padaElem.Word = padaWord
-			// 	ew.Padas = append(ew.Padas, padaElem)
-			// 	continue
-			// }
-			ew.Padas = append(ew.Padas, PadaElement{
-				Word:  padaWord,
-				Found: false,
-			})
+
+			normPW := normalizePadaWord(padaWord)
+			padaElem := glossingPEs[glossingCursor]
+			glossingFoldedSurface := normalizeSurface(padaElem.G.Surface)
+			exactMatch := normPW == glossingFoldedSurface
+
+			padaElem.Word = padaWord
+			padaElem.ExactMatched = exactMatch
+			ew.Padas = append(ew.Padas, padaElem)
+			glossingCursor++
 		}
 		es = append(es, ew)
 	}

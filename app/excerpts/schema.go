@@ -27,6 +27,7 @@ type WordGlossing struct {
 type PadaElement struct {
 	Word            string
 	Found           bool
+	ExactMatched    bool
 	G               WordGlossing
 	Slp1NormLemma   string
 	Slp1NormSurface string

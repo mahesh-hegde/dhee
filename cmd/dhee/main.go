@@ -115,6 +115,10 @@ func runServer() {
 	var address, dataDir string
 	var port int
 	var cpuProfile, memProfile string
+
+	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
+	slog.SetDefault(slog.New(jsonHandler))
+
 	flags.StringVarP(&address, "address", "a", "localhost", "Server address to bind")
 	flags.IntVarP(&port, "port", "p", 8080, "Server port to bind")
 	flags.StringVarP(&dataDir, "data-dir", "d", "",

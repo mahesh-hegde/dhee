@@ -104,7 +104,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 
 	excerpts, err := c.es.Get(ctx.Request().Context(), paths)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Failed to get excerpts")
+		return echo.NewHTTPError(http.StatusNotFound, "Failed to get excerpts. Cross check the excerpt number.")
 	}
 
 	return ctx.Render(http.StatusOK, "excerpts", excerpts)
