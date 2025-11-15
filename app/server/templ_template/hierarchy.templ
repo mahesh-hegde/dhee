@@ -1,0 +1,51 @@
+package templ_template
+
+import (
+	"fmt"
+	"github.com/mahesh-hegde/dhee/app/excerpts"
+)
+
+templ Hierarchy(data *excerpts.Hierarchy) {
+	<div class="container mt-4">
+		<h2>Hierarchy View: { data.Scripture.ReadableName }</h2>
+		{{ var pathPrefix string = "" }}
+		if data.Path != nil {
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href={ templ.URL(fmt.Sprintf("/scriptures/%s/hierarchy", data.Scripture.Name)) }>{ data.Scripture.Name }</a></li>
+					for _, p := range data.Path {
+						<li class="breadcrumb-item">
+							<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/hierarchy/%s", data.Scripture.Name, p.FullPath)) }>{ p.Type } { fmt.Sprintf("%d", p.Number) }</a>
+						</li>
+					}
+				</ol>
+			</nav>
+			if len(data.Path) > 0 {
+				{{ pathPrefix = data.Path[len(data.Path)-1].FullPath + "." }}
+			}
+		}
+
+		<div class="list-group">
+			if len(data.Children) > 0 {
+				for _, child := range data.Children {
+					if data.IsLeaf {
+						<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s%d", data.Scripture.Name, pathPrefix, child)) } class="list-group-item list-group-item-action">
+							{ data.ChildType } { fmt.Sprintf("%d", child) }
+						</a>
+					} else {
+						<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/hierarchy/%s%d", data.Scripture.Name, pathPrefix, child)) } class="list-group-item list-group-item-action">
+							{ data.ChildType } { fmt.Sprintf("%d", child) }
+						</a>
+					}
+				}
+			} else {
+				<div class="alert alert-warning mt-4" role="alert">
+					No results found!
+				</div>
+			}
+		</div>
+		<br/>
+		<br/>
+		<br/>
+	</div>
+}

@@ -1,0 +1,163 @@
+package templ_template
+
+import (
+	"github.com/mahesh-hegde/dhee/app/config"
+	"github.com/a-h/templ"
+)
+
+templ Layout(conf *config.DheeConfig, page templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en" data-bs-theme="light">
+		<head>
+			<meta charset="UTF-8"/>
+			<script>
+				{ `
+        (() => {
+            'use strict'
+
+            const getStoredTheme = () => localStorage.getItem('theme')
+            const setStoredTheme = theme => localStorage.setItem('theme', theme)
+
+            const getPreferredTheme = () => {
+                const storedTheme = getStoredTheme()
+                if (storedTheme) {
+                    return storedTheme
+                }
+
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+            }
+
+            const setTheme = theme => {
+                if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark')
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', theme)
+                }
+            }
+
+            setTheme(getPreferredTheme())
+
+            window.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('[data-bs-theme-value]')
+                    .forEach(toggle => {
+                        toggle.addEventListener('click', () => {
+                            const theme = toggle.getAttribute('data-bs-theme-value')
+                            setStoredTheme(theme)
+                            setTheme(theme)
+                        })
+                    })
+            })
+        })()
+    ` }
+			</script>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ conf.InstanceName }</title>
+			<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+			<style>
+				{ `
+        @import url('https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+        body {
+            font-family: Cantarell, sans-serif;
+            /* background-color: cornsilk;
+            --bs-body-bg: cornsilk; */
+        }
+
+        .roman-text-search {
+            width: 40%;
+        }
+
+        .wrap-50 {
+            max-width: 50% !important;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .navbar-custom {
+            background-color: #4a0e0e;
+        }
+
+        [data-bs-theme="dark"] .navbar-custom {
+            background-color: #3a0000;
+        }
+
+        .verse .line {
+            display: block;
+        }
+
+        .verse .line:nth-child(odd)::after {
+            content: " |";
+            margin-left: .25em;
+            white-space: pre;
+        }
+
+        .verse .line:nth-child(even)::after {
+            content: " ||";
+            margin-left: .25em;
+            white-space: pre;
+        }
+
+        .accordion-header {
+            --bs-accordion-active-bg: lightgray;
+            --bs-accordion-active-color: teal;
+        }
+
+        [data-bs-theme="dark"] .accordion-header {
+            --bs-accordion-active-bg: #002a00;
+        }
+    ` }
+			</style>
+		</head>
+		<body>
+			<nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+				<div class="container-fluid">
+					<a class="navbar-brand" href="/">{ conf.InstanceName }</a>
+					<ul class="navbar-nav">
+						<li class="nav-item dropdown">
+							<button class="btn btn-link nav-link dropdown-toggle" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
+								<i class="bi bi-circle-half"></i>
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="bd-theme">
+								<li>
+									<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
+										<i class="bi bi-sun-fill me-2"></i>
+										"Light"
+									</button>
+								</li>
+								<li>
+									<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
+										<i class="bi bi-moon-stars-fill me-2"></i>
+										"Dark"
+									</button>
+								</li>
+								<li>
+									<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto">
+										<i class="bi bi-circle-half me-2"></i>
+										"Auto"
+									</button>
+								</li>
+							</ul>
+						</li>
+					</ul>
+					<span class="navbar-text ms-auto">
+						"br̥hád vadema vidáthe suvī́rāḥ"
+					</span>
+				</div>
+			</nav>
+
+			@page
+
+			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+			<script type="text/javascript">
+				{ `
+        // Init functions exported by inner template
+        if (initFn != undefined) {
+            initFn()
+        }
+    ` }
+			</script>
+		</body>
+	</html>
+}

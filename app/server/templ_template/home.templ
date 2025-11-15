@@ -1,0 +1,118 @@
+package templ_template
+
+import (
+	"fmt"
+	"github.com/mahesh-hegde/dhee/app/config"
+)
+
+templ Home(data *config.DheeConfig) {
+	<div class="container">
+		<div class="text-center my-4">
+			<h1>Dhee</h1>
+			<p class="lead">A platform for linguistic analysis of vedic Sanskrit texts</p>
+		</div>
+		<h2>Scriptures</h2>
+		<div class="accordion" id="scriptureAccordion">
+			for _, scripture := range data.Scriptures {
+				<div class="accordion-item">
+					<h2 class="accordion-header" id={ "heading-" + scripture.Name }>
+						<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={ "#collapse-" + scripture.Name } aria-expanded="true" aria-controls={ "collapse-" + scripture.Name }>
+							<b>{ scripture.ReadableName }</b>
+						</button>
+					</h2>
+					<div id={ "collapse-" + scripture.Name } class="accordion-collapse collapse show" aria-labelledby={ "heading-" + scripture.Name } data-bs-parent="#scriptureAccordion">
+						<div class="accordion-body">
+							<h3>Jump to excerpt</h3>
+							<form class="jump-form row g-3" data-scripture-name={ scripture.Name } action={ fmt.Sprintf("scriptures/%s/excerpts", scripture.Name) } method="get">
+								<div class="col-auto">
+									<input type="text" name="path" class="form-control" placeholder="e.g., 1.1.1"/>
+								</div>
+								<div class="col-auto">
+									<button type="submit" class="btn btn-primary">Go</button>
+								</div>
+							</form>
+							<h3 class="mt-4">Search</h3>
+							<form action="/scripture-search" method="GET" class="row g-3">
+								<input type="hidden" name="scriptures" value={ scripture.Name }/>
+								<div class="col-sm-6">
+									<input type="text" class="form-control" name="query" placeholder="Search text"/>
+								</div>
+								<div class="col-sm-2">
+									<select name="tl" class="form-select">
+										<option value="slp1" selected>SLP1</option>
+										<option value="iast">IAST</option>
+										<option value="hk">HK</option>
+										<option value="dn">Devanagari</option>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<select name="mode" class="form-select">
+										<option value="exact" selected>Normal</option>
+										<option value="regex">Regex</option>
+										<option value="fuzzy">Fuzzy</option>
+										<option value="prefix">Prefix</option>
+										<option value="ascii">ASCII</option>
+									</select>
+								</div>
+								<div class="col-auto">
+									<button type="submit" class="btn btn-primary">Go</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+		<h2 class="mt-5">Dictionaries</h2>
+		<div class="accordion" id="dictionaryAccordion">
+			for _, dictionary := range data.Dictionaries {
+				<div class="accordion-item">
+					<h2 class="accordion-header" id={ "heading-" + dictionary.Name }>
+						<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target={ "#collapse-" + dictionary.Name } aria-expanded="true" aria-controls={ "collapse-" + dictionary.Name }>
+							<b>{ dictionary.ReadableName }</b>
+						</button>
+					</h2>
+					<div id={ "collapse-" + dictionary.Name } class="accordion-collapse collapse show" aria-labelledby={ "heading-" + dictionary.Name } data-bs-parent="#dictionaryAccordion">
+						<div class="accordion-body">
+							<form action={ fmt.Sprintf("/dictionaries/%s/search", dictionary.Name) } method="GET" class="row g-3">
+								<div class="col-sm-6">
+									<input type="text" class="form-control" name="q" placeholder="Search text"/>
+								</div>
+								<div class="col-sm-2">
+									<select name="tl" class="form-select">
+										<option value="slp1" selected>SLP1</option>
+										<option value="iast">IAST</option>
+										<option value="hk">HK</option>
+										<option value="dn">Devanagari</option>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<select name="mode" class="form-select">
+										<option value="exact" selected>Exact</option>
+										<option value="prefix">Prefix</option>
+										<option value="fuzzy">Fuzzy</option>
+										<option value="regex">Regex</option>
+									</select>
+								</div>
+								<div class="col-auto">
+									<button type="submit" class="btn btn-primary">Find</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="mt-5" style="width: 75%;">
+			<h2>About</h2>
+			<p>
+				Dhee is a website for studying and analyzing old indic texts, specifically Rigveda Samhita.
+			</p>
+			<p>
+				Dhee is a work in progress at this moment. It is being built by Mahesh Hegde (
+				<code>net.mahesh29 [@] gmail.com</code>
+				).
+			</p>
+		</div>
+	</div>
+}

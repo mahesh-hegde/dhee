@@ -1,0 +1,15 @@
+package templ_template
+
+import "github.com/mahesh-hegde/dhee/app/dictionary"
+
+templ Preview(page string, data any) {
+	if page == "dictionary_search" {
+		if d, ok := data.(dictionary.SearchResults); ok {
+			@DictionarySearch(d)
+		} else {
+			<p>Invalid data for dictionary_search preview</p>
+		}
+	} else {
+		<p>Page not supported for preview</p>
+	}
+}

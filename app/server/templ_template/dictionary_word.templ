@@ -1,0 +1,28 @@
+package templ_template
+
+import "github.com/mahesh-hegde/dhee/app/dictionary"
+
+templ DictionaryWord(data []dictionary.DictionaryEntry) {
+	<div class="container">
+		if len(data) > 0 {
+			<div class="my-4">
+				for _, entry := range data {
+					<div class="card mb-3">
+						<div class="card-body">
+							<h3 class="card-title">{ entry.IAST }</h3>
+							for _, meaning := range entry.Meanings {
+								<p class="card-text">{ meaning.Body.Plain }</p>
+								<hr/>
+							}
+						</div>
+					</div>
+					<hr/>
+				}
+			</div>
+		} else {
+			<div class="alert alert-warning mt-4" role="alert">
+				No results found!
+			</div>
+		}
+	</div>
+}

@@ -1,0 +1,41 @@
+package templ_template
+
+import (
+	"fmt"
+	"github.com/mahesh-hegde/dhee/app/dictionary"
+)
+
+templ DictionarySearch(data dictionary.SearchResults) {
+	<div class="container">
+		<h2 class="my-4">Dictionary Search Results</h2>
+		if len(data.Items) > 0 {
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Word (IAST)</th>
+						<th scope="col">Word (Devanagari)</th>
+						<th scope="col">Overview</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, item := range data.Items {
+						<tr>
+							<td><a href={ templ.URL(fmt.Sprintf("/dictionaries/%s/words/%s", data.DictionaryName, item.Word)) }>{ item.IAST }</a></td>
+							<td>{ item.Nagari }</td>
+							<!-- TODO: show main H1, H2, H3 entries -->
+							if len(item.Previews) > 0 {
+								<td>{ item.Previews[0] }</td>
+							} else {
+								<td></td>
+							}
+						</tr>
+					}
+				</tbody>
+			</table>
+		} else {
+			<div class="alert alert-warning" role="alert">
+				No results found!
+			</div>
+		}
+	</div>
+}

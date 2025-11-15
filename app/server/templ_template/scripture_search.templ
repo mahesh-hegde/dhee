@@ -1,0 +1,49 @@
+package templ_template
+
+import (
+	"fmt"
+	"strings"
+	"github.com/mahesh-hegde/dhee/app/excerpts"
+)
+
+templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
+	<div class="container">
+		<h2 class="my-4">Search Results for { fmt.Sprintf("%q", data.Search.Q) }</h2>
+		if data.Excerpts != nil && len(data.Excerpts) > 0 {
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Path</th>
+						<th scope="col">Roman Text</th>
+						<th scope="col">Translation (Griffith)</th>
+						<th scope="col">Addressee</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, excerpt := range data.Excerpts {
+						<tr>
+							<td><a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", excerpt.Scripture, excerpt.ReadableIndex)) }>{ excerpt.ReadableIndex }</a></td>
+							<td class="roman-text-search">
+								for _, line := range excerpt.RomanText {
+									{ line }<br/>
+								}
+							</td>
+							<td class="wrap-50">
+								if griffith, ok := excerpt.Auxiliaries["griffith"]; ok {
+									for _, text := range griffith.Text {
+										{ text }
+									}
+								}
+							</td>
+							<td>{ strings.Join(excerpt.Addressees, ", ") }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		} else {
+			<div class="alert alert-warning" role="alert">
+				No results found!
+			</div>
+		}
+	</div>
+}

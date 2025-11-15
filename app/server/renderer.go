@@ -1,43 +1,72 @@
+//go:generate templ generate
 package server
 
 import (
-	"html/template"
 	"io"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/mahesh-hegde/dhee/app/config"
+	"github.com/mahesh-hegde/dhee/app/dictionary"
+	"github.com/mahesh-hegde/dhee/app/excerpts"
+	"github.com/mahesh-hegde/dhee/app/server/templ_template"
 )
 
 type TemplateRenderer struct {
 	conf *config.DheeConfig
-	tmpl *template.Template
 }
 
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	baseName, modifier, found := strings.Cut(name, ".")
-	wrappedData := map[string]any{
-		"Page": baseName,
-		"Conf": t.conf,
-		"Data": data,
-	}
-	var tName string
+
+	ctx := c.Request().Context()
+
 	if found && modifier == "preview" {
-		tName = "preview.html"
-	} else {
-		tName = "layout.html"
+		return templ_template.Preview(baseName, data).Render(ctx, w)
 	}
-	err := t.tmpl.ExecuteTemplate(w, tName, wrappedData)
-	if err != nil {
-		c.Logger().Error(err)
-		return err
+
+	var page templ.Component
+	switch baseName {
+	case "home":
+		if d, ok := data.(*config.DheeConfig); ok {
+			page = templ_template.Home(d)
+		}
+	case "scripture_search":
+		if d, ok := data.(*excerpts.ExcerptSearchData); ok {
+			page = templ_template.ScriptureSearch(d)
+		}
+	case "excerpts":
+		if d, ok := data.(*excerpts.ExcerptTemplateData); ok {
+			page = templ_template.Excerpts(d)
+		}
+	case "dictionary_search":
+		if d, ok := data.(dictionary.SearchResults); ok {
+			page = templ_template.DictionarySearch(d)
+		}
+	case "dictionary_word":
+		if d, ok := data.([]dictionary.DictionaryEntry); ok {
+			page = templ_template.DictionaryWord(d)
+		}
+	case "hierarchy":
+		if d, ok := data.(*excerpts.Hierarchy); ok {
+			page = templ_template.Hierarchy(d)
+		}
+	default:
+		c.Logger().Errorf("template not found: %s", baseName)
+		return echo.ErrNotFound
 	}
-	return nil
+
+	if page == nil {
+		c.Logger().Errorf("invalid data type for template %s", baseName)
+		return echo.ErrInternalServerError
+	}
+
+	return templ_template.Layout(t.conf, page).Render(ctx, w)
 }
 
 func NewTemplateRenderer(conf *config.DheeConfig) *TemplateRenderer {
 	return &TemplateRenderer{
-		tmpl: MustParseTemplates(),
 		conf: conf,
 	}
 }
