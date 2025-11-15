@@ -170,18 +170,16 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 			normalizedSurface := normalizePadaWord(pe.G.Surface)
 			glossingMap[normalizedSurface] = append(glossingMap[normalizedSurface], i)
 		}
-		usedGlossings := make(map[int]bool)
 
 		glossingCursor := 0
 		for _, padaWord := range padaWords {
 			normPW := normalizePadaWord(padaWord)
 			glossingIndex := -1
 
-			// Attempt to match using the map first
+			// Attempt to match using the map first, looking forward from cursor
 			if indices, ok := glossingMap[normPW]; ok {
-				// Find an unused index for this surface
 				for _, idx := range indices {
-					if !usedGlossings[idx] {
+					if idx >= glossingCursor {
 						glossingIndex = idx
 						break
 					}
@@ -189,18 +187,15 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 			}
 
 			if glossingIndex != -1 {
-				// Found a match in the map.
-				usedGlossings[glossingIndex] = true
-				padaElem := glossingPEs[glossingIndex]
+				// Found a forward match in the map.
+				glossingCursor = glossingIndex
+				padaElem := glossingPEs[glossingCursor]
 				padaElem.Word = padaWord
 				padaElem.ExactMatched = true
 				ew.Padas = append(ew.Padas, padaElem)
+				glossingCursor++
 			} else {
-				// Fallback to index-based logic: find next unused glossing
-				for glossingCursor < len(glossingPEs) && usedGlossings[glossingCursor] {
-					glossingCursor++
-				}
-
+				// Fallback to index-based logic
 				if glossingCursor >= len(glossingPEs) {
 					ew.Padas = append(ew.Padas, PadaElement{
 						Word:  padaWord,
@@ -209,7 +204,6 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 					continue
 				}
 
-				usedGlossings[glossingCursor] = true
 				padaElem := glossingPEs[glossingCursor]
 				padaElem.Word = padaWord
 				padaElem.ExactMatched = false // Since it's a fallback
