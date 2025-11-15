@@ -70,7 +70,7 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 	}))
 
 	e.GET("/favicon.ico", func(c echo.Context) error {
-		file, err := templateFs.ReadFile("template/favicon.ico")
+		file, err := templateFs.ReadFile("templ_template/favicon.ico")
 		if err != nil {
 			// Let's not expose internal server errors, a simple 404 is sufficient
 			return echo.ErrNotFound

@@ -104,7 +104,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 
 	excerpts, err := c.es.Get(ctx.Request().Context(), paths)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get excerpts")
+		return echo.NewHTTPError(http.StatusNotFound, "Failed to get excerpts")
 	}
 
 	return ctx.Render(http.StatusOK, "excerpts", excerpts)
@@ -128,7 +128,7 @@ func (c *DheeController) GetHierarchy(ctx echo.Context) error {
 	hier, err := c.es.GetHier(ctx.Request().Context(), scriptureName, path)
 	if err != nil {
 		slog.Error("error getting hierarchy", "err", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get hierarchy")
+		return echo.NewHTTPError(http.StatusNotFound, "Failed to get hierarchy")
 	}
 
 	return ctx.Render(http.StatusOK, "hierarchy", hier)
@@ -174,7 +174,7 @@ func (c *DheeController) GetDictionaryWord(ctx echo.Context) error {
 
 	entries, err := c.ds.GetEntries(ctx.Request().Context(), dictionaryName, []string{word}, common.TlSLP1)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get dictionary entries")
+		return echo.NewHTTPError(http.StatusNotFound, "Failed to get dictionary entries")
 	}
 
 	return ctx.Render(http.StatusOK, "dictionary_word", entries)
