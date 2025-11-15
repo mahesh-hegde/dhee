@@ -23,7 +23,19 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	ctx := c.Request().Context()
 
 	if found && modifier == "preview" {
-		return templ_template.Preview(baseName, data).Render(ctx, w)
+		var content templ.Component
+		switch baseName {
+		case "dictionary_search":
+			if d, ok := data.(dictionary.SearchResults); ok {
+				content = templ_template.DictionarySearch(d)
+			}
+		}
+
+		if content == nil {
+			content = templ_template.UnsupportedPreview("Page not supported for preview, or invalid data provided.")
+		}
+
+		return templ_template.Preview(content).Render(ctx, w)
 	}
 
 	var page templ.Component
