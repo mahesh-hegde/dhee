@@ -64,6 +64,10 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 		if d, ok := data.(*excerpts.Hierarchy); ok {
 			page = templ_template.Hierarchy(d)
 		}
+	case "error":
+		if d, ok := data.(string); ok {
+			page = templ_template.Error(d)
+		}
 	default:
 		c.Logger().Errorf("template not found: %s", baseName)
 		return echo.ErrNotFound

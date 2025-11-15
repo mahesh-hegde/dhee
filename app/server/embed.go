@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-//go:embed template/*.html
-//go:embed template/*.ico
+//go:embed templ_template/*.ico
 var templateFs embed.FS
 
 func sliceOf(a any, others ...any) []any {

@@ -16,6 +16,25 @@ import (
 func StartServer(controller *DheeController, conf *config.DheeConfig, host string, port int) {
 	e := echo.New()
 	e.Renderer = NewTemplateRenderer(conf)
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		code := http.StatusInternalServerError
+		msg := http.StatusText(code)
+
+		if he, ok := err.(*echo.HTTPError); ok {
+			code = he.Code
+			if he.Message != nil {
+				msg = fmt.Sprintf("%v", he.Message)
+			}
+		}
+
+		c.Logger().Error(err)
+
+		if !c.Response().Committed {
+			if renderErr := c.Render(code, "error", msg); renderErr != nil {
+				c.Logger().Error(renderErr)
+			}
+		}
+	}
 	e.HideBanner = true
 
 	e.Pre(middleware.RemoveTrailingSlash())
@@ -54,7 +73,7 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 		file, err := templateFs.ReadFile("template/favicon.ico")
 		if err != nil {
 			// Let's not expose internal server errors, a simple 404 is sufficient
-			return c.NoContent(http.StatusNotFound)
+			return echo.ErrNotFound
 		}
 		return c.Blob(http.StatusOK, "image/x-icon", file)
 	})

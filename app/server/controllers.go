@@ -63,11 +63,11 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 		rangeParts := strings.Split(lastPart, "-")
 		start, err := strconv.Atoi(rangeParts[0])
 		if err != nil {
-			return ctx.String(http.StatusBadRequest, "Invalid range start")
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid range start")
 		}
 		end, err := strconv.Atoi(rangeParts[1])
 		if err != nil {
-			return ctx.String(http.StatusBadRequest, "Invalid range end")
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid range end")
 		}
 
 		basePathParts := parts[:len(parts)-1]
@@ -75,7 +75,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 		for _, part := range basePathParts {
 			i, err := strconv.Atoi(part)
 			if err != nil {
-				return ctx.String(http.StatusBadRequest, "Invalid path")
+				return echo.NewHTTPError(http.StatusBadRequest, "Invalid path")
 			}
 			basePathInts = append(basePathInts, i)
 		}
@@ -92,7 +92,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 		for _, part := range parts {
 			i, err := strconv.Atoi(part)
 			if err != nil {
-				return ctx.String(http.StatusBadRequest, "Invalid path")
+				return echo.NewHTTPError(http.StatusBadRequest, "Invalid path")
 			}
 			pathInts = append(pathInts, i)
 		}
@@ -104,7 +104,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 
 	excerpts, err := c.es.Get(ctx.Request().Context(), paths)
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to get excerpts")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get excerpts")
 	}
 
 	return ctx.Render(http.StatusOK, "excerpts", excerpts)
@@ -119,7 +119,7 @@ func (c *DheeController) GetHierarchy(ctx echo.Context) error {
 		for _, part := range parts {
 			i, err := strconv.Atoi(part)
 			if err != nil {
-				return ctx.String(http.StatusBadRequest, "Invalid path")
+				return echo.NewHTTPError(http.StatusBadRequest, "Invalid path")
 			}
 			path = append(path, i)
 		}
@@ -128,7 +128,7 @@ func (c *DheeController) GetHierarchy(ctx echo.Context) error {
 	hier, err := c.es.GetHier(ctx.Request().Context(), scriptureName, path)
 	if err != nil {
 		slog.Error("error getting hierarchy", "err", err)
-		return ctx.String(http.StatusInternalServerError, "Failed to get hierarchy")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get hierarchy")
 	}
 
 	return ctx.Render(http.StatusOK, "hierarchy", hier)
@@ -137,7 +137,7 @@ func (c *DheeController) GetHierarchy(ctx echo.Context) error {
 func (c *DheeController) SearchScripture(ctx echo.Context) error {
 	query := ctx.QueryParam("query")
 	if query == "" {
-		return ctx.String(http.StatusBadRequest, "query is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "query is required")
 	}
 
 	tl := ctx.QueryParam("tl")
@@ -162,7 +162,7 @@ func (c *DheeController) SearchScripture(ctx echo.Context) error {
 	excerpts, err := c.es.Search(ctx.Request().Context(), params)
 	if err != nil {
 		slog.Error("error in scripture search", "err", err)
-		return ctx.String(http.StatusInternalServerError, "Failed to search scripture")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to search scripture")
 	}
 
 	return ctx.Render(http.StatusOK, "scripture_search", excerpts)
@@ -174,7 +174,7 @@ func (c *DheeController) GetDictionaryWord(ctx echo.Context) error {
 
 	entries, err := c.ds.GetEntries(ctx.Request().Context(), dictionaryName, []string{word}, common.TlSLP1)
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to get dictionary entries")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get dictionary entries")
 	}
 
 	return ctx.Render(http.StatusOK, "dictionary_word", entries)
@@ -187,11 +187,11 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 	preview := ctx.QueryParam("preview")
 
 	if query == "" && textQuery == "" {
-		return ctx.String(http.StatusBadRequest, "one of q or textQuery is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "one of q or textQuery is required")
 	}
 
 	if query != "" && textQuery != "" {
-		return ctx.String(http.StatusBadRequest, "only one of q or textQuery is allowed")
+		return echo.NewHTTPError(http.StatusBadRequest, "only one of q or textQuery is allowed")
 	}
 
 	tlStr := ctx.QueryParam("tl")
@@ -210,7 +210,7 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 	case "slp1":
 		tl = common.TlSLP1
 	default:
-		return ctx.String(http.StatusBadRequest, "invalid tl value")
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid tl value")
 	}
 
 	modeStr := ctx.QueryParam("mode")
@@ -227,7 +227,7 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 
 	results, err := c.ds.Search(ctx.Request().Context(), dictionaryName, params)
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to search dictionary")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to search dictionary")
 	}
 
 	templateName := "dictionary_search"
@@ -241,7 +241,7 @@ func (c *DheeController) SuggestDictionary(ctx echo.Context) error {
 	dictionaryName := ctx.Param("dictionaryName")
 	query := ctx.QueryParam("q")
 	if query == "" {
-		return ctx.String(http.StatusBadRequest, "q is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "q is required")
 	}
 
 	tlStr := ctx.QueryParam("tl")
@@ -260,12 +260,12 @@ func (c *DheeController) SuggestDictionary(ctx echo.Context) error {
 	case "slp1":
 		tl = common.TlSLP1
 	default:
-		return ctx.String(http.StatusBadRequest, "invalid tl value")
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid tl value")
 	}
 
 	suggestions, err := c.ds.Suggest(ctx.Request().Context(), dictionaryName, query, tl)
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to get suggestions")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get suggestions")
 	}
 
 	return ctx.JSON(http.StatusOK, suggestions)
