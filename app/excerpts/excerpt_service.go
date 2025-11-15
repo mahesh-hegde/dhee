@@ -165,25 +165,57 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		}
 
 		padaWords := padaWordsByExcerpt[eidx]
+		glossingMap := make(map[string][]int)
+		for i, pe := range glossingPEs {
+			normalizedSurface := normalizePadaWord(pe.G.Surface)
+			glossingMap[normalizedSurface] = append(glossingMap[normalizedSurface], i)
+		}
+		usedGlossings := make(map[int]bool)
+
 		glossingCursor := 0
 		for _, padaWord := range padaWords {
-			if glossingCursor >= len(glossingPEs) {
-				ew.Padas = append(ew.Padas, PadaElement{
-					Word:  padaWord,
-					Found: false,
-				})
-				continue
+			normPW := normalizePadaWord(padaWord)
+			glossingIndex := -1
+
+			// Attempt to match using the map first
+			if indices, ok := glossingMap[normPW]; ok {
+				// Find an unused index for this surface
+				for _, idx := range indices {
+					if !usedGlossings[idx] {
+						glossingIndex = idx
+						break
+					}
+				}
 			}
 
-			normPW := normalizePadaWord(padaWord)
-			padaElem := glossingPEs[glossingCursor]
-			glossingFoldedSurface := normalizeSurface(padaElem.G.Surface)
-			exactMatch := normPW == glossingFoldedSurface
+			if glossingIndex != -1 {
+				// Found a match in the map.
+				usedGlossings[glossingIndex] = true
+				padaElem := glossingPEs[glossingIndex]
+				padaElem.Word = padaWord
+				padaElem.ExactMatched = true
+				ew.Padas = append(ew.Padas, padaElem)
+			} else {
+				// Fallback to index-based logic: find next unused glossing
+				for glossingCursor < len(glossingPEs) && usedGlossings[glossingCursor] {
+					glossingCursor++
+				}
 
-			padaElem.Word = padaWord
-			padaElem.ExactMatched = exactMatch
-			ew.Padas = append(ew.Padas, padaElem)
-			glossingCursor++
+				if glossingCursor >= len(glossingPEs) {
+					ew.Padas = append(ew.Padas, PadaElement{
+						Word:  padaWord,
+						Found: false,
+					})
+					continue
+				}
+
+				usedGlossings[glossingCursor] = true
+				padaElem := glossingPEs[glossingCursor]
+				padaElem.Word = padaWord
+				padaElem.ExactMatched = false // Since it's a fallback
+				ew.Padas = append(ew.Padas, padaElem)
+				glossingCursor++
+			}
 		}
 		es = append(es, ew)
 	}
