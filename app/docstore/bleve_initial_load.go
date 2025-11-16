@@ -3,6 +3,7 @@ package docstore
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -46,34 +47,6 @@ func init() {
 	registry.RegisterCharFilter("accent_fold", func(config map[string]interface{}, cache *registry.Cache) (analysis.CharFilter, error) {
 		return AccentFoldingCharFilter{}, nil
 	})
-}
-
-var replacer = strings.NewReplacer(common.FoldableAccentsList...)
-
-func normalizeRomanTextForKwStorage(txt []string) string {
-	var result []string
-	for _, t := range txt {
-		// Why would we do this?
-		// short vowels in the dataset have accented chars which do not match while searching.
-		result = append(result, replacer.Replace(t))
-	}
-	return strings.Join(result, " ")
-}
-
-func getAllVariants(entry *dictionary.DictionaryEntry) []string {
-	res := make([]string, 0)
-	for _, meaning := range entry.Meanings {
-		res = append(res, meaning.Variants...)
-	}
-	return res
-}
-
-func getAllLitRefs(entry *dictionary.DictionaryEntry) []string {
-	res := make([]string, 0)
-	for _, meaning := range entry.Meanings {
-		res = append(res, meaning.LitRefs...)
-	}
-	return res
 }
 
 func parseNotesFile(filePath string) (map[string]string, error) {
@@ -126,67 +99,6 @@ func parseNotesFile(filePath string) (map[string]string, error) {
 	return notes, nil
 }
 
-func prepareDictEntryForDb(e *dictionary.DictionaryEntry) dictionary.DictionaryEntryInDB {
-	// Marshal full entry
-	entryJSON, err := json.Marshal(e)
-	if err != nil {
-		slog.Error("unexpected error", "err", err)
-		panic(err)
-	}
-
-	bodyText := []string{}
-	for _, meaning := range e.Meanings {
-		bodyText = append(bodyText, meaning.Body.Plain)
-	}
-
-	return dictionary.DictionaryEntryInDB{
-		DictName: e.DictName,
-		Word:     e.Word,
-		Entry:    string(entryJSON),
-		Variants: getAllVariants(e),
-		LitRefs:  getAllLitRefs(e),
-		BodyText: bodyText,
-	}
-}
-
-func prepareExcerptForDb(e *excerpts.Excerpt) excerpts.ExcerptInDB {
-	entryJSON, err := json.Marshal(e)
-	if err != nil {
-		slog.Error("unexpected error", "err", err)
-		panic(err)
-	}
-
-	aux := make(map[string]string)
-	for name, auxObj := range e.Auxiliaries {
-		aux[name] = strings.Join(auxObj.Text, " ")
-	}
-
-	var surfaces []string
-	for _, glossGroup := range e.Glossings {
-		for _, g := range glossGroup {
-			if g.Surface != "" {
-				surfaces = append(surfaces, g.Surface)
-			}
-		}
-	}
-
-	return excerpts.ExcerptInDB{
-		E:           string(entryJSON),
-		Scripture:   e.Scripture,
-		SourceT:     strings.Join(e.SourceText, " "),
-		RomanT:      strings.Join(e.RomanText, " "),
-		RomanK:      normalizeRomanTextForKwStorage(e.RomanText),
-		RomanF:      normalizeRomanTextForKwStorage(e.RomanText),
-		ViewIndex:   common.PathToString(e.Path),
-		SortIndex:   common.PathToSortString(e.Path),
-		Auxiliaries: aux,
-		Addressees:  e.Addressees,
-		Notes:       strings.Join(e.Notes, " "),
-		Authors:     e.Authors,
-		Meter:       e.Meter,
-		Surfaces:    surfaces,
-	}
-}
 
 // --- bleve mappings ---
 func GetBleveIndexMappings() mapping.IndexMapping {
@@ -292,7 +204,8 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 // --- data loading ---
 const batchSize = 1024
 
-func loadJSONL[T any, R any](index bleve.Index, dataFile string, idFunc func(T) string, enrichFunc func(T) R) error {
+func loadDictionaryData(store dictionary.DictStore, dict config.DictDefn, dataDir string) error {
+	dataFile := path.Join(dataDir, dict.DataFile)
 	file, err := os.Open(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to open data file %s: %w", dataFile, err)
@@ -300,31 +213,23 @@ func loadJSONL[T any, R any](index bleve.Index, dataFile string, idFunc func(T) 
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	batch := index.NewBatch()
-	count := 0
+	entries := make([]dictionary.DictionaryEntry, 0, batchSize)
 
 	for scanner.Scan() {
-		var entry T
+		var entry dictionary.DictionaryEntry
 		if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
 			slog.Warn("failed to unmarshal line", "err", err)
 			continue
 		}
 
-		id := idFunc(entry)
-		enriched := enrichFunc(entry)
+		entries = append(entries, entry)
 
-		if err := batch.Index(id, enriched); err != nil {
-			return fmt.Errorf("failed to add item to batch: %w", err)
-		}
-		count++
-
-		if count >= batchSize {
-			slog.Info("ingest batch", "size", count)
-			if err := index.Batch(batch); err != nil {
+		if len(entries) >= batchSize {
+			slog.Info("ingesting dictionary batch", "size", len(entries))
+			if err := store.Add(context.Background(), dict.Name, entries); err != nil {
 				return fmt.Errorf("failed to execute batch: %w", err)
 			}
-			batch = index.NewBatch()
-			count = 0
+			entries = make([]dictionary.DictionaryEntry, 0, batchSize)
 		}
 	}
 
@@ -333,8 +238,8 @@ func loadJSONL[T any, R any](index bleve.Index, dataFile string, idFunc func(T) 
 	}
 
 	// Execute the final batch
-	if count > 0 {
-		if err := index.Batch(batch); err != nil {
+	if len(entries) > 0 {
+		if err := store.Add(context.Background(), dict.Name, entries); err != nil {
 			return fmt.Errorf("failed to execute final batch: %w", err)
 		}
 	}
@@ -343,38 +248,67 @@ func loadJSONL[T any, R any](index bleve.Index, dataFile string, idFunc func(T) 
 	return nil
 }
 
-// --- LoadData with conversions ---
-func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) error {
-	// Load scriptures
-	for _, sc := range config.Scriptures {
-		slog.Info("Loading scripture", "name", sc.Name)
+func loadExcerptsData(store excerpts.ExcerptStore, sc config.ScriptureDefn, dataDir string) error {
+	slog.Info("Loading scripture", "name", sc.Name)
 
-		var notes map[string]string
-		if sc.NotesFile != "" {
-			var err error
-			notes, err = parseNotesFile(path.Join(dataDir, sc.NotesFile))
-			if err != nil {
-				return fmt.Errorf("failed to parse notes for %s: %w", sc.Name, err)
-			}
-			slog.Info("loaded notes", "count", len(notes), "scripture", sc.Name)
+	var notes map[string]string
+	if sc.NotesFile != "" {
+		var err error
+		notes, err = parseNotesFile(path.Join(dataDir, sc.NotesFile))
+		if err != nil {
+			return fmt.Errorf("failed to parse notes for %s: %w", sc.Name, err)
+		}
+		slog.Info("loaded notes", "count", len(notes), "scripture", sc.Name)
+	}
+
+	dataFile := path.Join(dataDir, sc.DataFile)
+	file, err := os.Open(dataFile)
+	if err != nil {
+		return fmt.Errorf("failed to open data file %s: %w", dataFile, err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	entries := make([]excerpts.Excerpt, 0, batchSize)
+
+	for scanner.Scan() {
+		var entry excerpts.Excerpt
+		if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
+			slog.Warn("failed to unmarshal line", "err", err)
+			continue
 		}
 
-		err := loadJSONL(index, path.Join(dataDir, sc.DataFile),
-			func(e *excerpts.Excerpt) string {
-				return fmt.Sprintf("%d:%s", config.ScriptureNameToId(sc.Name), common.PathToString(e.Path))
-			},
-			func(e *excerpts.Excerpt) *excerpts.ExcerptInDB {
-				e.Scripture = sc.Name
-				if notes != nil {
-					if note, ok := notes[e.ReadableIndex]; ok {
-						e.Notes = []string{note}
-					}
-				}
-				dbObj := prepareExcerptForDb(e)
-				return &dbObj
-			},
-		)
-		if err != nil {
+		if notes != nil {
+			if note, ok := notes[entry.ReadableIndex]; ok {
+				entry.Notes = []string{note}
+			}
+		}
+		entries = append(entries, entry)
+
+		if len(entries) >= batchSize {
+			slog.Info("ingesting excerpts batch", "size", len(entries))
+			if err := store.Add(context.Background(), sc.Name, entries); err != nil {
+				return fmt.Errorf("failed to execute batch: %w", err)
+			}
+			entries = make([]excerpts.Excerpt, 0, batchSize)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("scanner error: %w", err)
+	}
+	if len(entries) > 0 {
+		if err := store.Add(context.Background(), sc.Name, entries); err != nil {
+			return fmt.Errorf("failed to execute final batch: %w", err)
+		}
+	}
+	return nil
+}
+
+// --- LoadData with conversions ---
+func LoadInitialData(dictStore dictionary.DictStore, excerptStore excerpts.ExcerptStore, dataDir string, config *config.DheeConfig) error {
+	// Load scriptures
+	for _, sc := range config.Scriptures {
+		if err := loadExcerptsData(excerptStore, sc, dataDir); err != nil {
 			return fmt.Errorf("failed to load scripture %s: %w", sc.Name, err)
 		}
 	}
@@ -382,17 +316,7 @@ func LoadData(index bleve.Index, dataDir string, config *config.DheeConfig) erro
 	// Load dictionaries
 	for _, dict := range config.Dictionaries {
 		slog.Info("Loading dictionary", "name", dict.Name)
-		err := loadJSONL(index, path.Join(dataDir, dict.DataFile),
-			func(e *dictionary.DictionaryEntry) string {
-				return fmt.Sprintf("%d:%s", config.DictNameToId(dict.Name), e.Word)
-			},
-			func(e *dictionary.DictionaryEntry) *dictionary.DictionaryEntryInDB {
-				e.DictName = dict.Name
-				dbObj := prepareDictEntryForDb(e)
-				return &dbObj
-			},
-		)
-		if err != nil {
+		if err := loadDictionaryData(dictStore, dict, dataDir); err != nil {
 			return fmt.Errorf("failed to load dictionary %s: %w", dict.Name, err)
 		}
 	}
@@ -413,7 +337,10 @@ func InitDB(dataDir string, config *config.DheeConfig) (bleve.Index, error) {
 		}
 
 		slog.Info("Loading initial data into the index...")
-		if err := LoadData(index, dataDir, config); err != nil {
+		dictStore := dictionary.NewBleveDictStore(index, config)
+		excerptStore := excerpts.NewBleveExcerptStore(index, config)
+
+		if err := LoadInitialData(dictStore, excerptStore, dataDir, config); err != nil {
 			// Cleanup created index on load failure
 			os.RemoveAll(dbPath)
 			return nil, fmt.Errorf("failed to load data: %w", err)

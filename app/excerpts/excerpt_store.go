@@ -15,6 +15,7 @@ import (
 )
 
 type ExcerptStore interface {
+	Init() error
 	Add(ctx context.Context, scripture string, es []Excerpt) error
 	Get(ctx context.Context, paths []QualifiedPath) ([]Excerpt, error)
 	// FindBeforeAndAfter, given a set of possible idsBefore and idsAfter in priority order,
@@ -144,13 +145,21 @@ func (b *BleveExcerptStore) FindBeforeAndAfter(ctx context.Context, scripture st
 	return before, after
 }
 
+func (b *BleveExcerptStore) Init() error {
+	return nil
+}
+
 // Add implements ExcerptStore.
 func (b *BleveExcerptStore) Add(ctx context.Context, scripture string, es []Excerpt) error {
 	batch := b.idx.NewBatch()
 	for _, e := range es {
 		e.Scripture = scripture
+		if e.ReadableIndex == "" {
+			e.ReadableIndex = common.PathToString(e.Path)
+		}
+		dbEntry := prepareExcerptForDb(&e)
 		id := fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(scripture), e.ReadableIndex)
-		err := batch.Index(id, e)
+		err := batch.Index(id, &dbEntry)
 		if err != nil {
 			return err
 		}
@@ -279,6 +288,57 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	}
 
 	return excerpts, nil
+}
+
+var replacer = strings.NewReplacer(common.FoldableAccentsList...)
+
+func normalizeRomanTextForKwStorage(txt []string) string {
+	var result []string
+	for _, t := range txt {
+		// Why would we do this?
+		// short vowels in the dataset have accented chars which do not match while searching.
+		result = append(result, replacer.Replace(t))
+	}
+	return strings.Join(result, " ")
+}
+
+func prepareExcerptForDb(e *Excerpt) ExcerptInDB {
+	entryJSON, err := json.Marshal(e)
+	if err != nil {
+		slog.Error("unexpected error", "err", err)
+		panic(err)
+	}
+
+	aux := make(map[string]string)
+	for name, auxObj := range e.Auxiliaries {
+		aux[name] = strings.Join(auxObj.Text, " ")
+	}
+
+	var surfaces []string
+	for _, glossGroup := range e.Glossings {
+		for _, g := range glossGroup {
+			if g.Surface != "" {
+				surfaces = append(surfaces, g.Surface)
+			}
+		}
+	}
+
+	return ExcerptInDB{
+		E:           string(entryJSON),
+		Scripture:   e.Scripture,
+		SourceT:     strings.Join(e.SourceText, " "),
+		RomanT:      strings.Join(e.RomanText, " "),
+		RomanK:      normalizeRomanTextForKwStorage(e.RomanText),
+		RomanF:      normalizeRomanTextForKwStorage(e.RomanText),
+		ViewIndex:   common.PathToString(e.Path),
+		SortIndex:   common.PathToSortString(e.Path),
+		Auxiliaries: aux,
+		Addressees:  e.Addressees,
+		Notes:       strings.Join(e.Notes, " "),
+		Authors:     e.Authors,
+		Meter:       e.Meter,
+		Surfaces:    surfaces,
+	}
 }
 
 var _ ExcerptStore = &BleveExcerptStore{}

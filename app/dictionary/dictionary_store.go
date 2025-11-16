@@ -12,6 +12,7 @@ import (
 )
 
 type DictStore interface {
+	Init() error
 	// Add simply batch-adds all the dictionary entries to the
 	// dictionary, making sure they have proper dictName set.
 	Add(ctx context.Context, dictName string, es []DictionaryEntry) error
@@ -41,8 +42,9 @@ func (b *BleveDictStore) Add(ctx context.Context, dictName string, es []Dictiona
 	batch := b.idx.NewBatch()
 	for _, e := range es {
 		e.DictName = dictName
+		dbEntry := prepareDictEntryForDb(&e)
 		id := fmt.Sprintf("%d:%s", b.conf.DictNameToId(dictName), e.Word)
-		if err := batch.Index(id, e); err != nil {
+		if err := batch.Index(id, dbEntry); err != nil {
 			return fmt.Errorf("failed to add item to batch: %w", err)
 		}
 	}
@@ -199,6 +201,49 @@ func (b *BleveDictStore) Suggest(ctx context.Context, dictName string, s Suggest
 	}
 
 	return Suggestions{Items: items}, nil
+}
+
+func (b *BleveDictStore) Init() error {
+	return nil
+}
+
+func getAllVariants(entry *DictionaryEntry) []string {
+	res := make([]string, 0)
+	for _, meaning := range entry.Meanings {
+		res = append(res, meaning.Variants...)
+	}
+	return res
+}
+
+func getAllLitRefs(entry *DictionaryEntry) []string {
+	res := make([]string, 0)
+	for _, meaning := range entry.Meanings {
+		res = append(res, meaning.LitRefs...)
+	}
+	return res
+}
+
+func prepareDictEntryForDb(e *DictionaryEntry) DictionaryEntryInDB {
+	// Marshal full entry
+	entryJSON, err := json.Marshal(e)
+	if err != nil {
+		slog.Error("unexpected error", "err", err)
+		panic(err)
+	}
+
+	bodyText := []string{}
+	for _, meaning := range e.Meanings {
+		bodyText = append(bodyText, meaning.Body.Plain)
+	}
+
+	return DictionaryEntryInDB{
+		DictName: e.DictName,
+		Word:     e.Word,
+		Entry:    string(entryJSON),
+		Variants: getAllVariants(e),
+		LitRefs:  getAllLitRefs(e),
+		BodyText: bodyText,
+	}
 }
 
 var _ DictStore = &BleveDictStore{}
