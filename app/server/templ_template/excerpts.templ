@@ -200,6 +200,11 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 										}
 									}
 								}
+								if aux.Attribution != "" {
+									<div class="text-end" style="font-size: 45%;">
+										@templ.Raw(aux.Attribution)
+									</div>
+								}
 							</div>
 						</div>
 					}
@@ -658,6 +663,11 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 					<span></span>
 				}
 			</div>
+			if data.Scripture.Attribution != "" {
+				<div class="text-center my-4" style="font-size: 50%;">
+					@templ.Raw(data.Scripture.Attribution)
+				</div>
+			}
 		} else {
 			<div class="alert alert-warning mt-4" role="alert">
 				No results found!

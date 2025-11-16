@@ -74,3 +74,18 @@ func (c *DheeConfig) ScriptureNameToId(scriptureName string) int {
 	}
 	return -1
 }
+
+func (c *DheeConfig) GetAuxiliaryAttributions(scriptureName string) map[string]string {
+	s := c.GetScriptureByName(scriptureName)
+	if s == nil {
+		return nil
+	}
+
+	attributions := make(map[string]string)
+	for _, aux := range s.Auxiliaries {
+		if aux.Attribution != "" {
+			attributions[aux.Name] = aux.Attribution
+		}
+	}
+	return attributions
+}
