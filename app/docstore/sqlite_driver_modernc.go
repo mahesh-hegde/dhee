@@ -1,5 +1,5 @@
-//go:build !cgo
-// +build !cgo
+//go:build native_sqlite
+// +build native_sqlite
 
 package docstore
 

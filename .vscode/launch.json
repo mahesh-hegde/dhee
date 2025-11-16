@@ -44,7 +44,9 @@
             "args": [
                 "index",
                 "--data-dir",
-                "./data"
+                "./data",
+                "--store",
+                "sqlite"
             ]
         },
         {
