@@ -286,7 +286,30 @@ func runStats() {
 			fmt.Printf("'%s' count: %d\n", docType, searchResult.Total)
 		}
 	} else if store == "sqlite" {
-		fmt.Println("stats for sqlite not implemented yet")
+		db, err := docstore.NewSQLiteDB(dataDir)
+		if err != nil {
+			slog.Error("error while initializing SQLite DB", "err", err)
+			os.Exit(1)
+		}
+		defer db.Close()
+
+		var count int
+
+		// Dictionary entries
+		err = db.QueryRow("SELECT COUNT(*) FROM dhee_dictionary_entries").Scan(&count)
+		if err != nil {
+			slog.Error("error getting dictionary entry count", "err", err)
+		} else {
+			fmt.Printf("'dictionary_entry' count: %d\n", count)
+		}
+
+		// Excerpts (called scripture in bleve stats)
+		err = db.QueryRow("SELECT COUNT(*) FROM dhee_excerpts").Scan(&count)
+		if err != nil {
+			slog.Error("error getting excerpt count", "err", err)
+		} else {
+			fmt.Printf("'scripture' count: %d\n", count)
+		}
 	} else {
 		slog.Error("unknown store type", "store", store)
 		os.Exit(1)
