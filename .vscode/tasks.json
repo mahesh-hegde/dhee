@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "remove_db",
+            "type": "shell",
+            "command": "rm",
+            "args": [
+                "-fr",
+                "data/docstore.bleve"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "go_generate",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "generate",
+                "./..."
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

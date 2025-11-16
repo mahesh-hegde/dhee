@@ -25,6 +25,7 @@
             "program": "${workspaceFolder}/cmd/dhee/main.go",
             "cwd": "${workspaceFolder}",
             "internalConsoleOptions": "openOnSessionStart",
+            "preLaunchTask": "go_generate",
             "args": [
                 "server",
                 "--data-dir",
@@ -36,6 +37,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
+            "preLaunchTask": "remove_db",
             "program": "${workspaceFolder}/cmd/dhee/main.go",
             "cwd": "${workspaceFolder}",
             "internalConsoleOptions": "openOnSessionStart",
