@@ -53,7 +53,7 @@ func PathToString(path []int) string {
 func StringToPath(pth string) ([]int, error) {
 	var parts []int
 
-	for _, p := range strings.Split(pth, ".") {
+	for p := range strings.SplitSeq(pth, ".") {
 		idx, err := strconv.Atoi(p)
 		if err != nil {
 			return nil, err

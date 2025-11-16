@@ -317,8 +317,10 @@ func (s *SQLiteExcerptStore) GetHier(ctx context.Context, scripture *config.Scri
 		sortPrefix += "."
 	}
 
-	query := "SELECT view_index FROM dhee_excerpts WHERE scripture = ? AND sort_index LIKE ? ORDER BY sort_index"
-	rows, err := s.db.QueryContext(ctx, query, scripture.Name, sortPrefix+"%")
+	sortWildcard := sortPrefix + "%"
+
+	query := "SELECT sort_index FROM dhee_excerpts WHERE scripture = ? AND sort_index LIKE ? ORDER BY sort_index"
+	rows, err := s.db.QueryContext(ctx, query, scripture.Name, sortWildcard)
 	if err != nil {
 		return nil, err
 	}
@@ -328,11 +330,11 @@ func (s *SQLiteExcerptStore) GetHier(ctx context.Context, scripture *config.Scri
 	known := make(map[int]struct{})
 	var childs []int
 	for rows.Next() {
-		var viewIndex string
-		if err := rows.Scan(&viewIndex); err != nil {
+		var sortIndex string
+		if err := rows.Scan(&sortIndex); err != nil {
 			return nil, err
 		}
-		chldPath, err := common.StringToPath(viewIndex)
+		chldPath, err := common.StringToPath(sortIndex)
 		if err != nil {
 			continue
 		}

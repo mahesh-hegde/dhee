@@ -194,7 +194,7 @@ func runServer() {
 		dictStore = dictionary.NewBleveDictStore(index, conf)
 		excerptStore = excerpts.NewBleveExcerptStore(index, conf)
 	case "sqlite":
-		db, err := docstore.NewSQLiteDB(dataDir)
+		db, err := docstore.NewSQLiteDB(dataDir, true)
 		if err != nil {
 			slog.Error("error while initializing SQLite DB", "err", err)
 			os.Exit(1)
@@ -286,7 +286,7 @@ func runStats() {
 			fmt.Printf("'%s' count: %d\n", docType, searchResult.Total)
 		}
 	} else if store == "sqlite" {
-		db, err := docstore.NewSQLiteDB(dataDir)
+		db, err := docstore.NewSQLiteDB(dataDir, true)
 		if err != nil {
 			slog.Error("error while initializing SQLite DB", "err", err)
 			os.Exit(1)

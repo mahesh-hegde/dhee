@@ -226,7 +226,7 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 
 	results, err := c.ds.Search(ctx.Request().Context(), dictionaryName, params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to search dictionary")
+		return common.WrapErrorForResponse(err, "Failed to search dictionary")
 	}
 
 	templateName := "dictionary_search"

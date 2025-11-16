@@ -32,7 +32,9 @@
             "args": [
                 "server",
                 "--data-dir",
-                "./data"
+                "./data",
+                "--store",
+                "sqlite"
             ]
         },
         {

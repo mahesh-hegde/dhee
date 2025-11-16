@@ -371,7 +371,7 @@ func InitDB(store, dataDir string, config *config.DheeConfig) (io.Closer, error)
 		dbPath := path.Join(dataDir, "dhee.db")
 		_, err := os.Stat(dbPath)
 		if errors.Is(err, os.ErrNotExist) {
-			db, err := NewSQLiteDB(dataDir)
+			db, err := NewSQLiteDB(dataDir, false)
 			if err != nil {
 				return nil, fmt.Errorf("error creating sqlite db: %w", err)
 			}

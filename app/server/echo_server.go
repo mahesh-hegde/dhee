@@ -10,6 +10,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 )
 
@@ -25,6 +26,11 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 			if he.Message != nil {
 				msg = fmt.Sprintf("%v", he.Message)
 			}
+		}
+
+		if he, ok := err.(*common.UserVisibleError); ok {
+			code = he.HttpCode
+			msg = he.Error()
 		}
 
 		c.Logger().Error(err)

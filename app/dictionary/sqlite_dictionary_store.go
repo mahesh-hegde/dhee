@@ -175,9 +175,25 @@ func (s *SQLiteDictStore) Get(ctx context.Context, dictName string, words []stri
 }
 
 func (s *SQLiteDictStore) Search(ctx context.Context, dictName string, searchParams SearchParams) (SearchResults, error) {
-	if searchParams.Mode == "exact" {
-		query := `SELECT entry FROM dhee_dictionary_entries WHERE dict_name = ? AND word = ? ORDER BY word LIMIT 100`
-		rows, err := s.db.QueryContext(ctx, query, dictName, searchParams.Query)
+	// TODO: implement fuzzy search using a combined bleve index
+	// since spellfix1 is not available in any Go bindings
+	if searchParams.Mode == "fuzzy" {
+		searchParams.Mode = "prefix"
+	}
+
+	if searchParams.Mode == "exact" || searchParams.Mode == "prefix" {
+		var rows *sql.Rows
+		var err error
+
+		switch searchParams.Mode {
+		case "exact":
+			query := `SELECT entry FROM dhee_dictionary_entries WHERE dict_name = ? AND word = ? ORDER BY word LIMIT 100`
+			rows, err = s.db.QueryContext(ctx, query, dictName, searchParams.Query)
+		case "prefix":
+			query := `SELECT entry FROM dhee_dictionary_entries WHERE dict_name = ? AND word GLOB ? ORDER BY LENGTH(word), word LIMIT 100`
+			rows, err = s.db.QueryContext(ctx, query, dictName, sanitizeNonAlphanumASCII(searchParams.Query)+"*")
+		}
+
 		if err != nil {
 			return SearchResults{}, fmt.Errorf("sqlite search failed: %w", err)
 		}
@@ -214,15 +230,15 @@ func (s *SQLiteDictStore) Search(ctx context.Context, dictName string, searchPar
 	orderBy = "ORDER BY de.word"
 
 	switch searchParams.Mode {
-	case "prefix":
-		q := searchParams.Query + "*"
-		ftsQuery = fmt.Sprintf("word:%s OR variants:%s", sanitizeNonAlphanumASCII(q), sanitizeNonAlphanumASCII(q))
 	case "translations":
 		ftsQuery = searchParams.Query
 		ftsColumn = "body_text"
 		orderBy = "ORDER BY de_fts.rank" // Corresponds to _score sort
 	default:
-		return SearchResults{}, fmt.Errorf("search mode '%s' not supported by sqlite store", searchParams.Mode)
+		return SearchResults{}, &common.UserVisibleError{
+			HttpCode: 500,
+			Message:  fmt.Sprintf("search mode '%s' not supported by sqlite store", searchParams.Mode),
+		}
 	}
 
 	matchClause := "de_fts.dhee_dictionary_fts MATCH ?"
