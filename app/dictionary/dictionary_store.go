@@ -44,7 +44,7 @@ func (b *BleveDictStore) Add(ctx context.Context, dictName string, es []Dictiona
 		e.DictName = dictName
 		dbEntry := prepareDictEntryForDb(&e)
 		id := fmt.Sprintf("%d:%s", b.conf.DictNameToId(dictName), e.Word)
-		if err := batch.Index(id, dbEntry); err != nil {
+		if err := batch.Index(id, &dbEntry); err != nil {
 			return fmt.Errorf("failed to add item to batch: %w", err)
 		}
 	}
