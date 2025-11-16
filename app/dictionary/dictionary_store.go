@@ -11,6 +11,22 @@ import (
 	"github.com/mahesh-hegde/dhee/app/config"
 )
 
+func getAllVariants(entry *DictionaryEntry) []string {
+	res := make([]string, 0)
+	for _, meaning := range entry.Meanings {
+		res = append(res, meaning.Variants...)
+	}
+	return res
+}
+
+func getAllLitRefs(entry *DictionaryEntry) []string {
+	res := make([]string, 0)
+	for _, meaning := range entry.Meanings {
+		res = append(res, meaning.LitRefs...)
+	}
+	return res
+}
+
 type DictStore interface {
 	Init() error
 	// Add simply batch-adds all the dictionary entries to the
@@ -209,22 +225,6 @@ func (b *BleveDictStore) Suggest(ctx context.Context, dictName string, s Suggest
 
 func (b *BleveDictStore) Init() error {
 	return nil
-}
-
-func getAllVariants(entry *DictionaryEntry) []string {
-	res := make([]string, 0)
-	for _, meaning := range entry.Meanings {
-		res = append(res, meaning.Variants...)
-	}
-	return res
-}
-
-func getAllLitRefs(entry *DictionaryEntry) []string {
-	res := make([]string, 0)
-	for _, meaning := range entry.Meanings {
-		res = append(res, meaning.LitRefs...)
-	}
-	return res
 }
 
 func prepareDictEntryForDb(e *DictionaryEntry) DictionaryEntryInDB {

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path"
@@ -330,39 +331,64 @@ func LoadInitialData(dictStore dictionary.DictStore, excerptStore excerpts.Excer
 	return nil
 }
 
-func InitDB(dataDir string, config *config.DheeConfig) (bleve.Index, error) {
-	dbPath := filepath.Join(dataDir, "docstore.bleve")
+func InitDB(store, dataDir string, config *config.DheeConfig) (io.Closer, error) {
+	if store == "bleve" {
+		dbPath := filepath.Join(dataDir, "docstore.bleve")
 
-	_, err := os.Stat(dbPath)
+		_, err := os.Stat(dbPath)
 
-	if errors.Is(err, os.ErrNotExist) {
-		slog.Info("Creating new bleve index", "path", dbPath)
-		mapping := GetBleveIndexMappings()
-		index, err := bleve.New(dbPath, mapping)
+		if errors.Is(err, os.ErrNotExist) {
+			slog.Info("Creating new bleve index", "path", dbPath)
+			mapping := GetBleveIndexMappings()
+			index, err := bleve.New(dbPath, mapping)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create new bleve index: %w", err)
+			}
+
+			slog.Info("Loading initial data into the index...")
+			dictStore := dictionary.NewBleveDictStore(index, config)
+			excerptStore := excerpts.NewBleveExcerptStore(index, config)
+
+			if err := LoadInitialData(dictStore, excerptStore, dataDir, config); err != nil {
+				// Cleanup created index on load failure
+				os.RemoveAll(dbPath)
+				return nil, fmt.Errorf("failed to load data: %w", err)
+			}
+			slog.Info("Initial data loaded successfully.")
+			if err := index.Close(); err != nil {
+				return nil, err
+			}
+		} else if err != nil {
+			return nil, fmt.Errorf("failed to open bleve index: %w", err)
+		}
+		index, err := bleve.OpenUsing(dbPath, map[string]any{"read_only": true})
 		if err != nil {
-			return nil, fmt.Errorf("failed to create new bleve index: %w", err)
-		}
-
-		slog.Info("Loading initial data into the index...")
-		dictStore := dictionary.NewBleveDictStore(index, config)
-		excerptStore := excerpts.NewBleveExcerptStore(index, config)
-
-		if err := LoadInitialData(dictStore, excerptStore, dataDir, config); err != nil {
-			// Cleanup created index on load failure
-			os.RemoveAll(dbPath)
-			return nil, fmt.Errorf("failed to load data: %w", err)
-		}
-		slog.Info("Initial data loaded successfully.")
-		if err := index.Close(); err != nil {
 			return nil, err
 		}
-	} else if err != nil {
-		return nil, fmt.Errorf("failed to open bleve index: %w", err)
+		slog.Info("Opened existing bleve index", "path", dbPath)
+		return index, nil
+	} else if store == "sqlite" {
+		dbPath := path.Join(dataDir, "dhee.db")
+		_, err := os.Stat(dbPath)
+		if errors.Is(err, os.ErrNotExist) {
+			db, err := NewSQLiteDB(dataDir)
+			if err != nil {
+				return nil, fmt.Errorf("error creating sqlite db: %w", err)
+			}
+
+			dictStore := dictionary.NewSQLiteDictStore(db, config)
+			excerptStore := excerpts.NewSQLiteExcerptStore(db, config)
+			err = LoadInitialData(dictStore, excerptStore, dataDir, config)
+			if err != nil {
+				db.Close()
+				os.Remove(dbPath)
+				return nil, fmt.Errorf("error loading initial data into sqlite: %w", err)
+			}
+			return db, nil
+		} else if err != nil {
+			return nil, fmt.Errorf("error checking sqlite db: %w", err)
+		}
+		return nil, nil // Already exists
 	}
-	index, err := bleve.OpenUsing(dbPath, map[string]any{"read_only": true})
-	if err != nil {
-		return nil, err
-	}
-	slog.Info("Opened existing bleve index", "path", dbPath)
-	return index, nil
+	return nil, fmt.Errorf("unknown store: %s", store)
 }

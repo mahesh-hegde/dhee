@@ -37,7 +37,7 @@ We want to migrate our DictionaryStore to SQLite3 first.
 
 * Make sure `init` runs successfully and loads data into an SQLite DB.
 
-* Add command line switches for `server`, `index` and `stats` commands in main, which can switch between SQLite3 and Bleve implementations. Define the default in global variable.
+* Add command line switches for `server`, `index` and `stats` commands in main, which can switch between SQLite3 and Bleve implementations using --store option. Define the default in global variable.
 
 #### Step 3 Implement store methods in `DictionaryStore` and `ExcerptStore`.
   * Mirror the existing Bleve implementations in new file (same package).

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -232,37 +231,15 @@ func runIndex() {
 	conf := readConfig(dataDir)
 
 	slog.Info("starting indexing", "data-dir", dataDir, "store", store)
-	if store == "bleve" {
-		idx, err := docstore.InitDB(dataDir, conf)
-		if err != nil {
-			slog.Error("error while initializing DB", "err", err)
-		}
-		idx.Close()
-	} else if store == "sqlite" {
-		dbPath := path.Join(dataDir, "dhee.db")
-		_, err := os.Stat(dbPath)
-		if errors.Is(err, os.ErrNotExist) {
-			db, err := docstore.NewSQLiteDB(dataDir)
-			if err != nil {
-				slog.Error("error creating sqlite db", "err", err)
-				os.Exit(1)
-			}
-			defer db.Close()
-			dictStore := dictionary.NewSQLiteDictStore(db, conf)
-			excerptStore := excerpts.NewSQLiteExcerptStore(db, conf)
-			err = docstore.LoadInitialData(dictStore, excerptStore, dataDir, conf)
-			if err != nil {
-				slog.Error("error loading initial data into sqlite", "err", err)
-				os.Remove(dbPath)
-				os.Exit(1)
-			}
-		} else if err != nil {
-			slog.Error("error checking sqlite db", "err", err)
-			os.Exit(1)
-		}
-	} else {
-		slog.Error("unknown store type", "store", store)
+	closer, err := docstore.InitDB(store, dataDir, conf)
+	if err != nil {
+		slog.Error("error while initializing store", "err", err)
 		os.Exit(1)
+	}
+	if closer != nil {
+		if err := closer.Close(); err != nil {
+			slog.Error("error closing store", "err", err)
+		}
 	}
 	slog.Info("finished indexing")
 }
