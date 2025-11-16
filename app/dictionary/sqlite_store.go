@@ -1,7 +1,6 @@
 package dictionary
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -96,7 +95,7 @@ func (s *SQLiteDictStore) Add(ctx context.Context, dictName string, es []Diction
 			return fmt.Errorf("failed to json encode dictionary entry: %w", err)
 		}
 
-		_, err := stmt.ExecContext(ctx, id, dictName, e.Word, entryJSON)
+		_, err = stmt.ExecContext(ctx, id, dictName, e.Word, entryJSON)
 		if err != nil {
 			return err
 		}
