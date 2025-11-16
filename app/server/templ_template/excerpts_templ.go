@@ -1034,106 +1034,134 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "</div></div>")
+					if aux.Attribution != "" {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<div class=\"text-end text-muted\" style=\"font-size: 60%;\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templ.Raw(aux.Attribution).Render(ctx, templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "</div>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "</div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
 					if auxText, ok := data.Excerpts[0].Auxiliaries[aux.Name]; ok && len(auxText.Text) > 0 {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "<div class=\"card my-3\"><div class=\"card-header\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "<div class=\"card my-3\"><div class=\"card-header\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var58 string
 						templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(aux.ReadableName)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 192, Col: 26}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 197, Col: 26}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "</div><div class=\"card-body\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "</div><div class=\"card-body\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						for _, excerpt := range data.Excerpts {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "<p><strong>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "<p><strong>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var59 string
 							templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 196, Col: 43}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 201, Col: 43}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "</strong></p>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "</strong></p>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							if auxiliary, ok := excerpt.Auxiliaries[aux.Name]; ok {
 								for _, text := range auxiliary.Text {
-									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "<p>")
+									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "<p>")
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
 									var templ_7745c5c3_Var60 string
 									templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 199, Col: 20}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 204, Col: 20}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
-									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "</p>")
+									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "</p>")
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
 								}
 							}
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "</div></div>")
+						if aux.Attribution != "" {
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "<div class=\"text-end text-muted\" style=\"font-size: 45%;\">")
+							if templ_7745c5c3_Err != nil {
+								return templ_7745c5c3_Err
+							}
+							templ_7745c5c3_Err = templ.Raw(aux.Attribution).Render(ctx, templ_7745c5c3_Buffer)
+							if templ_7745c5c3_Err != nil {
+								return templ_7745c5c3_Err
+							}
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "</div>")
+							if templ_7745c5c3_Err != nil {
+								return templ_7745c5c3_Err
+							}
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "</div></div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if data.Excerpts[0].Notes != nil {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "<div class=\"card my-3\"><div class=\"card-header\">Notes</div><div class=\"card-body\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "<div class=\"card my-3\"><div class=\"card-header\">Notes</div><div class=\"card-body\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, excerpt := range data.Excerpts {
 					if len(excerpt.Notes) > 0 {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "<p><strong>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "<p><strong>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var61 string
 						templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 216, Col: 42}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 226, Col: 42}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "</strong></p>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, "</strong></p>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						for _, note := range excerpt.Notes {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "<div>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 117, "<div>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1141,386 +1169,386 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "</div>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "</div>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						}
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "</div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "</div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, " <div class=\"card my-3\"><div class=\"card-header d-flex justify-content-between align-items-center\"><div>Grammatical analysis</div><div><button class=\"btn btn-sm btn-outline-info me-2\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#grammaticalCollapse\" aria-expanded=\"true\" aria-controls=\"grammaticalCollapse\">Toggle table</button></div></div><div class=\"card-body collapse\" id=\"grammaticalCollapse\"><div class=\"table-responsive\"><table class=\"table table-sm table-striped align-middle\"><thead><tr><th>Source index</th><th>Surface</th><th>Lemma</th><th>Information</th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, " <div class=\"card my-3\"><div class=\"card-header d-flex justify-content-between align-items-center\"><div>Grammatical analysis</div><div><button class=\"btn btn-sm btn-outline-info me-2\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#grammaticalCollapse\" aria-expanded=\"true\" aria-controls=\"grammaticalCollapse\">Toggle table</button></div></div><div class=\"card-body collapse\" id=\"grammaticalCollapse\"><div class=\"table-responsive\"><table class=\"table table-sm table-striped align-middle\"><thead><tr><th>Source index</th><th>Surface</th><th>Lemma</th><th>Information</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, ew := range data.Excerpts {
 				for rindex, row := range ew.Glossings {
 					for windex, g := range row {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 117, "<tr><td class=\"text-muted small\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 121, "<tr><td class=\"text-muted small\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var62 string
 						templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(ew.ReadableIndex)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 252, Col: 59}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 262, Col: 59}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "</td><td>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 122, "</td><td>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						surfEntry := ew.Words[g.Surface]
 						if surfEntry.IAST != "" {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "<span class=\"table-word table-word-underline\" data-word-id=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 123, "<span class=\"table-word table-word-underline\" data-word-id=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var63 string
 							templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("surf-%d-%d", rindex, windex))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 256, Col: 116}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 266, Col: 116}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, "\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 124, "\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var64 string
 							templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(g.Surface)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 256, Col: 130}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 266, Col: 130}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 121, "</span>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 125, "</span>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						} else {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 122, "<span class=\"table-word\" data-word-id=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 126, "<span class=\"table-word\" data-word-id=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var65 string
 							templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("surf-%d-%d", rindex, windex))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 258, Col: 95}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 268, Col: 95}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 123, "\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 127, "\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var66 string
 							templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(g.Surface)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 258, Col: 109}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 268, Col: 109}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 124, "</span>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 128, "</span>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 125, "<div id=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 129, "<div id=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var67 string
 						templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("surf-%d-%d", rindex, windex))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 260, Col: 64}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 270, Col: 64}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 126, "\" class=\"table-word-data\" style=\"display: none;\"><div class=\"table-word-popup-content\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 130, "\" class=\"table-word-data\" style=\"display: none;\"><div class=\"table-word-popup-content\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						if surfEntry.IAST != "" {
 							for i, e := range surfEntry.Meanings {
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 127, "<div class=\"mb-2\"><span class=\"dict-iast-surface\"><em>")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 131, "<div class=\"mb-2\"><span class=\"dict-iast-surface\"><em>")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var68 string
 								templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(surfEntry.IAST)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 265, Col: 70}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 275, Col: 70}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 128, "</em></span> ")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 132, "</em></span> ")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var69 string
 								templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(": ")
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 266, Col: 24}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 276, Col: 24}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 129, " ")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 133, " ")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var70 string
 								templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.JoinStringErrs(e.Body.Plain)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 267, Col: 32}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 277, Col: 32}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var70))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 130, "</div>")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "</div>")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								if i < len(surfEntry.Meanings)-1 {
-									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 131, "<hr>")
+									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 135, "<hr>")
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
 								}
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 132, " <hr>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 136, " <hr>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 133, "<a href=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 137, "<a href=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var71 templ.SafeURL
 						templ_7745c5c3_Var71, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=fuzzy", g.Surface)))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 275, Col: 122}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 285, Col: 122}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var71))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "\" class=\"badge bg-secondary\">🔎 ")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 138, "\" class=\"badge bg-secondary\">🔎 ")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var72 string
 						templ_7745c5c3_Var72, templ_7745c5c3_Err = templ.JoinStringErrs(g.Surface)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 275, Col: 168}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 285, Col: 168}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var72))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 135, "</a></div></div></td><td>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 139, "</a></div></div></td><td>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						lemmaEntry := ew.Words[g.Lemma]
 						if g.Lemma != "" {
 							if lemmaEntry.Word != "" {
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 136, "<span class=\"table-word table-word-underline\" data-word-id=\"")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 140, "<span class=\"table-word table-word-underline\" data-word-id=\"")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var73 string
 								templ_7745c5c3_Var73, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("lemma-%d-%d", rindex, windex))
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 283, Col: 118}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 293, Col: 118}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var73))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 137, "\">")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 141, "\">")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var74 string
 								templ_7745c5c3_Var74, templ_7745c5c3_Err = templ.JoinStringErrs(g.Lemma)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 283, Col: 130}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 293, Col: 130}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var74))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 138, "</span>")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 142, "</span>")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 							} else {
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 139, "<span class=\"table-word\" data-word-id=\"")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 143, "<span class=\"table-word\" data-word-id=\"")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var75 string
 								templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("lemma-%d-%d", rindex, windex))
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 285, Col: 97}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 295, Col: 97}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var75))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 140, "\">")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 144, "\">")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 								var templ_7745c5c3_Var76 string
 								templ_7745c5c3_Var76, templ_7745c5c3_Err = templ.JoinStringErrs(g.Lemma)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 285, Col: 109}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 295, Col: 109}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var76))
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 141, "</span>")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 145, "</span>")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 142, " <div id=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 146, " <div id=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var77 string
 							templ_7745c5c3_Var77, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("lemma-%d-%d", rindex, windex))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 287, Col: 66}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 297, Col: 66}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var77))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 143, "\" class=\"table-word-data\" style=\"display: none;\"><div class=\"table-word-popup-content\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 147, "\" class=\"table-word-data\" style=\"display: none;\"><div class=\"table-word-popup-content\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							if lemmaEntry.Word != "" {
 								for i, e := range lemmaEntry.Meanings {
-									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 144, "<div class=\"mb-2\"><span class=\"dict-iast-lemma\"><em>")
+									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 148, "<div class=\"mb-2\"><span class=\"dict-iast-lemma\"><em>")
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
 									var templ_7745c5c3_Var78 string
 									templ_7745c5c3_Var78, templ_7745c5c3_Err = templ.JoinStringErrs(lemmaEntry.IAST)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 292, Col: 70}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 302, Col: 70}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var78))
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
-									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 145, "</em></span> ")
+									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 149, "</em></span> ")
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
 									var templ_7745c5c3_Var79 string
 									templ_7745c5c3_Var79, templ_7745c5c3_Err = templ.JoinStringErrs(": ")
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 293, Col: 25}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 303, Col: 25}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var79))
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
-									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 146, " ")
+									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 150, " ")
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
 									var templ_7745c5c3_Var80 string
 									templ_7745c5c3_Var80, templ_7745c5c3_Err = templ.JoinStringErrs(e.Body.Plain)
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 294, Col: 33}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 304, Col: 33}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var80))
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
-									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 147, "</div>")
+									templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 151, "</div>")
 									if templ_7745c5c3_Err != nil {
 										return templ_7745c5c3_Err
 									}
 									if i < len(lemmaEntry.Meanings)-1 {
-										templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 148, "<hr>")
+										templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 152, "<hr>")
 										if templ_7745c5c3_Err != nil {
 											return templ_7745c5c3_Err
 										}
 									}
 								}
-								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 149, " <hr>")
+								templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 153, " <hr>")
 								if templ_7745c5c3_Err != nil {
 									return templ_7745c5c3_Err
 								}
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 150, "<a href=\"")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 154, "<a href=\"")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var81 templ.SafeURL
 							templ_7745c5c3_Var81, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=fuzzy", g.Lemma)))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 302, Col: 121}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 312, Col: 121}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var81))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 151, "\" class=\"badge bg-secondary\">🔎 ")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 155, "\" class=\"badge bg-secondary\">🔎 ")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 							var templ_7745c5c3_Var82 string
 							templ_7745c5c3_Var82, templ_7745c5c3_Err = templ.JoinStringErrs(g.Lemma)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 302, Col: 165}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 312, Col: 165}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var82))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 152, "</a></div></div>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 156, "</a></div></div>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						} else {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 153, "<span class=\"text-muted\">N/A</span>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 157, "<span class=\"text-muted\">N/A</span>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 154, "</td><td>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 158, "</td><td>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -1528,147 +1556,161 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 155, "</td></tr>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 159, "</td></tr>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 156, "</tbody></table></div></div></div><style>\n        .dotted-underline {\n            border-bottom: 1px dotted currentColor;\n            cursor: help;\n        }\n        .pada-word {\n            cursor: pointer;\n            position: relative;\n        }\n\n        .pada-popup {\n            position: absolute;\n            background: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: 4px;\n            padding: 12px;\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n            z-index: 1000;\n            max-width: 400px;\n            max-height: 40vh;\n            overflow-y: auto;\n            font-size: 0.9rem;\n            line-height: 1.4;\n        }\n\n        .pada-word a {\n            border-bottom: 1px dotted currentColor;\n            text-decoration: none;\n            cursor: help;\n            color: var(--bs-body-color);\n        }\n\n        .table-word {\n            cursor: pointer;\n        }\n\n        .table-word-underline {\n            border-bottom: 1px dotted currentColor;\n        }\n\n        .table-word-popup {\n            position: absolute;\n            background: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: 4px;\n            padding: 12px;\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n            z-index: 1000;\n            max-width: 400px;\n            max-height: 40vh;\n            overflow-y: auto;\n            font-size: 0.9rem;\n            line-height: 1.4;\n        }\n\n        .search-result-window {\n            position: fixed;\n            top: 10vh;\n            left: 30vw;\n            z-index: 1060;\n            background-color: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: .3rem;\n            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);\n            max-width: 40vw;\n            max-height: 50vh;\n            overflow: hidden;\n            display: flex;\n            flex-direction: column;\n        }\n\n        .search-result-title-bar {\n            height: 2em;\n            background-color: #003300;\n            cursor: move;\n            display: flex;\n            align-items: center;\n            justify-content: flex-end;\n            flex-shrink: 0;\n        }\n\n        .search-result-content {\n            padding: 1.5rem;\n            overflow-y: auto;\n        }\n\n        .search-result-window .btn-close {\n            margin-right: 0.5em;\n            filter: invert(1) grayscale(100%) brightness(200%);\n        }\n\t\t\t</style> <script>\n        // Pada word popup handler and table word popup handler\n        // initFn will be called by layout body after bootstrap is loaded. This way we can keep JS loading in the end.\n        var initFn = (function () {\n            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]'))\n            tooltipTriggerList.forEach(function (tooltipTriggerEl) {\n                new bootstrap.Tooltip(tooltipTriggerEl)\n            })\n\n            var activePopup = null;\n\n            // Pada word hover cards\n            document.querySelectorAll('.pada-word').forEach(function (wordEl) {\n                var padaId = wordEl.getAttribute('data-pada-id');\n                var dataEl = document.getElementById(padaId);\n\n                if (!dataEl) return;\n\n                wordEl.addEventListener('mouseenter', function (e) {\n                    // Remove any existing popup\n                    if (activePopup) {\n                        activePopup.remove();\n                        activePopup = null;\n                    }\n\n                    // Create popup\n                    var popup = document.createElement('div');\n                    popup.className = 'pada-popup';\n                    popup.innerHTML = dataEl.querySelector('.pada-popup-content').innerHTML;\n\n                    // Position popup\n                    document.body.appendChild(popup);\n                    var rect = wordEl.getBoundingClientRect();\n                    popup.style.left = rect.left + 'px';\n                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';\n\n                    activePopup = popup;\n                });\n\n                wordEl.addEventListener('mouseleave', function (e) {\n                    setTimeout(function () {\n                        if (activePopup && !activePopup.matches(':hover')) {\n                            activePopup.remove();\n                            activePopup = null;\n                        }\n                    }, 100);\n                });\n            });\n\n            // Table word hover cards\n            document.querySelectorAll('.table-word').forEach(function (wordEl) {\n                var wordId = wordEl.getAttribute('data-word-id');\n                var dataEl = document.getElementById(wordId);\n\n                if (!dataEl) return;\n\n                wordEl.addEventListener('mouseenter', function (e) {\n                    // Remove any existing popup\n                    if (activePopup) {\n                        activePopup.remove();\n                        activePopup = null;\n                    }\n\n                    // Create popup\n                    var popup = document.createElement('div');\n                    popup.className = 'table-word-popup';\n                    popup.innerHTML = dataEl.querySelector('.table-word-popup-content').innerHTML;\n\n                    // Position popup\n                    document.body.appendChild(popup);\n                    var rect = wordEl.getBoundingClientRect();\n                    popup.style.left = rect.left + 'px';\n                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';\n\n                    activePopup = popup;\n                });\n\n                wordEl.addEventListener('mouseleave', function (e) {\n                    setTimeout(function () {\n                        if (activePopup && !activePopup.matches(':hover')) {\n                            activePopup.remove();\n                            activePopup = null;\n                        }\n                    }, 100);\n                });\n            });\n\n            function makeDraggable(element) {\n                let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;\n                const dragHandle = element.querySelector('.search-result-title-bar');\n                if (!dragHandle) { return; }\n                dragHandle.onmousedown = dragMouseDown;\n\n                function dragMouseDown(e) {\n                    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a, button')) {\n                        return;\n                    }\n                    e = e || window.event;\n                    e.preventDefault();\n                    pos3 = e.clientX;\n                    pos4 = e.clientY;\n                    document.onmouseup = closeDragElement;\n                    document.onmousemove = elementDrag;\n                }\n\n                function elementDrag(e) {\n                    e = e || window.event;\n                    e.preventDefault();\n                    pos1 = pos3 - e.clientX;\n                    pos2 = pos4 - e.clientY;\n                    pos3 = e.clientX;\n                    pos4 = e.clientY;\n                    element.style.top = (element.offsetTop - pos2) + \"px\";\n                    element.style.left = (element.offsetLeft - pos1) + \"px\";\n                }\n\n                function closeDragElement() {\n                    document.onmouseup = null;\n                    document.onmousemove = null;\n                }\n            }\n\n            // Text selection search popup\n            function setupTextSelectionSearch(elementId, transliteration, fuzziness) {\n                const textEl = document.getElementById(elementId);\n                if (!textEl) return;\n\n                textEl.addEventListener('mouseup', function (e) {\n                    const searchResultWindow = document.querySelector('.search-result-window');\n                    if (searchResultWindow && searchResultWindow.contains(e.target)) {\n                        return;\n                    }\n\n                    if (activePopup) {\n                        activePopup.remove();\n                        activePopup = null;\n                    }\n\n                    setTimeout(() => {\n                        const selection = window.getSelection();\n                        if (!selection.rangeCount) return;\n                        const selectedText = selection.toString().trim();\n\n                        if (selectedText.length > 0 && (selectedText.match(/\\s/g) || []).length <= 2) {\n                            const range = selection.getRangeAt(0);\n                            const rect = range.getBoundingClientRect();\n\n                            if (e.target.closest('.pada-popup, .table-word-popup, .roman-selection-popup')) return;\n\n                            const popup = document.createElement('div');\n                            popup.className = 'roman-selection-popup';\n                            popup.style.position = 'absolute';\n                            popup.style.zIndex = 1050;\n\n                            const searchBadge = document.createElement('button');\n                            searchBadge.className = 'btn btn-sm btn-info';\n                            searchBadge.innerHTML = `🔎 ${selectedText}`;\n\n                            popup.appendChild(searchBadge);\n                            document.body.appendChild(popup);\n\n                            const popupRect = popup.getBoundingClientRect();\n                            popup.style.left = `${rect.right + window.scrollX - popupRect.width}px`;\n                            popup.style.top = `${rect.bottom + window.scrollY + 5}px`;\n\n                            activePopup = popup;\n\n                            searchBadge.addEventListener('click', function () {\n                                if (activePopup) {\n                                    activePopup.remove();\n                                    activePopup = null;\n                                }\n\n                                const existingResultWindow = document.querySelector('.search-result-window');\n                                if (existingResultWindow) {\n                                    existingResultWindow.remove();\n                                }\n\n                                const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(selectedText)}&tl=${transliteration}&mode=fuzzy&preview=true&fuzziness=${fuzziness}`;\n                                fetch(url)\n                                    .then(response => response.text())\n                                    .then(html => {\n                                        const resultWindow = document.createElement('div');\n                                        resultWindow.className = 'search-result-window';\n\n                                        const titleBar = document.createElement('div');\n                                        titleBar.className = 'search-result-title-bar';\n\n                                        const closeButton = document.createElement('button');\n                                        closeButton.className = 'btn-close';\n                                        closeButton.setAttribute('aria-label', 'Close');\n                                        titleBar.appendChild(closeButton);\n\n                                        const contentDiv = document.createElement('div');\n                                        contentDiv.className = 'search-result-content';\n                                        contentDiv.innerHTML = html;\n\n                                        resultWindow.appendChild(titleBar);\n                                        resultWindow.appendChild(contentDiv);\n\n                                        document.body.appendChild(resultWindow);\n\n                                        closeButton.onclick = function () {\n                                            resultWindow.remove();\n                                        };\n\n                                        makeDraggable(resultWindow);\n                                    }).catch(err => console.error(\"Failed to fetch search preview:\", err));\n                            });\n                        }\n                    }, 10);\n                });\n            }\n            setupTextSelectionSearch('roman-text-section', 'iast', 2);\n            setupTextSelectionSearch('source-text-section', 'dn', 3);\n\n            // Close popup when clicking outside\n            document.addEventListener('click', function (e) {\n                if (activePopup && !activePopup.contains(e.target) && !e.target.closest('.pada-word') && !e.target.closest('.table-word')) {\n                    activePopup.remove();\n                    activePopup = null;\n                }\n\n                const resultWindow = document.querySelector('.search-result-window');\n                if (resultWindow && !resultWindow.contains(e.target) && !e.target.closest('.roman-selection-popup')) {\n                    resultWindow.remove();\n                }\n            });\n\n        });\n\t\t\t</script> <div class=\"d-flex justify-content-between my-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 160, "</tbody></table></div></div></div><style>\n        .dotted-underline {\n            border-bottom: 1px dotted currentColor;\n            cursor: help;\n        }\n        .pada-word {\n            cursor: pointer;\n            position: relative;\n        }\n\n        .pada-popup {\n            position: absolute;\n            background: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: 4px;\n            padding: 12px;\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n            z-index: 1000;\n            max-width: 400px;\n            max-height: 40vh;\n            overflow-y: auto;\n            font-size: 0.9rem;\n            line-height: 1.4;\n        }\n\n        .pada-word a {\n            border-bottom: 1px dotted currentColor;\n            text-decoration: none;\n            cursor: help;\n            color: var(--bs-body-color);\n        }\n\n        .table-word {\n            cursor: pointer;\n        }\n\n        .table-word-underline {\n            border-bottom: 1px dotted currentColor;\n        }\n\n        .table-word-popup {\n            position: absolute;\n            background: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: 4px;\n            padding: 12px;\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n            z-index: 1000;\n            max-width: 400px;\n            max-height: 40vh;\n            overflow-y: auto;\n            font-size: 0.9rem;\n            line-height: 1.4;\n        }\n\n        .search-result-window {\n            position: fixed;\n            top: 10vh;\n            left: 30vw;\n            z-index: 1060;\n            background-color: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: .3rem;\n            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);\n            max-width: 40vw;\n            max-height: 50vh;\n            overflow: hidden;\n            display: flex;\n            flex-direction: column;\n        }\n\n        .search-result-title-bar {\n            height: 2em;\n            background-color: #003300;\n            cursor: move;\n            display: flex;\n            align-items: center;\n            justify-content: flex-end;\n            flex-shrink: 0;\n        }\n\n        .search-result-content {\n            padding: 1.5rem;\n            overflow-y: auto;\n        }\n\n        .search-result-window .btn-close {\n            margin-right: 0.5em;\n            filter: invert(1) grayscale(100%) brightness(200%);\n        }\n\t\t\t</style> <script>\n        // Pada word popup handler and table word popup handler\n        // initFn will be called by layout body after bootstrap is loaded. This way we can keep JS loading in the end.\n        var initFn = (function () {\n            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]'))\n            tooltipTriggerList.forEach(function (tooltipTriggerEl) {\n                new bootstrap.Tooltip(tooltipTriggerEl)\n            })\n\n            var activePopup = null;\n\n            // Pada word hover cards\n            document.querySelectorAll('.pada-word').forEach(function (wordEl) {\n                var padaId = wordEl.getAttribute('data-pada-id');\n                var dataEl = document.getElementById(padaId);\n\n                if (!dataEl) return;\n\n                wordEl.addEventListener('mouseenter', function (e) {\n                    // Remove any existing popup\n                    if (activePopup) {\n                        activePopup.remove();\n                        activePopup = null;\n                    }\n\n                    // Create popup\n                    var popup = document.createElement('div');\n                    popup.className = 'pada-popup';\n                    popup.innerHTML = dataEl.querySelector('.pada-popup-content').innerHTML;\n\n                    // Position popup\n                    document.body.appendChild(popup);\n                    var rect = wordEl.getBoundingClientRect();\n                    popup.style.left = rect.left + 'px';\n                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';\n\n                    activePopup = popup;\n                });\n\n                wordEl.addEventListener('mouseleave', function (e) {\n                    setTimeout(function () {\n                        if (activePopup && !activePopup.matches(':hover')) {\n                            activePopup.remove();\n                            activePopup = null;\n                        }\n                    }, 100);\n                });\n            });\n\n            // Table word hover cards\n            document.querySelectorAll('.table-word').forEach(function (wordEl) {\n                var wordId = wordEl.getAttribute('data-word-id');\n                var dataEl = document.getElementById(wordId);\n\n                if (!dataEl) return;\n\n                wordEl.addEventListener('mouseenter', function (e) {\n                    // Remove any existing popup\n                    if (activePopup) {\n                        activePopup.remove();\n                        activePopup = null;\n                    }\n\n                    // Create popup\n                    var popup = document.createElement('div');\n                    popup.className = 'table-word-popup';\n                    popup.innerHTML = dataEl.querySelector('.table-word-popup-content').innerHTML;\n\n                    // Position popup\n                    document.body.appendChild(popup);\n                    var rect = wordEl.getBoundingClientRect();\n                    popup.style.left = rect.left + 'px';\n                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';\n\n                    activePopup = popup;\n                });\n\n                wordEl.addEventListener('mouseleave', function (e) {\n                    setTimeout(function () {\n                        if (activePopup && !activePopup.matches(':hover')) {\n                            activePopup.remove();\n                            activePopup = null;\n                        }\n                    }, 100);\n                });\n            });\n\n            function makeDraggable(element) {\n                let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;\n                const dragHandle = element.querySelector('.search-result-title-bar');\n                if (!dragHandle) { return; }\n                dragHandle.onmousedown = dragMouseDown;\n\n                function dragMouseDown(e) {\n                    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a, button')) {\n                        return;\n                    }\n                    e = e || window.event;\n                    e.preventDefault();\n                    pos3 = e.clientX;\n                    pos4 = e.clientY;\n                    document.onmouseup = closeDragElement;\n                    document.onmousemove = elementDrag;\n                }\n\n                function elementDrag(e) {\n                    e = e || window.event;\n                    e.preventDefault();\n                    pos1 = pos3 - e.clientX;\n                    pos2 = pos4 - e.clientY;\n                    pos3 = e.clientX;\n                    pos4 = e.clientY;\n                    element.style.top = (element.offsetTop - pos2) + \"px\";\n                    element.style.left = (element.offsetLeft - pos1) + \"px\";\n                }\n\n                function closeDragElement() {\n                    document.onmouseup = null;\n                    document.onmousemove = null;\n                }\n            }\n\n            // Text selection search popup\n            function setupTextSelectionSearch(elementId, transliteration, fuzziness) {\n                const textEl = document.getElementById(elementId);\n                if (!textEl) return;\n\n                textEl.addEventListener('mouseup', function (e) {\n                    const searchResultWindow = document.querySelector('.search-result-window');\n                    if (searchResultWindow && searchResultWindow.contains(e.target)) {\n                        return;\n                    }\n\n                    if (activePopup) {\n                        activePopup.remove();\n                        activePopup = null;\n                    }\n\n                    setTimeout(() => {\n                        const selection = window.getSelection();\n                        if (!selection.rangeCount) return;\n                        const selectedText = selection.toString().trim();\n\n                        if (selectedText.length > 0 && (selectedText.match(/\\s/g) || []).length <= 2) {\n                            const range = selection.getRangeAt(0);\n                            const rect = range.getBoundingClientRect();\n\n                            if (e.target.closest('.pada-popup, .table-word-popup, .roman-selection-popup')) return;\n\n                            const popup = document.createElement('div');\n                            popup.className = 'roman-selection-popup';\n                            popup.style.position = 'absolute';\n                            popup.style.zIndex = 1050;\n\n                            const searchBadge = document.createElement('button');\n                            searchBadge.className = 'btn btn-sm btn-info';\n                            searchBadge.innerHTML = `🔎 ${selectedText}`;\n\n                            popup.appendChild(searchBadge);\n                            document.body.appendChild(popup);\n\n                            const popupRect = popup.getBoundingClientRect();\n                            popup.style.left = `${rect.right + window.scrollX - popupRect.width}px`;\n                            popup.style.top = `${rect.bottom + window.scrollY + 5}px`;\n\n                            activePopup = popup;\n\n                            searchBadge.addEventListener('click', function () {\n                                if (activePopup) {\n                                    activePopup.remove();\n                                    activePopup = null;\n                                }\n\n                                const existingResultWindow = document.querySelector('.search-result-window');\n                                if (existingResultWindow) {\n                                    existingResultWindow.remove();\n                                }\n\n                                const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(selectedText)}&tl=${transliteration}&mode=fuzzy&preview=true&fuzziness=${fuzziness}`;\n                                fetch(url)\n                                    .then(response => response.text())\n                                    .then(html => {\n                                        const resultWindow = document.createElement('div');\n                                        resultWindow.className = 'search-result-window';\n\n                                        const titleBar = document.createElement('div');\n                                        titleBar.className = 'search-result-title-bar';\n\n                                        const closeButton = document.createElement('button');\n                                        closeButton.className = 'btn-close';\n                                        closeButton.setAttribute('aria-label', 'Close');\n                                        titleBar.appendChild(closeButton);\n\n                                        const contentDiv = document.createElement('div');\n                                        contentDiv.className = 'search-result-content';\n                                        contentDiv.innerHTML = html;\n\n                                        resultWindow.appendChild(titleBar);\n                                        resultWindow.appendChild(contentDiv);\n\n                                        document.body.appendChild(resultWindow);\n\n                                        closeButton.onclick = function () {\n                                            resultWindow.remove();\n                                        };\n\n                                        makeDraggable(resultWindow);\n                                    }).catch(err => console.error(\"Failed to fetch search preview:\", err));\n                            });\n                        }\n                    }, 10);\n                });\n            }\n            setupTextSelectionSearch('roman-text-section', 'iast', 2);\n            setupTextSelectionSearch('source-text-section', 'dn', 3);\n\n            // Close popup when clicking outside\n            document.addEventListener('click', function (e) {\n                if (activePopup && !activePopup.contains(e.target) && !e.target.closest('.pada-word') && !e.target.closest('.table-word')) {\n                    activePopup.remove();\n                    activePopup = null;\n                }\n\n                const resultWindow = document.querySelector('.search-result-window');\n                if (resultWindow && !resultWindow.contains(e.target) && !e.target.closest('.roman-selection-popup')) {\n                    resultWindow.remove();\n                }\n            });\n\n        });\n\t\t\t</script> <div class=\"d-flex justify-content-between my-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if data.Previous != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 157, "<a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 161, "<a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var83 templ.SafeURL
 				templ_7745c5c3_Var83, templ_7745c5c3_Err = templ.JoinURLErrs(data.Previous)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 648, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 658, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var83))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 158, "\" class=\"btn btn-primary\">&larr; Previous (")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 162, "\" class=\"btn btn-primary\">&larr; Previous (")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var84 string
 				templ_7745c5c3_Var84, templ_7745c5c3_Err = templ.JoinStringErrs(data.Previous)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 648, Col: 87}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 658, Col: 87}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var84))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 159, ")</a> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 163, ")</a> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 160, "<span></span> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 164, "<span></span> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if data.Up != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 161, "<a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 165, "<a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var85 templ.SafeURL
 				templ_7745c5c3_Var85, templ_7745c5c3_Err = templ.JoinURLErrs(data.Up)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 653, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 663, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var85))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 162, "\" class=\"btn btn-info\">&uarr; ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 166, "\" class=\"btn btn-info\">&uarr; ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var86 string
 				templ_7745c5c3_Var86, templ_7745c5c3_Err = templ.JoinStringErrs(data.UpType)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 653, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 663, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var86))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 163, " ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 167, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var87 string
 				templ_7745c5c3_Var87, templ_7745c5c3_Err = templ.JoinStringErrs(data.Up)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 653, Col: 78}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 663, Col: 78}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var87))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 164, "</a> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 168, "</a> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if data.Next != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 165, "<a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 169, "<a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var88 templ.SafeURL
 				templ_7745c5c3_Var88, templ_7745c5c3_Err = templ.JoinURLErrs(data.Next)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 656, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 666, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var88))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 166, "\" class=\"btn btn-primary\">Next (")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 170, "\" class=\"btn btn-primary\">Next (")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var89 string
 				templ_7745c5c3_Var89, templ_7745c5c3_Err = templ.JoinStringErrs(data.Next)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 656, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 666, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var89))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 167, ") &rarr;</a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 171, ") &rarr;</a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 168, "<span></span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 172, "<span></span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 169, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 173, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			if data.Scripture.Attribution != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 174, "<div class=\"text-center my-4 text-muted\" style=\"font-size: 60%;\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templ.Raw(data.Scripture.Attribution).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 175, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 170, "<div class=\"alert alert-warning mt-4\" role=\"alert\">No results found!</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 176, "<div class=\"alert alert-warning mt-4\" role=\"alert\">No results found!</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 171, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 177, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

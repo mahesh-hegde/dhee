@@ -19,10 +19,7 @@
             "name": "rigveda",
             "readable_name": "Rig Veda",
             "description": "The Rig Veda with linguistic data",
-            "attribution": "VedaWeb project",
-            "attribution_links": {
-                "VedaWeb": "https://vedaweb.uni-koeln.de/"
-            },
+            "attribution": "Data from <a href=\"https://github.com/VedaWebProject/vedaweb-data\">VedaWeb project</a>",
             "hierarchy": [
                 "Mandala",
                 "Sukta",
@@ -32,7 +29,8 @@
                 {
                     "name": "pada",
                     "readable_name": "Padapāṭha",
-                    "language": "sanskrit"
+                    "language": "sanskrit",
+                    "attribution": "<a href=\"https://www.sanskrit-lexicon.uni-koeln.de/\">Monier-Williams</a> dictionary from Cologne Sanskrit Lexicon"
                 },
                 {
                     "name": "griffith",

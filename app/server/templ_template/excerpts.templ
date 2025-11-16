@@ -183,6 +183,11 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 								}
 								<p></p>
 							}
+							if aux.Attribution != "" {
+								<div class="text-end text-muted" style="font-size: 60%;">
+									@templ.Raw(aux.Attribution)
+								</div>
+							}
 						</div>
 					</div>
 				} else {
@@ -201,7 +206,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 									}
 								}
 								if aux.Attribution != "" {
-									<div class="text-end" style="font-size: 45%;">
+									<div class="text-end text-muted" style="font-size: 45%;">
 										@templ.Raw(aux.Attribution)
 									</div>
 								}
@@ -664,7 +669,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 				}
 			</div>
 			if data.Scripture.Attribution != "" {
-				<div class="text-center my-4" style="font-size: 50%;">
+				<div class="text-center my-4 text-muted" style="font-size: 60%;">
 					@templ.Raw(data.Scripture.Attribution)
 				</div>
 			}
