@@ -27,17 +27,21 @@ We want to migrate our DictionaryStore to SQLite3 first.
 * Create Init() methods for SQLite3
   * Create schemas in SQLite3 `dhee_excerpts` and `dhee_dictionary_entries`
   * Primary key will be string (since we are using `<scriptureId>:<index>` or `<dictId>:SLP1Word` format in bleve and don't want to disrupt it).
-  * Create FTS5 virtual table to store full text indexes. But use simple columns for fields which are non-analyzed in bleve.
-  * Create a spellfix table for fuzzy search and populate it using FTS5 vocabulary after loading.
-
-* After this step, make sure `init` runs successfully and loads data into an SQLite DB.
+  * Create FTS5 virtual table to store full text indexes. But use simple columns in the main table for keyword fields (fields which are non-analyzed in bleve).
+  * For multi-valued columns (ExcerptInDB.authors, DictionaryEntryInDB.variants etc..), create an FTS column which stores all values separated by `, `.
+  * The main excerpt/dictionary entry payload should be serialized as `gob` to save space.
+  * Create a spellfix1 table for fuzzy search on dictionary and populate it using dictionary words.
 
 * Create `New____StoreWithSQLite()` which take a higher level object (like a connection pool) which can be shared across concurrent requests.
+  * The db path should always be '{dataDir}/dhee.db'.
+
+* Make sure `init` runs successfully and loads data into an SQLite DB.
+
+* Add command line switches for `server`, `index` and `stats` commands in main, which can switch between SQLite3 and Bleve implementations. Define the default in global variable.
 
 #### Step 3 Implement store methods in `DictionaryStore` and `ExcerptStore`.
   * Mirror the existing Bleve implementations in new file (same package).
     * (We will keep bleve implementation for now, do not delete it yet).
     * Follow the sorting behavior properly.
-    * Do not make queries which result in a full table scan except in case of advanced / fuzzy search.
-
-## Step 4: 
+    * Keep the queries optimal.
+    * Fuzzy search on excerpts can be skipped with an error message "unsupported".
