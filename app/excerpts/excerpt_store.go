@@ -219,6 +219,7 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewRegexpQuery(q)
 			if field == "roman_t" {
+				// redirect to roman_k which contains whole text (not analyzed).
 				field = "roman_k"
 			}
 			bq.SetField(field)
@@ -228,6 +229,7 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewMatchQuery(q)
 			if field == "roman_t" {
+				// redirect to roman_folded which contains ascii folded text
 				field = "roman_f"
 			}
 			bq.SetField(field)
@@ -246,6 +248,19 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 			bq.SetField(field)
 			return bq
 		}
+	case common.SearchTranslations:
+		queryMaker = func(q string, field string) query.Query {
+			// ignore field that is specified
+			// TODO: only pick English auxiliaries?
+			bqs := make([]query.Query, 0)
+			for _, scripture := range scriptures {
+				bq := bleve.NewMatchQuery(q)
+				sc := b.conf.GetScriptureByName(scripture)
+				bq.SetField("auxiliaries." + sc.TranslationAuxiliary)
+				bqs = append(bqs, bq)
+			}
+			return bleve.NewDisjunctionQuery(bqs...)
+		}
 	default:
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewMatchQuery(q)
@@ -255,11 +270,8 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	}
 	var contentQuery query.Query
 	if params.Q != "" {
-		// TODO: add sourceText in devanagari to index
-		// sourceQuery := queryMaker(params.Q, "source_text")
 		romanQuery := queryMaker(params.Q, "roman_t")
-		auxQuery := queryMaker(params.Q, "auxiliaries.*")
-		contentQuery = bleve.NewDisjunctionQuery(romanQuery, auxQuery)
+		contentQuery = romanQuery
 	}
 
 	finalQuery := bleve.NewConjunctionQuery(scriptureQuery, contentQuery)

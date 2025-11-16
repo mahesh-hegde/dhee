@@ -32,8 +32,12 @@ We want to migrate our DictionaryStore to SQLite3 first.
 
 * After this step, make sure `init` runs successfully and loads data into an SQLite DB.
 
+* Create `New____StoreWithSQLite()` which take a higher level object (like a connection pool) which can be shared across concurrent requests.
+
 #### Step 3 Implement store methods in `DictionaryStore` and `ExcerptStore`.
   * Mirror the existing Bleve implementations in new file (same package).
     * (We will keep bleve implementation for now, do not delete it yet).
     * Follow the sorting behavior properly.
     * Do not make queries which result in a full table scan except in case of advanced / fuzzy search.
+
+## Step 4: 

@@ -268,12 +268,14 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 
 // Search returns upto 100 Excerpts which match the search according to search parameters.
 func (s *ExcerptService) Search(ctx context.Context, search SearchParams) (*ExcerptSearchData, error) {
-	iastQuery, err := s.transliterator.Convert(search.Q, common.Transliteration(search.Tl), common.TlIAST)
-	if err != nil {
-		slog.Warn("transliteration failed for scripture search", "query", search.Q, "err", err)
-		iastQuery = search.Q
+	if search.Mode != common.SearchTranslations {
+		iastQuery, err := s.transliterator.Convert(search.Q, common.Transliteration(search.Tl), common.TlIAST)
+		if err != nil {
+			slog.Warn("transliteration failed for scripture search", "query", search.Q, "err", err)
+			iastQuery = search.Q
+		}
+		search.Q = iastQuery
 	}
-	search.Q = iastQuery
 
 	excerpts, err := s.store.Search(ctx, search.Scriptures, search)
 	if err != nil {

@@ -26,11 +26,12 @@ const (
 type SearchMode string
 
 const (
-	SearchExact  SearchMode = "exact"
-	SearchRegex  SearchMode = "regex"
-	SearchPrefix SearchMode = "prefix"
-	SearchFuzzy  SearchMode = "fuzzy"
-	SearchASCII  SearchMode = "ascii"
+	SearchExact        SearchMode = "exact"
+	SearchRegex        SearchMode = "regex"
+	SearchPrefix       SearchMode = "prefix"
+	SearchFuzzy        SearchMode = "fuzzy"
+	SearchASCII        SearchMode = "ascii"
+	SearchTranslations SearchMode = "translations"
 )
 
 func PathToSortString(path []int) string {

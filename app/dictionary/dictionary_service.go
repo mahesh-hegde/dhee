@@ -63,12 +63,15 @@ func (s *DictionaryService) Search(ctx context.Context, dictionaryName string, s
 	if searchParams.Tl == common.TlNagari {
 		searchParams.Query = s.transliterator.FoldDevanagariAccents(searchParams.Query)
 	}
-	slp1Query, err := s.transliterator.Convert(searchParams.Query, searchParams.Tl, common.TlSLP1)
-	if err != nil {
-		slog.Warn("transliteration failed for search", "query", searchParams.Query, "err", err)
-		slp1Query = searchParams.Query
+
+	if searchParams.Mode != common.SearchTranslations {
+		finalQuery, err := s.transliterator.Convert(searchParams.Query, searchParams.Tl, common.TlSLP1)
+		if err != nil {
+			slog.Warn("transliteration failed for search", "query", searchParams.Query, "err", err)
+			finalQuery = searchParams.Query
+		}
+		searchParams.Query = finalQuery
 	}
-	searchParams.Query = slp1Query
 
 	res, err := s.store.Search(ctx, dictionaryName, searchParams)
 	if err != nil {

@@ -128,6 +128,10 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 		vq := bleve.NewPrefixQuery(s.Query)
 		vq.SetField("variants")
 		wordQuery = bleve.NewDisjunctionQuery(q, vq)
+	case "translations":
+		q := bleve.NewMatchQuery(s.Query)
+		q.SetField("body_text")
+		wordQuery = q
 	default: // exact
 		q := bleve.NewTermQuery(s.Query)
 		q.SetField("word")
@@ -140,7 +144,7 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 100
 	searchRequest.Fields = []string{"_id", "e"}
-	if s.Mode == "fuzzy" {
+	if s.Mode == "fuzzy" || s.Mode == "translations" {
 		// TODO: add htag
 		searchRequest.SortBy([]string{"-_score", "_id"})
 	} else {
