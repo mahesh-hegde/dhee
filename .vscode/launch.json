@@ -26,6 +26,9 @@
             "cwd": "${workspaceFolder}",
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": "go_generate",
+            "buildFlags": [
+                "-tags=json1,fts5"
+            ],
             "args": [
                 "server",
                 "--data-dir",
@@ -38,6 +41,9 @@
             "request": "launch",
             "mode": "auto",
             "preLaunchTask": "remove_db",
+            "buildFlags": [
+                "-tags=json1,fts5"
+            ],
             "program": "${workspaceFolder}/cmd/dhee/main.go",
             "cwd": "${workspaceFolder}",
             "internalConsoleOptions": "openOnSessionStart",

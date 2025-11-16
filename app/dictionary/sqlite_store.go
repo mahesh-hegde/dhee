@@ -51,12 +51,12 @@ func (s *SQLiteDictStore) Init() error {
 	}
 
 	// Spellfix table
-	_, err = s.db.Exec(`
-		CREATE VIRTUAL TABLE IF NOT EXISTS dhee_dictionary_spellfix USING spellfix1;
-	`)
-	if err != nil {
-		return fmt.Errorf("failed to create spellfix1 table: %w", err)
-	}
+	// _, err = s.db.Exec(`
+	// 	CREATE VIRTUAL TABLE IF NOT EXISTS dhee_dictionary_spellfix USING spellfix1;
+	// `)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to create spellfix1 table: %w", err)
+	// }
 
 	return nil
 }
@@ -80,11 +80,11 @@ func (s *SQLiteDictStore) Add(ctx context.Context, dictName string, es []Diction
 	}
 	defer ftsStmt.Close()
 
-	spellfixStmt, err := tx.Prepare("INSERT INTO dhee_dictionary_spellfix (word) VALUES (?)")
-	if err != nil {
-		return err
-	}
-	defer spellfixStmt.Close()
+	// spellfixStmt, err := tx.Prepare("INSERT INTO dhee_dictionary_spellfix (word) VALUES (?)")
+	// if err != nil {
+	// return err
+	// }
+	// defer spellfixStmt.Close()
 
 	for _, e := range es {
 		e.DictName = dictName
@@ -117,10 +117,10 @@ func (s *SQLiteDictStore) Add(ctx context.Context, dictName string, es []Diction
 			return err
 		}
 
-		_, err = spellfixStmt.ExecContext(ctx, e.Word)
-		if err != nil {
-			return err
-		}
+		// _, err = spellfixStmt.ExecContext(ctx, e.Word)
+		// if err != nil {
+		// return err
+		// }
 	}
 
 	return tx.Commit()
