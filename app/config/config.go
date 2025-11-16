@@ -14,15 +14,14 @@ type AuxiliaryDefinition struct {
 }
 
 type ScriptureDefn struct {
-	Name             string                `json:"name"`
-	ReadableName     string                `json:"readable_name"`
-	Description      string                `json:"description"`
-	Attribution      string                `json:"attribution"`
-	AttributionLinks map[string]string     `json:"attribution_links"`
-	Hierarchy        []string              `json:"hierarchy"`
-	Auxiliaries      []AuxiliaryDefinition `json:"auxiliaries"`
-	DataFile         string                `json:"data_file"`
-	NotesFile        string                `json:"notes_file,omitempty"`
+	Name         string                `json:"name"`
+	ReadableName string                `json:"readable_name"`
+	Description  string                `json:"description"`
+	Attribution  string                `json:"attribution"`
+	Hierarchy    []string              `json:"hierarchy"`
+	Auxiliaries  []AuxiliaryDefinition `json:"auxiliaries"`
+	DataFile     string                `json:"data_file"`
+	NotesFile    string                `json:"notes_file,omitempty"`
 }
 
 type DictDefn struct {
