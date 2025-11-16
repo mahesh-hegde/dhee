@@ -216,7 +216,7 @@ func (s *SQLiteDictStore) Search(ctx context.Context, dictName string, searchPar
 	switch searchParams.Mode {
 	case "prefix":
 		q := searchParams.Query + "*"
-		ftsQuery = fmt.Sprintf("word:%s OR variants:%s", q, q)
+		ftsQuery = fmt.Sprintf("word:%s OR variants:%s", sanitizeNonAlphanumASCII(q), sanitizeNonAlphanumASCII(q))
 	case "translations":
 		ftsQuery = searchParams.Query
 		ftsColumn = "body_text"
