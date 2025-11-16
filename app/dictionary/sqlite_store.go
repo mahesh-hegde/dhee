@@ -11,6 +11,19 @@ import (
 	"github.com/mahesh-hegde/dhee/app/config"
 )
 
+func sanitizeNonAlphanumASCII(s string) string {
+	var sb strings.Builder
+	sb.Grow(len(s))
+	for _, r := range s {
+		if r < 128 && !(('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z') ||
+			('0' <= r && r <= '9') || r == '~' || r == '/' || r == '-') {
+			continue
+		}
+		sb.WriteRune(r)
+	}
+	return sb.String()
+}
+
 type SQLiteDictStore struct {
 	db   *sql.DB
 	conf *config.DheeConfig
@@ -214,7 +227,7 @@ func (s *SQLiteDictStore) Search(ctx context.Context, dictName string, searchPar
 
 	matchClause := "de_fts.dhee_dictionary_fts MATCH ?"
 	if ftsColumn != "" {
-		matchClause = fmt.Sprintf("de_fts.dhee_dictionary_fts(%s) MATCH ?", ftsColumn)
+		matchClause = fmt.Sprintf("de_fts.%s MATCH ?", ftsColumn)
 	}
 
 	query := `

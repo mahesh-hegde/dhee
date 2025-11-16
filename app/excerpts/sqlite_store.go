@@ -52,8 +52,7 @@ func (s *SQLiteExcerptStore) Init() error {
 			authors,
 			meter,
 			surfaces,
-			translation,
-			tokenize = 'porter ascii'
+			translation
 		);
 	`)
 	if err != nil {
@@ -277,7 +276,7 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 			ftsColumn = "roman_t"
 		}
 
-		matchClause := fmt.Sprintf("ex_fts.dhee_excerpts_fts(%s) MATCH ?", ftsColumn)
+		matchClause := fmt.Sprintf("ex_fts.%s MATCH ?", ftsColumn)
 		query := `
 			SELECT ex.e
 			FROM dhee_excerpts_fts AS ex_fts JOIN dhee_excerpts AS ex ON ex_fts.rowid = ex.rowid
