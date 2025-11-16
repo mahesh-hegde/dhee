@@ -177,12 +177,14 @@ func runServer() {
 		slog.Error("--data-dir not provided, stopping")
 		os.Exit(1)
 	}
+
 	conf := readConfig(dataDir)
 	var dictStore dictionary.DictStore
 	var excerptStore excerpts.ExcerptStore
 	var err error
 
-	if store == "bleve" {
+	switch store {
+	case "bleve":
 		dbPath := path.Join(dataDir, "docstore.bleve")
 		index, err := bleve.OpenUsing(dbPath, map[string]any{"read_only": true})
 		if err != nil {
@@ -191,7 +193,7 @@ func runServer() {
 		}
 		dictStore = dictionary.NewBleveDictStore(index, conf)
 		excerptStore = excerpts.NewBleveExcerptStore(index, conf)
-	} else if store == "sqlite" {
+	case "sqlite":
 		db, err := docstore.NewSQLiteDB(dataDir)
 		if err != nil {
 			slog.Error("error while initializing SQLite DB", "err", err)
@@ -199,7 +201,7 @@ func runServer() {
 		}
 		dictStore = dictionary.NewSQLiteDictStore(db, conf)
 		excerptStore = excerpts.NewSQLiteExcerptStore(db, conf)
-	} else {
+	default:
 		slog.Error("unknown store type", "store", store)
 		os.Exit(1)
 	}
