@@ -384,6 +384,14 @@ func InitDB(store, dataDir string, config *config.DheeConfig) (io.Closer, error)
 				os.Remove(dbPath)
 				return nil, fmt.Errorf("error loading initial data into sqlite: %w", err)
 			}
+
+			slog.Info("Optimizing FTS indexes")
+			if _, err := db.Exec("INSERT INTO dhee_dictionary_fts(dhee_dictionary_fts) VALUES('optimize')"); err != nil {
+				slog.Warn("failed to optimize dictionary fts", "err", err)
+			}
+			if _, err := db.Exec("INSERT INTO dhee_excerpts_fts(dhee_excerpts_fts) VALUES('optimize')"); err != nil {
+				slog.Warn("failed to optimize excerpts fts", "err", err)
+			}
 			return db, nil
 		} else if err != nil {
 			return nil, fmt.Errorf("error checking sqlite db: %w", err)

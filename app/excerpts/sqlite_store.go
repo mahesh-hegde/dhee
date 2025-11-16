@@ -30,6 +30,8 @@ func (s *SQLiteExcerptStore) Init() error {
 			id TEXT PRIMARY KEY,
 			scripture TEXT,
 			sort_index TEXT,
+			view_index TEXT,
+			roman_t TEXT,
 			e BLOB
 		);
 		CREATE INDEX IF NOT EXISTS idx_excerpt_sort_index ON dhee_excerpts(sort_index);
@@ -50,7 +52,8 @@ func (s *SQLiteExcerptStore) Init() error {
 			authors,
 			meter,
 			surfaces,
-			translation
+			translation,
+			tokenize = 'porter ascii'
 		);
 	`)
 	if err != nil {
@@ -71,7 +74,7 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 		return fmt.Errorf("scripture not found in config: %s", scripture)
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO dhee_excerpts (id, scripture, sort_index, e) VALUES (?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO dhee_excerpts (id, scripture, sort_index, view_index, roman_t, e) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -100,13 +103,14 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 		}
 
 		sortIndex := common.PathToSortString(e.Path)
-		_, err = stmt.ExecContext(ctx, id, scripture, sortIndex, entryJSON)
+		romanT := strings.Join(e.RomanText, " ")
+
+		_, err = stmt.ExecContext(ctx, id, scripture, sortIndex, e.ReadableIndex, romanT, entryJSON)
 		if err != nil {
 			return err
 		}
 
 		sourceT := strings.Join(e.SourceText, " ")
-		romanT := strings.Join(e.RomanText, " ")
 		romanK := normalizeRomanTextForKwStorage(e.RomanText)
 		romanF := romanK
 		auxTexts := make([]string, 0, len(e.Auxiliaries))
@@ -236,43 +240,51 @@ func (s *SQLiteExcerptStore) FindBeforeAndAfter(ctx context.Context, scripture s
 }
 
 func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, params SearchParams) ([]Excerpt, error) {
-	var ftsQuery string
-	orderBy := "ORDER BY T1.rank, T2.sort_index"
-
 	q := params.Q
-	switch params.Mode {
-	case common.SearchASCII:
-		ftsQuery = "roman_f:" + q
-	case common.SearchPrefix:
-		ftsQuery = "roman_t:" + q + "*"
-	case common.SearchTranslations:
-		ftsQuery = "translation:" + q
-	case common.SearchFuzzy:
-		return nil, errors.New("fuzzy search is not supported on excerpts with sqlite store")
-	case common.SearchRegex:
-		return nil, errors.New("regex search is not supported on excerpts with sqlite store")
-	default: // "exact" from controller, which means match query in bleve. The bleve code defaults to a match query.
-		ftsQuery = "roman_t:" + q
-	}
-
 	scripturePlaceholders := "?"
 	if len(scriptures) > 1 {
 		scripturePlaceholders += strings.Repeat(",?", len(scriptures)-1)
 	}
 
-	query := `
-		SELECT T2.e
-		FROM dhee_excerpts_fts AS T1 JOIN dhee_excerpts AS T2 ON T1.rowid = T2.rowid
-		WHERE T2.scripture IN (` + scripturePlaceholders + `) AND T1.dhee_excerpts_fts MATCH ?
-	`
-
-	fullQuery := query + " " + orderBy + " LIMIT 100"
-
 	args := make([]any, 0, len(scriptures)+1)
 	for _, s := range scriptures {
 		args = append(args, s)
 	}
-	args = append(args, ftsQuery)
+
+	var fullQuery string
+	if params.Mode == common.SearchRegex {
+		query := `SELECT e FROM dhee_excerpts WHERE scripture IN (` + scripturePlaceholders + `) AND roman_t REGEXP ? ORDER BY sort_index LIMIT 100`
+		args = append(args, q)
+		fullQuery = query
+	} else {
+		var ftsQuery, ftsColumn, orderBy string
+		orderBy = "ORDER BY ex_fts.rank, ex.sort_index"
+
+		switch params.Mode {
+		case common.SearchASCII:
+			ftsQuery = q
+			ftsColumn = "roman_f"
+		case common.SearchPrefix:
+			ftsQuery = q + "*"
+			ftsColumn = "roman_t"
+		case common.SearchTranslations:
+			ftsQuery = q
+			ftsColumn = "translation"
+		case common.SearchFuzzy:
+			return nil, errors.New("fuzzy search is not supported on excerpts with sqlite store")
+		default: // "exact" from controller, which means match query in bleve. The bleve code defaults to a match query.
+			ftsQuery = q
+			ftsColumn = "roman_t"
+		}
+
+		matchClause := fmt.Sprintf("ex_fts.dhee_excerpts_fts(%s) MATCH ?", ftsColumn)
+		query := `
+			SELECT ex.e
+			FROM dhee_excerpts_fts AS ex_fts JOIN dhee_excerpts AS ex ON ex_fts.rowid = ex.rowid
+			WHERE ex.scripture IN (` + scripturePlaceholders + `) AND ` + matchClause
+		fullQuery = query + " " + orderBy + " LIMIT 100"
+		args = append(args, ftsQuery)
+	}
 
 	rows, err := s.db.QueryContext(ctx, fullQuery, args...)
 	if err != nil {
@@ -306,7 +318,7 @@ func (s *SQLiteExcerptStore) GetHier(ctx context.Context, scripture *config.Scri
 		sortPrefix += "."
 	}
 
-	query := "SELECT sort_index FROM dhee_excerpts WHERE scripture = ? AND sort_index LIKE ?"
+	query := "SELECT view_index FROM dhee_excerpts WHERE scripture = ? AND sort_index LIKE ? ORDER BY sort_index"
 	rows, err := s.db.QueryContext(ctx, query, scripture.Name, sortPrefix+"%")
 	if err != nil {
 		return nil, err
@@ -317,11 +329,11 @@ func (s *SQLiteExcerptStore) GetHier(ctx context.Context, scripture *config.Scri
 	known := make(map[int]struct{})
 	var childs []int
 	for rows.Next() {
-		var sortIndex string
-		if err := rows.Scan(&sortIndex); err != nil {
+		var viewIndex string
+		if err := rows.Scan(&viewIndex); err != nil {
 			return nil, err
 		}
-		chldPath, err := common.StringToPath(sortIndex)
+		chldPath, err := common.StringToPath(viewIndex)
 		if err != nil {
 			continue
 		}

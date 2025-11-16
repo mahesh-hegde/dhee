@@ -162,28 +162,65 @@ func (s *SQLiteDictStore) Get(ctx context.Context, dictName string, words []stri
 }
 
 func (s *SQLiteDictStore) Search(ctx context.Context, dictName string, searchParams SearchParams) (SearchResults, error) {
-	var ftsQuery string
-	orderBy := "ORDER BY T2.word"
+	if searchParams.Mode == "exact" {
+		query := `SELECT entry FROM dhee_dictionary_entries WHERE dict_name = ? AND word = ? ORDER BY word LIMIT 100`
+		rows, err := s.db.QueryContext(ctx, query, dictName, searchParams.Query)
+		if err != nil {
+			return SearchResults{}, fmt.Errorf("sqlite search failed: %w", err)
+		}
+		defer rows.Close()
+
+		var items []DictSearchResult
+		for rows.Next() {
+			var entryJSON []byte
+			if err := rows.Scan(&entryJSON); err != nil {
+				return SearchResults{}, err
+			}
+			var ent DictionaryEntry
+			if err := json.Unmarshal(entryJSON, &ent); err != nil {
+				return SearchResults{}, err
+			}
+			previews := make([]string, 0, len(ent.Meanings))
+			for _, meaning := range ent.Meanings {
+				previews = append(previews, meaning.Body.Plain)
+			}
+			items = append(items, DictSearchResult{
+				IAST:     ent.IAST,
+				Word:     ent.Word,
+				Previews: previews,
+			})
+		}
+		if err := rows.Err(); err != nil {
+			return SearchResults{}, err
+		}
+
+		return SearchResults{Items: items, DictionaryName: dictName}, nil
+	}
+
+	var ftsQuery, ftsColumn, orderBy string
+	orderBy = "ORDER BY de.word"
 
 	switch searchParams.Mode {
 	case "prefix":
 		q := searchParams.Query + "*"
 		ftsQuery = fmt.Sprintf("word:%s OR variants:%s", q, q)
 	case "translations":
-		ftsQuery = fmt.Sprintf("body_text:%s", searchParams.Query)
-		orderBy = "ORDER BY T1.rank" // Corresponds to _score sort
-	case "exact":
-		q := `"` + searchParams.Query + `"`
-		ftsQuery = fmt.Sprintf("word:%s OR variants:%s", q, q)
+		ftsQuery = searchParams.Query
+		ftsColumn = "body_text"
+		orderBy = "ORDER BY de_fts.rank" // Corresponds to _score sort
 	default:
 		return SearchResults{}, fmt.Errorf("search mode '%s' not supported by sqlite store", searchParams.Mode)
 	}
 
+	matchClause := "de_fts.dhee_dictionary_fts MATCH ?"
+	if ftsColumn != "" {
+		matchClause = fmt.Sprintf("de_fts.dhee_dictionary_fts(%s) MATCH ?", ftsColumn)
+	}
+
 	query := `
-		SELECT T2.entry 
-		FROM dhee_dictionary_fts AS T1 JOIN dhee_dictionary_entries AS T2 ON T1.rowid = T2.rowid 
-		WHERE T2.dict_name = ? AND T1.dhee_dictionary_fts MATCH ?
-	`
+		SELECT de.entry 
+		FROM dhee_dictionary_fts AS de_fts JOIN dhee_dictionary_entries AS de ON de_fts.rowid = de.rowid 
+		WHERE de.dict_name = ? AND ` + matchClause
 	fullQuery := query + " " + orderBy + " LIMIT 100"
 
 	rows, err := s.db.QueryContext(ctx, fullQuery, dictName, ftsQuery)
@@ -220,18 +257,15 @@ func (s *SQLiteDictStore) Search(ctx context.Context, dictName string, searchPar
 }
 
 func (s *SQLiteDictStore) Suggest(ctx context.Context, dictName string, p SuggestParams) (Suggestions, error) {
-	q := p.PartialQuery + "*"
-	ftsQuery := "word:" + q
-
 	query := `
-		SELECT T2.entry
-		FROM dhee_dictionary_fts AS T1 JOIN dhee_dictionary_entries AS T2 ON T1.rowid = T2.rowid
-		WHERE T2.dict_name = ? AND T1.dhee_dictionary_fts MATCH ?
-		ORDER BY T2.word
+		SELECT entry
+		FROM dhee_dictionary_entries
+		WHERE dict_name = ? AND word LIKE ?
+		ORDER BY word
 		LIMIT 20
 	`
 
-	rows, err := s.db.QueryContext(ctx, query, dictName, ftsQuery)
+	rows, err := s.db.QueryContext(ctx, query, dictName, p.PartialQuery+"%")
 	if err != nil {
 		return Suggestions{}, fmt.Errorf("sqlite suggest failed: %w", err)
 	}
