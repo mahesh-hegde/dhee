@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -112,7 +113,7 @@ func runPreprocess() {
 
 func runServer() {
 	flags := pflag.NewFlagSet("server", pflag.ExitOnError)
-	var address, dataDir string
+	var address, dataDir, store string
 	var port int
 	var cpuProfile, memProfile string
 
@@ -123,6 +124,7 @@ func runServer() {
 	flags.IntVarP(&port, "port", "p", 8080, "Server port to bind")
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
+	flags.StringVar(&store, "store", "bleve", "storage backend to use (bleve or sqlite)")
 	flags.StringVar(&cpuProfile, "cpu-profile", "", "write cpu profile to file")
 	flags.StringVar(&memProfile, "mem-profile", "", "write memory profile to file")
 
@@ -177,12 +179,33 @@ func runServer() {
 		os.Exit(1)
 	}
 	conf := readConfig(dataDir)
+	var dictStore dictionary.DictStore
+	var excerptStore excerpts.ExcerptStore
+	var err error
+
+	if store == "bleve" {
+		dbPath := path.Join(dataDir, "docstore.bleve")
+		index, err := bleve.OpenUsing(dbPath, map[string]any{"read_only": true})
+		if err != nil {
+			slog.Error("error opening index, did you run the 'index' command first?", "err", err)
+			os.Exit(1)
+		}
+		dictStore = dictionary.NewBleveDictStore(index, conf)
+		excerptStore = excerpts.NewBleveExcerptStore(index, conf)
+	} else if store == "sqlite" {
+		db, err := docstore.NewSQLiteDB(dataDir)
+		if err != nil {
+			slog.Error("error while initializing SQLite DB", "err", err)
+			os.Exit(1)
+		}
+		dictStore = dictionary.NewSQLiteDictStore(db, conf)
+		excerptStore = excerpts.NewSQLiteExcerptStore(db, conf)
+	} else {
+		slog.Error("unknown store type", "store", store)
+		os.Exit(1)
+	}
 
 	fmt.Printf("Starting server on %s:%d\n", address, port)
-	index, err := docstore.InitDB(dataDir, conf)
-	if err != nil {
-		slog.Error("error while initializing DB", "err", err)
-	}
 
 	transliterator, err := transliteration.NewTransliterator(transliteration.TlOptions{})
 	if err != nil {
@@ -190,18 +213,16 @@ func runServer() {
 		os.Exit(1)
 	}
 
-	dictStore := dictionary.NewBleveDictStore(index, conf)
-	excerptStore := excerpts.NewBleveExcerptStore(index, conf)
 	controller := server.NewDheeController(dictStore, excerptStore, conf, transliterator)
 	server.StartServer(controller, conf, address, port)
 }
 
 func runIndex() {
 	flags := pflag.NewFlagSet("index", pflag.ExitOnError)
-	var dataDir string
+	var dataDir, store string
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
-
+	flags.StringVar(&store, "store", "bleve", "storage backend to use (bleve or sqlite)")
 	flags.Parse(os.Args[2:])
 
 	if dataDir == "" {
@@ -210,21 +231,48 @@ func runIndex() {
 	}
 	conf := readConfig(dataDir)
 
-	slog.Info("starting indexing", "data-dir", dataDir)
-	idx, err := docstore.InitDB(dataDir, conf)
-	if err != nil {
-		slog.Error("error while initializing DB", "err", err)
+	slog.Info("starting indexing", "data-dir", dataDir, "store", store)
+	if store == "bleve" {
+		idx, err := docstore.InitDB(dataDir, conf)
+		if err != nil {
+			slog.Error("error while initializing DB", "err", err)
+		}
+		idx.Close()
+	} else if store == "sqlite" {
+		dbPath := path.Join(dataDir, "dhee.db")
+		_, err := os.Stat(dbPath)
+		if errors.Is(err, os.ErrNotExist) {
+			db, err := docstore.NewSQLiteDB(dataDir)
+			if err != nil {
+				slog.Error("error creating sqlite db", "err", err)
+				os.Exit(1)
+			}
+			defer db.Close()
+			dictStore := dictionary.NewSQLiteDictStore(db, conf)
+			excerptStore := excerpts.NewSQLiteExcerptStore(db, conf)
+			err = docstore.LoadInitialData(dictStore, excerptStore, dataDir, conf)
+			if err != nil {
+				slog.Error("error loading initial data into sqlite", "err", err)
+				os.Remove(dbPath)
+				os.Exit(1)
+			}
+		} else if err != nil {
+			slog.Error("error checking sqlite db", "err", err)
+			os.Exit(1)
+		}
+	} else {
+		slog.Error("unknown store type", "store", store)
+		os.Exit(1)
 	}
-	idx.Close()
 	slog.Info("finished indexing")
 }
 
 func runStats() {
 	flags := pflag.NewFlagSet("stats", pflag.ExitOnError)
-	var dataDir string
+	var dataDir, store string
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
-
+	flags.StringVar(&store, "store", "bleve", "storage backend to use (bleve or sqlite)")
 	flags.Parse(os.Args[2:])
 
 	if dataDir == "" {
@@ -232,29 +280,36 @@ func runStats() {
 		os.Exit(1)
 	}
 
-	dbPath := path.Join(dataDir, "docstore.bleve")
-	slog.Info("opening DB", "dbPath", dbPath)
-	index, err := bleve.Open(dbPath)
-	if err != nil {
-		slog.Error("error opening index, did you run the 'index' command first?", "err", err)
-		os.Exit(1)
-	}
-	defer index.Close()
-
-	docTypes := map[string]string{"dictionary_entry": "dict_name", "scripture": "scripture"}
-	for docType, field := range docTypes {
-		// query := bleve.NewTermQuery(docType)
-		// query.SetField("_type")
-		query := bleve.NewRegexpQuery(".+")
-		query.SetField(field)
-		searchRequest := bleve.NewSearchRequest(query)
-		searchRequest.Fields = []string{"*"}
-		searchRequest.Size = 1 // We only need the count
-		searchResult, err := index.Search(searchRequest)
+	if store == "bleve" {
+		dbPath := path.Join(dataDir, "docstore.bleve")
+		slog.Info("opening DB", "dbPath", dbPath)
+		index, err := bleve.Open(dbPath)
 		if err != nil {
-			slog.Error("error searching for doc type", "type", docType, "err", err)
-			continue
+			slog.Error("error opening index, did you run the 'index' command first?", "err", err)
+			os.Exit(1)
 		}
-		fmt.Printf("'%s' count: %d\n", docType, searchResult.Total)
+		defer index.Close()
+
+		docTypes := map[string]string{"dictionary_entry": "dict_name", "scripture": "scripture"}
+		for docType, field := range docTypes {
+			// query := bleve.NewTermQuery(docType)
+			// query.SetField("_type")
+			query := bleve.NewRegexpQuery(".+")
+			query.SetField(field)
+			searchRequest := bleve.NewSearchRequest(query)
+			searchRequest.Fields = []string{"*"}
+			searchRequest.Size = 1 // We only need the count
+			searchResult, err := index.Search(searchRequest)
+			if err != nil {
+				slog.Error("error searching for doc type", "type", docType, "err", err)
+				continue
+			}
+			fmt.Printf("'%s' count: %d\n", docType, searchResult.Total)
+		}
+	} else if store == "sqlite" {
+		fmt.Println("stats for sqlite not implemented yet")
+	} else {
+		slog.Error("unknown store type", "store", store)
+		os.Exit(1)
 	}
 }
