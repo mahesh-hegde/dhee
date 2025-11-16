@@ -99,7 +99,6 @@ func parseNotesFile(filePath string) (map[string]string, error) {
 	return notes, nil
 }
 
-
 // --- bleve mappings ---
 func GetBleveIndexMappings() mapping.IndexMapping {
 	// Base index mapping
