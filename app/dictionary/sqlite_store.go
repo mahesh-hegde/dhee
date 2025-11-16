@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 )
 
@@ -127,17 +128,148 @@ func (s *SQLiteDictStore) Add(ctx context.Context, dictName string, es []Diction
 }
 
 func (s *SQLiteDictStore) Get(ctx context.Context, dictName string, words []string) (map[string]DictionaryEntry, error) {
-	return nil, errors.New("not implemented")
+	if len(words) == 0 {
+		return make(map[string]DictionaryEntry), nil
+	}
+
+	ids := make([]any, len(words))
+	dictId := s.conf.DictNameToId(dictName)
+	for i, word := range words {
+		ids[i] = fmt.Sprintf("%d:%s", dictId, word)
+	}
+
+	query := "SELECT entry FROM dhee_dictionary_entries WHERE id IN (?" + strings.Repeat(",?", len(ids)-1) + ")"
+
+	rows, err := s.db.QueryContext(ctx, query, ids...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	results := make(map[string]DictionaryEntry)
+	for rows.Next() {
+		var entryJSON []byte
+		if err := rows.Scan(&entryJSON); err != nil {
+			return nil, err
+		}
+		var entry DictionaryEntry
+		if err := json.Unmarshal(entryJSON, &entry); err != nil {
+			return nil, err
+		}
+		results[entry.Word] = entry
+	}
+
+	return results, rows.Err()
 }
 
 func (s *SQLiteDictStore) Search(ctx context.Context, dictName string, searchParams SearchParams) (SearchResults, error) {
-	return SearchResults{}, errors.New("not implemented")
+	var ftsQuery string
+	orderBy := "ORDER BY T2.word"
+
+	switch searchParams.Mode {
+	case "prefix":
+		q := searchParams.Query + "*"
+		ftsQuery = fmt.Sprintf("word:%s OR variants:%s", q, q)
+	case "translations":
+		ftsQuery = fmt.Sprintf("body_text:%s", searchParams.Query)
+		orderBy = "ORDER BY T1.rank" // Corresponds to _score sort
+	case "exact":
+		q := `"` + searchParams.Query + `"`
+		ftsQuery = fmt.Sprintf("word:%s OR variants:%s", q, q)
+	default:
+		return SearchResults{}, fmt.Errorf("search mode '%s' not supported by sqlite store", searchParams.Mode)
+	}
+
+	query := `
+		SELECT T2.entry 
+		FROM dhee_dictionary_fts AS T1 JOIN dhee_dictionary_entries AS T2 ON T1.rowid = T2.rowid 
+		WHERE T2.dict_name = ? AND T1.dhee_dictionary_fts MATCH ?
+	`
+	fullQuery := query + " " + orderBy + " LIMIT 100"
+
+	rows, err := s.db.QueryContext(ctx, fullQuery, dictName, ftsQuery)
+	if err != nil {
+		return SearchResults{}, fmt.Errorf("sqlite search failed: %w", err)
+	}
+	defer rows.Close()
+
+	var items []DictSearchResult
+	for rows.Next() {
+		var entryJSON []byte
+		if err := rows.Scan(&entryJSON); err != nil {
+			return SearchResults{}, err
+		}
+		var ent DictionaryEntry
+		if err := json.Unmarshal(entryJSON, &ent); err != nil {
+			return SearchResults{}, err
+		}
+		previews := make([]string, 0, len(ent.Meanings))
+		for _, meaning := range ent.Meanings {
+			previews = append(previews, meaning.Body.Plain)
+		}
+		items = append(items, DictSearchResult{
+			IAST:     ent.IAST,
+			Word:     ent.Word,
+			Previews: previews,
+		})
+	}
+	if err := rows.Err(); err != nil {
+		return SearchResults{}, err
+	}
+
+	return SearchResults{Items: items, DictionaryName: dictName}, nil
 }
 
 func (s *SQLiteDictStore) Suggest(ctx context.Context, dictName string, p SuggestParams) (Suggestions, error) {
-	return Suggestions{}, errors.New("not implemented")
+	q := p.PartialQuery + "*"
+	ftsQuery := "word:" + q
+
+	query := `
+		SELECT T2.entry
+		FROM dhee_dictionary_fts AS T1 JOIN dhee_dictionary_entries AS T2 ON T1.rowid = T2.rowid
+		WHERE T2.dict_name = ? AND T1.dhee_dictionary_fts MATCH ?
+		ORDER BY T2.word
+		LIMIT 20
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, dictName, ftsQuery)
+	if err != nil {
+		return Suggestions{}, fmt.Errorf("sqlite suggest failed: %w", err)
+	}
+	defer rows.Close()
+
+	var items []DictSearchSuggestion
+	for rows.Next() {
+		var entryJSON []byte
+		if err := rows.Scan(&entryJSON); err != nil {
+			return Suggestions{}, err
+		}
+		var ent DictionaryEntry
+		if err := json.Unmarshal(entryJSON, &ent); err != nil {
+			return Suggestions{}, err
+		}
+
+		var preview string
+		if len(ent.Meanings) > 0 {
+			preview = ent.Meanings[0].Body.Plain
+		}
+
+		items = append(items, DictSearchSuggestion{
+			IAST:    ent.IAST,
+			Preview: preview,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return Suggestions{}, err
+	}
+
+	return Suggestions{Items: items}, nil
 }
 
 func (s *SQLiteDictStore) Related(ctx context.Context, dictName string, word string) (SearchResults, error) {
-	return SearchResults{}, errors.New("not implemented")
+	return s.Search(ctx, dictName, SearchParams{
+		Query: word + "-",
+		Mode:  common.SearchMode("prefix"),
+	})
 }
