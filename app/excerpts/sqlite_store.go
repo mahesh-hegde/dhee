@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
-	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -49,7 +49,8 @@ func (s *SQLiteExcerptStore) Init() error {
 			notes,
 			authors,
 			meter,
-			surfaces
+			surfaces,
+			translation
 		);
 	`)
 	if err != nil {
@@ -65,6 +66,11 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 	}
 	defer tx.Rollback()
 
+	scriptureDefn := s.conf.GetScriptureByName(scripture)
+	if scriptureDefn == nil {
+		return fmt.Errorf("scripture not found in config: %s", scripture)
+	}
+
 	stmt, err := tx.Prepare("INSERT INTO dhee_excerpts (id, scripture, sort_index, e) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return err
@@ -74,8 +80,8 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 	ftsStmt, err := tx.Prepare(`
 		INSERT INTO dhee_excerpts_fts (
 			source_t, roman_t, roman_k, roman_f, auxiliaries,
-			addressees, notes, authors, meter, surfaces
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			addressees, notes, authors, meter, surfaces, translation
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
 		return err
@@ -88,13 +94,13 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			e.ReadableIndex = common.PathToString(e.Path)
 		}
 		id := fmt.Sprintf("%d:%s", s.conf.ScriptureNameToId(scripture), e.ReadableIndex)
-		var buf bytes.Buffer
-		if err := gob.NewEncoder(&buf).Encode(e); err != nil {
-			return fmt.Errorf("failed to gob encode excerpt: %w", err)
+		entryJSON, err := json.Marshal(e)
+		if err != nil {
+			return fmt.Errorf("failed to json encode excerpt: %w", err)
 		}
 
 		sortIndex := common.PathToSortString(e.Path)
-		_, err = stmt.ExecContext(ctx, id, scripture, sortIndex, buf.Bytes())
+		_, err = stmt.ExecContext(ctx, id, scripture, sortIndex, entryJSON)
 		if err != nil {
 			return err
 		}
@@ -116,6 +122,13 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			}
 		}
 
+		var translationText string
+		if scriptureDefn.TranslationAuxiliary != "" {
+			if aux, ok := e.Auxiliaries[scriptureDefn.TranslationAuxiliary]; ok {
+				translationText = strings.Join(aux.Text, " ")
+			}
+		}
+
 		_, err = ftsStmt.ExecContext(ctx,
 			sourceT,
 			romanT,
@@ -127,6 +140,7 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			strings.Join(e.Authors, ", "),
 			e.Meter,
 			strings.Join(surfaces, ", "),
+			translationText,
 		)
 		if err != nil {
 			return err

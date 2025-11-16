@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
-	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -91,12 +91,12 @@ func (s *SQLiteDictStore) Add(ctx context.Context, dictName string, es []Diction
 		e.DictName = dictName
 		id := fmt.Sprintf("%d:%s", s.conf.DictNameToId(dictName), e.Word)
 
-		var buf bytes.Buffer
-		if err := gob.NewEncoder(&buf).Encode(e); err != nil {
-			return fmt.Errorf("failed to gob encode dictionary entry: %w", err)
+		entryJSON, err := json.Marshal(e)
+		if err != nil {
+			return fmt.Errorf("failed to json encode dictionary entry: %w", err)
 		}
 
-		_, err := stmt.ExecContext(ctx, id, dictName, e.Word, buf.Bytes())
+		_, err := stmt.ExecContext(ctx, id, dictName, e.Word, entryJSON)
 		if err != nil {
 			return err
 		}
