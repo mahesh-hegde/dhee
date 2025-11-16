@@ -238,6 +238,7 @@ func loadDictionaryData(store dictionary.DictStore, dict config.DictDefn, dataDi
 
 	// Execute the final batch
 	if len(entries) > 0 {
+		slog.Info("executing final batch", "size", len(entries))
 		if err := store.Add(context.Background(), dict.Name, entries); err != nil {
 			return fmt.Errorf("failed to execute final batch: %w", err)
 		}
@@ -296,6 +297,7 @@ func loadExcerptsData(store excerpts.ExcerptStore, sc config.ScriptureDefn, data
 		return fmt.Errorf("scanner error: %w", err)
 	}
 	if len(entries) > 0 {
+		slog.Info("executing final batch", "size", len(entries))
 		if err := store.Add(context.Background(), sc.Name, entries); err != nil {
 			return fmt.Errorf("failed to execute final batch: %w", err)
 		}
@@ -305,6 +307,12 @@ func loadExcerptsData(store excerpts.ExcerptStore, sc config.ScriptureDefn, data
 
 // --- LoadData with conversions ---
 func LoadInitialData(dictStore dictionary.DictStore, excerptStore excerpts.ExcerptStore, dataDir string, config *config.DheeConfig) error {
+	if err := dictStore.Init(); err != nil {
+		return fmt.Errorf("failed to init dict store: %w", err)
+	}
+	if err := excerptStore.Init(); err != nil {
+		return fmt.Errorf("failed to init excerpt store: %w", err)
+	}
 	// Load scriptures
 	for _, sc := range config.Scriptures {
 		if err := loadExcerptsData(excerptStore, sc, dataDir); err != nil {
