@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/blevesearch/bleve/v2"
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/transliteration"
@@ -92,9 +91,9 @@ func (s *DictionaryService) Related(ctx context.Context, dictName string, word s
 	return s.store.Related(ctx, dictName, word)
 }
 
-func NewDictionaryService(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DictionaryService {
+func NewDictionaryService(store DictStore, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DictionaryService {
 	return &DictionaryService{
-		store:          NewBleveDictStore(index, conf),
+		store:          store,
 		conf:           conf,
 		transliterator: transliterator,
 	}

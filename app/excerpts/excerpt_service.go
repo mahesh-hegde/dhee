@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/blevesearch/bleve/v2"
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
@@ -293,15 +292,20 @@ func (s *ExcerptService) GetHier(ctx context.Context, scriptureName string, path
 	return s.store.GetHier(ctx, &scri, path)
 }
 
-func NewExcerptService(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *ExcerptService {
+func NewExcerptService(
+	dictStore dictionary.DictStore,
+	excerptStore ExcerptStore,
+	conf *config.DheeConfig,
+	transliterator *transliteration.Transliterator,
+) *ExcerptService {
 	scriptureMap := map[string]config.ScriptureDefn{}
 	for _, scri := range conf.Scriptures {
 		scriptureMap[scri.Name] = scri
 	}
 
 	return &ExcerptService{
-		ds:             dictionary.NewBleveDictStore(index, conf),
-		store:          NewBleveExcerptStore(index, conf),
+		ds:             dictStore,
+		store:          excerptStore,
 		conf:           conf,
 		transliterator: transliterator,
 		scriptureMap:   scriptureMap,
