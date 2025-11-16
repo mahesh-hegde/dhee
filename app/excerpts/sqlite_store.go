@@ -58,16 +58,6 @@ func (s *SQLiteExcerptStore) Init() error {
 	return nil
 }
 
-var replacer = strings.NewReplacer(common.FoldableAccentsList...)
-
-func normalizeRomanTextForKwStorage(txt []string) string {
-	var result []string
-	for _, t := range txt {
-		result = append(result, replacer.Replace(t))
-	}
-	return strings.Join(result, " ")
-}
-
 func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Excerpt) error {
 	tx, err := s.db.Begin()
 	if err != nil {

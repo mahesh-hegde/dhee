@@ -62,22 +62,6 @@ func (s *SQLiteDictStore) Init() error {
 	return nil
 }
 
-func getAllVariants(entry *DictionaryEntry) []string {
-	res := make([]string, 0)
-	for _, meaning := range entry.Meanings {
-		res = append(res, meaning.Variants...)
-	}
-	return res
-}
-
-func getAllLitRefs(entry *DictionaryEntry) []string {
-	res := make([]string, 0)
-	for _, meaning := range entry.Meanings {
-		res = append(res, meaning.LitRefs...)
-	}
-	return res
-}
-
 func (s *SQLiteDictStore) Add(ctx context.Context, dictName string, es []DictionaryEntry) error {
 	tx, err := s.db.Begin()
 	if err != nil {
@@ -151,7 +135,7 @@ func (s *SQLiteDictStore) Search(ctx context.Context, dictName string, searchPar
 	return SearchResults{}, errors.New("not implemented")
 }
 
-func (s *SQLiteDictStore) Suggest(ctx context.Context, dictName string, s SuggestParams) (Suggestions, error) {
+func (s *SQLiteDictStore) Suggest(ctx context.Context, dictName string, p SuggestParams) (Suggestions, error) {
 	return Suggestions{}, errors.New("not implemented")
 }
 
