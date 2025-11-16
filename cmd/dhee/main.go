@@ -190,7 +190,9 @@ func runServer() {
 		os.Exit(1)
 	}
 
-	controller := server.NewDheeController(index, conf, transliterator)
+	dictStore := dictionary.NewBleveDictStore(index, conf)
+	excerptStore := excerpts.NewBleveExcerptStore(index, conf)
+	controller := server.NewDheeController(dictStore, excerptStore, conf, transliterator)
 	server.StartServer(controller, conf, address, port)
 }
 

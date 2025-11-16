@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/blevesearch/bleve/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
@@ -21,10 +20,10 @@ type DheeController struct {
 	conf *config.DheeConfig
 }
 
-func NewDheeController(index bleve.Index, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DheeController {
+func NewDheeController(dictStore dictionary.DictStore, excerptStore excerpts.ExcerptStore, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DheeController {
 	return &DheeController{
-		ds:   dictionary.NewDictionaryService(index, conf, transliterator),
-		es:   excerpts.NewExcerptService(index, conf, transliterator),
+		ds:   dictionary.NewDictionaryService(dictStore, conf, transliterator),
+		es:   excerpts.NewExcerptService(dictStore, excerptStore, conf, transliterator),
 		conf: conf,
 	}
 }
