@@ -278,7 +278,7 @@ func (s *ExcerptService) Search(ctx context.Context, search SearchParams) (*Exce
 
 	excerpts, err := s.store.Search(ctx, search.Scriptures, search)
 	if err != nil {
-		return nil, fmt.Errorf("failed to search: %w", err)
+		return nil, common.WrapErrorForResponse(err, "failed to search excerpts")
 	}
 	return &ExcerptSearchData{Excerpts: excerpts, Search: search}, nil
 }

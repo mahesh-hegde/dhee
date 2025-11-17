@@ -156,7 +156,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"><div class=\"col-sm-6\"><input type=\"text\" class=\"form-control\" name=\"query\" placeholder=\"Search text\"></div><div class=\"col-sm-2\"><select name=\"tl\" class=\"form-select\"><option value=\"slp1\" selected>SLP1</option> <option value=\"iast\">IAST</option> <option value=\"hk\">HK</option> <option value=\"dn\">Devanagari</option></select></div><div class=\"col-sm-2\"><select name=\"mode\" class=\"form-select\"><option value=\"exact\" selected>Normal</option> <option value=\"regex\">Regex</option> <option value=\"fuzzy\">Fuzzy</option> <option value=\"prefix\">Prefix</option> <option value=\"ascii\">ASCII</option> <option value=\"translations\">Translations</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Go</button></div></form></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"><div class=\"col-sm-6\"><input type=\"text\" class=\"form-control\" name=\"query\" placeholder=\"Search text\"></div><div class=\"col-sm-2\"><select name=\"tl\" class=\"form-select\"><option value=\"slp1\" selected>SLP1</option> <option value=\"iast\">IAST</option> <option value=\"hk\">HK</option> <option value=\"dn\">Devanagari</option></select></div><div class=\"col-sm-2\"><select name=\"mode\" class=\"form-select\"><option value=\"exact\" selected>Normal</option> <option value=\"regex\">Regex</option> <option value=\"fuzzy\">Fuzzy</option> <option value=\"translations\">Translations</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Go</button></div></form></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -173,7 +173,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("heading-" + dictionary.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 71, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 69, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -186,7 +186,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("#collapse-" + dictionary.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 72, Col: 126}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 70, Col: 126}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -199,7 +199,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("collapse-" + dictionary.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 72, Col: 195}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 70, Col: 195}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -212,7 +212,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(dictionary.ReadableName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 73, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 71, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -225,7 +225,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs("collapse-" + dictionary.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 76, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 74, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -238,7 +238,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs("heading-" + dictionary.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 76, Col: 134}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 74, Col: 134}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -251,7 +251,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			var templ_7745c5c3_Var17 templ.SafeURL
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/dictionaries/%s/search", dictionary.Name))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 78, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/home.templ`, Line: 76, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {

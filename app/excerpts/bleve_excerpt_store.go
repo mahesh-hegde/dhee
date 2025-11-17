@@ -214,16 +214,6 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 			bq.SetField(field)
 			return bq
 		}
-	case common.SearchASCII:
-		queryMaker = func(q string, field string) query.Query {
-			bq := bleve.NewMatchQuery(q)
-			if field == "roman_t" {
-				// redirect to roman_folded which contains ascii folded text
-				field = "roman_f"
-			}
-			bq.SetField(field)
-			return bq
-		}
 	case common.SearchFuzzy:
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewFuzzyQuery(q)
@@ -250,12 +240,18 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 			}
 			return bleve.NewDisjunctionQuery(bqs...)
 		}
-	default:
+	case common.SearchExact:
 		queryMaker = func(q string, field string) query.Query {
 			bq := bleve.NewMatchQuery(q)
 			bq.SetField(field)
-			return bq
+			bq.SetBoost(1.2)
+			bqa := bleve.NewMatchQuery(q)
+			bqa.SetField("roman_f")
+			bqa.SetBoost(0.9)
+			return bleve.NewDisjunctionQuery(bq, bqa)
 		}
+	default:
+		return nil, common.NewUserVisibleError(422, "Unsupported search mode")
 	}
 	var contentQuery query.Query
 	if params.Q != "" {

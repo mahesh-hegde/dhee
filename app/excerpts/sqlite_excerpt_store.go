@@ -52,7 +52,8 @@ func (s *SQLiteExcerptStore) Init() error {
 			authors,
 			meter,
 			surfaces,
-			translation
+			translation,
+			tokenize = 'unicode61 remove_diacritics 2'
 		);
 	`)
 	if err != nil {
