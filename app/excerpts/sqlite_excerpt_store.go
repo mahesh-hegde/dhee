@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"sort"
 	"strings"
 
@@ -40,24 +41,35 @@ func (s *SQLiteExcerptStore) Init() error {
 		return fmt.Errorf("failed to create dhee_excerpts table: %w", err)
 	}
 
+	// main excerpt FTS (no translation column)
 	_, err = s.db.Exec(`
 		CREATE VIRTUAL TABLE IF NOT EXISTS dhee_excerpts_fts USING fts5(
 			source_t,
 			roman_t,
-			roman_k,
-			roman_f,
-			auxiliaries,
 			addressees,
-			notes,
 			authors,
 			meter,
 			surfaces,
-			translation,
 			tokenize = 'unicode61 remove_diacritics 2'
 		);
 	`)
 	if err != nil {
 		return fmt.Errorf("failed to create dhee_excerpts_fts table: %w", err)
+	}
+
+	// separate translations FTS so we can configure/optimize translation queries independently
+	_, err = s.db.Exec(`
+		CREATE VIRTUAL TABLE IF NOT EXISTS dhee_excerpts_translations_fts USING fts5(
+			translation,
+			notes,
+			addressees,
+			authors,
+			meter,
+			tokenize = 'unicode61 remove_diacritics 2'
+		);
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to create dhee_excerpts_translations_fts table: %w", err)
 	}
 	return nil
 }
@@ -82,14 +94,23 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 
 	ftsStmt, err := tx.Prepare(`
 		INSERT INTO dhee_excerpts_fts (
-			source_t, roman_t, roman_k, roman_f, auxiliaries,
-			addressees, notes, authors, meter, surfaces, translation
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			source_t, roman_t, addressees, authors, meter, surfaces
+		) VALUES (?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
 		return err
 	}
 	defer ftsStmt.Close()
+
+	translFtsStmt, err := tx.Prepare(`
+		INSERT INTO dhee_excerpts_translations_fts (
+			translation, notes, addressees, authors, meter
+		) VALUES (?, ?, ?, ?, ?)
+	`)
+	if err != nil {
+		return err
+	}
+	defer translFtsStmt.Close()
 
 	for _, e := range es {
 		e.Scripture = scripture
@@ -97,7 +118,46 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			e.ReadableIndex = common.PathToString(e.Path)
 		}
 		id := fmt.Sprintf("%d:%s", s.conf.ScriptureNameToId(scripture), e.ReadableIndex)
-		entryJSON, err := json.Marshal(e)
+
+		// --- HTML-escape searchable text & auxiliaries BEFORE serializing ---
+		for i := range e.SourceText {
+			e.SourceText[i] = html.EscapeString(e.SourceText[i])
+		}
+		for i := range e.RomanText {
+			e.RomanText[i] = html.EscapeString(e.RomanText[i])
+		}
+		for i := range e.Notes {
+			e.Notes[i] = html.EscapeString(e.Notes[i])
+		}
+		// auxTextsEscaped := make([]string, 0, len(e.Auxiliaries))
+		// for k, auxObj := range e.Auxiliaries {
+		// 	for i := range auxObj.Text {
+		// 		auxObj.Text[i] = html.EscapeString(auxObj.Text[i])
+		// 	}
+		// 	// store back the escaped auxiliary in the JSON representation
+		// 	e.Auxiliaries[k] = auxObj
+		// 	auxTextsEscaped = append(auxTextsEscaped, strings.Join(auxObj.Text, " "))
+		// }
+
+		// HTML-escape searchable strings before serializing to db
+		for i := range e.SourceText {
+			e.SourceText[i] = html.EscapeString(e.SourceText[i])
+		}
+		for i := range e.RomanText {
+			e.RomanText[i] = html.EscapeString(e.RomanText[i])
+		}
+		for i := range e.Notes {
+			e.Notes[i] = html.EscapeString(e.Notes[i])
+		}
+		for k, aux := range e.Auxiliaries {
+			for i := range aux.Text {
+				aux.Text[i] = html.EscapeString(aux.Text[i])
+			}
+			e.Auxiliaries[k] = aux
+		}
+
+		entryJSON, _ := json.Marshal(e)
+
 		if err != nil {
 			return fmt.Errorf("failed to json encode excerpt: %w", err)
 		}
@@ -111,12 +171,6 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 		}
 
 		sourceT := strings.Join(e.SourceText, " ")
-		romanK := normalizeRomanTextForKwStorage(e.RomanText)
-		romanF := romanK
-		auxTexts := make([]string, 0, len(e.Auxiliaries))
-		for _, auxObj := range e.Auxiliaries {
-			auxTexts = append(auxTexts, strings.Join(auxObj.Text, " "))
-		}
 		var surfaces []string
 		for _, glossGroup := range e.Glossings {
 			for _, g := range glossGroup {
@@ -126,6 +180,7 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			}
 		}
 
+		// translation text is already escaped if present
 		var translationText string
 		if scriptureDefn.TranslationAuxiliary != "" {
 			if aux, ok := e.Auxiliaries[scriptureDefn.TranslationAuxiliary]; ok {
@@ -133,21 +188,34 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			}
 		}
 
+		// insert into main excerpts_fts (no translation column)
 		_, err = ftsStmt.ExecContext(ctx,
 			sourceT,
 			romanT,
-			romanK,
-			romanF,
-			strings.Join(auxTexts, " "),
 			strings.Join(e.Addressees, ", "),
-			strings.Join(e.Notes, " "),
 			strings.Join(e.Authors, ", "),
 			e.Meter,
-			strings.Join(surfaces, ", "),
-			translationText,
+			strings.Join(surfaces, " "),
 		)
 		if err != nil {
 			return err
+		}
+
+		// insert into separate translations fts table (so translation queries can be handled separately)
+		if translationText != "" {
+			_, err := translFtsStmt.ExecContext(
+				ctx, translationText,
+				strings.Join(e.Notes, ","), strings.Join(e.Addressees, ", "),
+				strings.Join(e.Authors, ", "), e.Meter,
+			)
+			if err != nil {
+				return err
+			}
+		} else {
+			// still insert an empty row so rowids align with dhee_excerpts insertion order
+			if _, err := tx.ExecContext(ctx, `INSERT INTO dhee_excerpts_translations_fts(translation) VALUES('N/A')`); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -276,14 +344,27 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 			ftsQuery = q
 			ftsColumn = "roman_t"
 		}
-
-		matchClause := fmt.Sprintf("ex_fts.%s MATCH ?", ftsColumn)
-		query := `
-			SELECT ex.e
-			FROM dhee_excerpts_fts AS ex_fts JOIN dhee_excerpts AS ex ON ex_fts.rowid = ex.rowid
-			WHERE ex.scripture IN (` + scripturePlaceholders + `) AND ` + matchClause
-		fullQuery = query + " " + orderBy + " LIMIT 100"
-		args = append(args, ftsQuery)
+		if params.Mode == common.SearchTranslations {
+			// Use highlight() on the translations FTS table
+			orderBy = "ORDER BY t_fts.rank, ex.sort_index"
+			query := `
+				SELECT ex.e, highlight(dhee_excerpts_translations_fts, 0, '<em>', '</em>') as translation_hl
+				FROM dhee_excerpts_translations_fts t_fts
+					JOIN dhee_excerpts AS ex ON t_fts.rowid = ex.rowid
+				WHERE ex.scripture IN (` + scripturePlaceholders + `) AND t_fts.translation MATCH ?
+				` + orderBy + ` LIMIT 100`
+			fullQuery = query
+			args = append(args, ftsQuery)
+		} else {
+			orderBy = "ORDER BY ex_fts.rank, ex.sort_index"
+			matchClause := fmt.Sprintf("ex_fts.%s MATCH ?", ftsColumn)
+			query := `
+				SELECT ex.e
+				FROM dhee_excerpts_fts AS ex_fts JOIN dhee_excerpts AS ex ON ex_fts.rowid = ex.rowid
+				WHERE ex.scripture IN (` + scripturePlaceholders + `) AND ` + matchClause
+			fullQuery = query + " " + orderBy + " LIMIT 100"
+			args = append(args, ftsQuery)
+		}
 	}
 
 	rows, err := s.db.QueryContext(ctx, fullQuery, args...)
@@ -293,14 +374,36 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 	defer rows.Close()
 
 	var excerpts []Excerpt
+
 	for rows.Next() {
+		// when translation search: we selected (ex.e, translation_hl), else only ex.e
 		var excerptJSON []byte
-		if err := rows.Scan(&excerptJSON); err != nil {
-			return nil, err
+		var translationHl sql.NullString
+		if params.Mode == common.SearchTranslations {
+			if err := rows.Scan(&excerptJSON, &translationHl); err != nil {
+				return nil, err
+			}
+		} else {
+			if err := rows.Scan(&excerptJSON); err != nil {
+				return nil, err
+			}
 		}
 		var excerpt Excerpt
 		if err := json.Unmarshal(excerptJSON, &excerpt); err != nil {
 			return nil, err
+		}
+		// If we obtained a highlighted translation snippet, override the translation auxiliary in the excerpt
+		if params.Mode == common.SearchTranslations && translationHl.Valid {
+			if scriptureDefn := s.conf.GetScriptureByName(excerpt.Scripture); scriptureDefn != nil && scriptureDefn.TranslationAuxiliary != "" {
+				if excerpt.Auxiliaries == nil {
+					excerpt.Auxiliaries = make(map[string]Auxiliary)
+				}
+
+				// translationHl contains <strong>...</strong> fragments (already escaped / safe as produced by highlight)
+				excerpt.Auxiliaries[scriptureDefn.TranslationAuxiliary] = Auxiliary{
+					Text: []string{translationHl.String},
+				}
+			}
 		}
 		excerpts = append(excerpts, excerpt)
 	}

@@ -10,12 +10,18 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 	<div class="container">
 		<h2 class="my-4">Search Results for { fmt.Sprintf("%q", data.Search.Q) }</h2>
 		if data.Excerpts != nil && len(data.Excerpts) > 0 {
-			<table class="table table-striped">
+			<table class="table table-striped search-result">
 				<thead>
 					<tr>
 						<th scope="col">Path</th>
 						<th scope="col">Roman Text</th>
-						<th scope="col">Translation (Griffith)</th>
+						<th scope="col">
+							if data.Scripture.TranslationAuxiliary != "" {
+								Translation ({ data.Scripture.TranslationAuxiliary })
+							} else {
+								Translation
+							}
+						</th>
 						<th scope="col">Addressee</th>
 					</tr>
 				</thead>
@@ -25,14 +31,14 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 							<td><a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", excerpt.Scripture, excerpt.ReadableIndex)) }>{ excerpt.ReadableIndex }</a></td>
 							<td class="roman-text-search">
 								for _, line := range excerpt.RomanText {
-									{ line }
+									@templ.Raw(line)
 									<br/>
 								}
 							</td>
 							<td class="wrap-50">
 								if griffith, ok := excerpt.Auxiliaries["griffith"]; ok {
 									for _, text := range griffith.Text {
-										{ text }
+										@templ.Raw(text)
 									}
 								}
 							</td>

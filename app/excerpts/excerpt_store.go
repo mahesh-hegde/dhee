@@ -33,7 +33,7 @@ func normalizeRomanTextForKwStorage(txt []string) string {
 	return strings.Join(result, " ")
 }
 
-func prepareExcerptForDb(e *Excerpt) ExcerptInDB {
+func prepareExcerptForDb(conf *config.DheeConfig, e *Excerpt) ExcerptInDB {
 	entryJSON, err := json.Marshal(e)
 	if err != nil {
 		slog.Error("unexpected error", "err", err)
@@ -53,7 +53,12 @@ func prepareExcerptForDb(e *Excerpt) ExcerptInDB {
 			}
 		}
 	}
-
+	translationText := ""
+	if sc := conf.GetScriptureByName(e.Scripture); sc != nil && sc.TranslationAuxiliary != "" {
+		if aux, ok := e.Auxiliaries[sc.TranslationAuxiliary]; ok {
+			translationText = strings.Join(aux.Text, " ")
+		}
+	}
 	return ExcerptInDB{
 		E:           string(entryJSON),
 		Scripture:   e.Scripture,
@@ -64,6 +69,7 @@ func prepareExcerptForDb(e *Excerpt) ExcerptInDB {
 		ViewIndex:   common.PathToString(e.Path),
 		SortIndex:   common.PathToSortString(e.Path),
 		Auxiliaries: aux,
+		Translation: translationText,
 		Addressees:  e.Addressees,
 		Notes:       strings.Join(e.Notes, " "),
 		Authors:     e.Authors,

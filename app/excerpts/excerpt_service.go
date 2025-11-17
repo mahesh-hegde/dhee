@@ -280,7 +280,15 @@ func (s *ExcerptService) Search(ctx context.Context, search SearchParams) (*Exce
 	if err != nil {
 		return nil, common.WrapErrorForResponse(err, "failed to search excerpts")
 	}
-	return &ExcerptSearchData{Excerpts: excerpts, Search: search}, nil
+	scripture := ""
+	if len(search.Scriptures) == 1 {
+		scripture = search.Scriptures[0]
+	}
+	return &ExcerptSearchData{
+		Excerpts:  excerpts,
+		Search:    search,
+		Scripture: *s.conf.GetScriptureByName(scripture),
+	}, nil
 }
 
 // GetHier returns the hierarchy for a given path.

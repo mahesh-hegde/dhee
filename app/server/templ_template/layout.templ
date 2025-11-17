@@ -101,6 +101,17 @@ templ Layout(conf *config.DheeConfig, page templ.Component) {
         [data-bs-theme="dark"] .accordion-header {
             --bs-accordion-active-bg: #002a00;
         }
+        [data-bs-theme="dark"] .search-result td em {
+            background: darkslategrey;
+            font-style: normal;
+            color: inherit;
+        }
+
+        [data-bs-theme="light"] .search-result td em {
+            background: yellow;
+            font-style: normal;
+            color: inherit;
+        }
 			</style>
 		</head>
 		<body>

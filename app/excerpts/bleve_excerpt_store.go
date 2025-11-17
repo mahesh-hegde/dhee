@@ -146,7 +146,7 @@ func (b *BleveExcerptStore) Add(ctx context.Context, scripture string, es []Exce
 		if e.ReadableIndex == "" {
 			e.ReadableIndex = common.PathToString(e.Path)
 		}
-		dbEntry := prepareExcerptForDb(&e)
+		dbEntry := prepareExcerptForDb(b.conf, &e)
 		id := fmt.Sprintf("%d:%s", b.conf.ScriptureNameToId(scripture), e.ReadableIndex)
 		err := batch.Index(id, &dbEntry)
 		if err != nil {
@@ -263,6 +263,8 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	searchRequest := bleve.NewSearchRequest(finalQuery)
 	searchRequest.Size = 100
 	searchRequest.Fields = []string{"*"}
+	searchRequest.Highlight = bleve.NewHighlightWithStyle("html")
+
 	if params.Mode == common.SearchRegex {
 		searchRequest.SortBy([]string{"sort_index"})
 	} else {
@@ -275,15 +277,30 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	}
 
 	var excerpts []Excerpt
+
 	for _, hit := range searchResults.Hits {
+
 		e, err := bleveDocToExcerpt(hit.Fields)
 		if err != nil {
 			slog.Info("failed to convert doc to excerpt", "err", err)
 			continue
 		}
+
+		// If search mode is translations, try to get highlighted fragments from Bleve and override the auxiliary
+		if params.Mode == common.SearchTranslations {
+			// Bleve returns fragments in hit.Fragments map[string][]string
+			if frags, ok := hit.Fragments["translation"]; ok && len(frags) > 0 {
+				hl := strings.Join(frags, " ... ")
+				if sc := b.conf.GetScriptureByName(e.Scripture); sc != nil && sc.TranslationAuxiliary != "" {
+					if e.Auxiliaries == nil {
+						e.Auxiliaries = make(map[string]Auxiliary)
+					}
+					e.Auxiliaries[sc.TranslationAuxiliary] = Auxiliary{Text: []string{hl}}
+				}
+			}
+		}
 		excerpts = append(excerpts, e)
 	}
-
 	return excerpts, nil
 }
 

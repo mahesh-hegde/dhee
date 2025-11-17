@@ -64,7 +64,6 @@ type SearchParams struct {
 
 // Excerpt represents a single atomic unit from the source text. Eg: a Rik in case of Rigveda.
 type Excerpt struct {
-	// Not serialized to JSON, but computed based on which file we are reading and stored in DB
 	Scripture string `json:"scripture,omitempty"`
 	// Eg: "4.30.1". Autocomputed from path if does not exist.
 	ReadableIndex string `json:"readable_index"`
@@ -114,6 +113,8 @@ type ExcerptInDB struct {
 
 	// Auxiliary texts joined by space and other details omitted if any.
 	Auxiliaries map[string]string `json:"auxiliaries"`
+
+	Translation string `json:"translation"`
 
 	// stuff we would want to do facetted search / query strings on. Keyword format.
 	Addressees []string
@@ -171,8 +172,9 @@ type ExcerptTemplateData struct {
 }
 
 type ExcerptSearchData struct {
-	Excerpts []Excerpt
-	Search   SearchParams
+	Excerpts  []Excerpt
+	Search    SearchParams
+	Scripture config.ScriptureDefn
 }
 
 type QualifiedPath struct {

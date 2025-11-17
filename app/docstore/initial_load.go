@@ -26,6 +26,7 @@ import (
 
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
+	"github.com/blevesearch/bleve/v2/analysis/token/porter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/registry"
 	"github.com/yuin/goldmark"
@@ -128,6 +129,22 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 		os.Exit(1)
 	}
 
+	// Analyzer for translation field: accent-fold + porter stemmer
+	err3 := indexMapping.AddCustomAnalyzer("translation_analyzer",
+		map[string]any{
+			"type":         custom.Name,
+			"char_filters": []string{"accent_fold"},
+			"tokenizer":    unicode.Name,
+			"token_filters": []string{
+				lowercase.Name,
+				porter.Name,
+			},
+		})
+	if err3 != nil {
+		slog.Error("error when defining translation analyzer", "err3", err3)
+		os.Exit(1)
+	}
+
 	// ----- ExcerptInDB mapping -----
 	excerptMapping := mapping.NewDocumentMapping()
 	eField := mapping.NewKeywordFieldMapping()
@@ -153,6 +170,13 @@ func GetBleveIndexMappings() mapping.IndexMapping {
 	rfField := mapping.NewTextFieldMapping()
 	rfField.Analyzer = "ascii_folding"
 	excerptMapping.AddFieldMappingsAt("roman_f", rfField)
+
+	// Translation field (accent-fold + porter stemming)
+	tField := mapping.NewTextFieldMapping()
+	tField.Analyzer = "translation_analyzer"
+	// store so we can extract serialized excerpt + rely on highlight fragments
+	tField.Store = true
+	excerptMapping.AddFieldMappingsAt("translation", tField)
 
 	excerptMapping.AddFieldMappingsAt("view_index", mapping.NewKeywordFieldMapping())
 	excerptMapping.AddFieldMappingsAt("sort_index", mapping.NewKeywordFieldMapping())
