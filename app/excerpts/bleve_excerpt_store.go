@@ -189,7 +189,7 @@ func (b *BleveExcerptStore) Get(ctx context.Context, paths []QualifiedPath) ([]E
 }
 
 // Search implements ExcerptStore.
-func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, params SearchParams) ([]Excerpt, error) {
+func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, params SearchParams) ([]HighlightedExcerpt, error) {
 	var scriptureQueries []query.Query
 
 	for _, s := range scriptures {
@@ -237,15 +237,9 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	case common.SearchTranslations:
 		queryMaker = func(q string, field string) query.Query {
 			// ignore field that is specified
-			// TODO: only pick English auxiliaries?
-			bqs := make([]query.Query, 0)
-			for _, scripture := range scriptures {
-				bq := bleve.NewMatchQuery(q)
-				sc := b.conf.GetScriptureByName(scripture)
-				bq.SetField("auxiliaries." + sc.TranslationAuxiliary)
-				bqs = append(bqs, bq)
-			}
-			return bleve.NewDisjunctionQuery(bqs...)
+			bq := bleve.NewMatchQuery(q)
+			bq.SetField("translation")
+			return bq
 		}
 	case common.SearchExact:
 		queryMaker = func(q string, field string) query.Query {
@@ -283,30 +277,28 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 		return nil, err
 	}
 
-	var excerpts []Excerpt
+	var excerpts []HighlightedExcerpt
 
 	for _, hit := range searchResults.Hits {
-
 		e, err := bleveDocToExcerpt(hit.Fields)
 		if err != nil {
 			slog.Info("failed to convert doc to excerpt", "err", err)
 			continue
 		}
 
-		// If search mode is translations, try to get highlighted fragments from Bleve and override the auxiliary
-		if params.Mode == common.SearchTranslations {
-			// Bleve returns fragments in hit.Fragments map[string][]string
-			if frags, ok := hit.Fragments["translation"]; ok && len(frags) > 0 {
-				hl := strings.Join(frags, " ... ")
-				if sc := b.conf.GetScriptureByName(e.Scripture); sc != nil && sc.TranslationAuxiliary != "" {
-					if e.Auxiliaries == nil {
-						e.Auxiliaries = make(map[string]Auxiliary)
-					}
-					e.Auxiliaries[sc.TranslationAuxiliary] = Auxiliary{Text: []string{hl}}
-				}
-			}
+		hlExcerpt := HighlightedExcerpt{Excerpt: e}
+
+		if frags, ok := hit.Fragments["roman_t"]; ok && len(frags) > 0 {
+			hlExcerpt.RomanHl = strings.Join(frags, " ... ")
 		}
-		excerpts = append(excerpts, e)
+
+		// Bleve returns fragments in hit.Fragments map[string][]string
+		// For translations, the field name is just "translation"
+		if frags, ok := hit.Fragments["translation"]; ok && len(frags) > 0 {
+			hlExcerpt.TranslationHl = strings.Join(frags, " ... ")
+		}
+
+		excerpts = append(excerpts, hlExcerpt)
 	}
 	return excerpts, nil
 }

@@ -287,28 +287,9 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 		args = append(args, q)
 		fullQuery = query
 	} else {
-		var ftsQuery, ftsColumn, orderBy string
-		orderBy = "ORDER BY ex_fts.rank, ex.sort_index"
-
-		switch params.Mode {
-		case common.SearchASCII:
-			ftsQuery = q
-			ftsColumn = "roman_f"
-		case common.SearchPrefix:
-			ftsQuery = q + "*"
-			ftsColumn = "roman_t"
-		case common.SearchTranslations:
-			ftsQuery = q
-			ftsColumn = "translation"
-		case common.SearchFuzzy:
-			return nil, errors.New("fuzzy search is not supported on excerpts with sqlite store")
-		default: // "exact" from controller, which means match query in bleve. The bleve code defaults to a match query.
-			ftsQuery = q
-			ftsColumn = "roman_t"
-		}
 		if params.Mode == common.SearchTranslations {
 			// Use highlight() on the translations FTS table
-			orderBy = "ORDER BY t_fts.rank, ex.sort_index"
+			orderBy := "ORDER BY t_fts.rank, ex.sort_index"
 			query := `
 				SELECT ex.e, highlight(dhee_excerpts_translations_fts, 0, '<em>', '</em>') as translation_hl
 				FROM dhee_excerpts_translations_fts t_fts
@@ -316,10 +297,25 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 				WHERE ex.scripture IN (` + scripturePlaceholders + `) AND t_fts.translation MATCH ?
 				` + orderBy + ` LIMIT 100`
 			fullQuery = query
-			args = append(args, ftsQuery)
+			args = append(args, q)
 		} else {
+			var ftsQuery, ftsColumn string
+			switch params.Mode {
+			case common.SearchASCII:
+				ftsQuery = q
+				ftsColumn = "roman_f"
+			case common.SearchPrefix:
+				ftsQuery = q + "*"
+				ftsColumn = "roman_t"
+			case common.SearchFuzzy:
+				return nil, errors.New("fuzzy search is not supported on excerpts with sqlite store")
+			default: // "exact" from controller, which means match query in bleve. The bleve code defaults to a match query.
+				ftsQuery = q
+				ftsColumn = "roman_t"
+			}
+
 			matchClause := fmt.Sprintf("ex_fts.%s MATCH ?", ftsColumn)
-			orderBy = "ORDER BY ex_fts.rank, ex.sort_index"
+			orderBy := "ORDER BY ex_fts.rank, ex.sort_index"
 			query := `
 				SELECT ex.e, highlight(dhee_excerpts_fts, 1, '<em>', '</em>') as roman_hl
 				FROM dhee_excerpts_fts AS ex_fts JOIN dhee_excerpts AS ex ON ex_fts.rowid = ex.rowid
