@@ -58,5 +58,11 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 			</div>
 		}
 	</div>
+	<style>
+		select:disabled {
+			background-color: #e9ecef;
+			cursor: not-allowed;
+		}
+	</style>
 	@SearchScript()
 }
