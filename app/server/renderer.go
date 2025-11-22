@@ -27,7 +27,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 		switch baseName {
 		case "dictionary_search":
 			if d, ok := data.(dictionary.SearchResults); ok {
-				content = templ_template.DictionarySearch(d)
+				content = templ_template.DictionarySearch(d, true)
 			}
 		}
 
@@ -54,7 +54,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 		}
 	case "dictionary_search":
 		if d, ok := data.(dictionary.SearchResults); ok {
-			page = templ_template.DictionarySearch(d)
+			page = templ_template.DictionarySearch(d, false)
 		}
 	case "dictionary_word":
 		if d, ok := data.(dictionary.DictionaryWordResponse); ok {
