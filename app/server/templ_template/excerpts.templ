@@ -151,7 +151,11 @@ templ Navigation(data *excerpts.ExcerptTemplateData) {
 
 templ Excerpts(data *excerpts.ExcerptTemplateData) {
 	<div class="container">
-		@ScriptureSearchWidget(data.Scripture, nil)
+		<div class="row my-3">
+			<div class="col-lg-6 offset-lg-6">
+				@ScriptureSearchWidget(data.Scripture, nil)
+			</div>
+		</div>
 		<script>
 		const scriptureName = "{{ data.Scripture.Name }}";
 		const scriptureKeys = {{ getKeys(data.Scripture) }};

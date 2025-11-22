@@ -3,9 +3,13 @@ package templ_template
 import "github.com/mahesh-hegde/dhee/app/dictionary"
 
 templ DictionaryWord(w dictionary.DictionaryWordResponse) {
-	@DictionarySearchWidget(w.Dictionary.Name, nil)
-	{{ data := w.Words }}
 	<div class="container">
+		<div class="row my-3">
+			<div class="col-lg-6 offset-lg-6">
+				@DictionarySearchWidget(w.Dictionary.Name, nil)
+			</div>
+		</div>
+		{{ data := w.Words }}
 		if len(data) > 0 {
 			<div class="my-4">
 				for _, entry := range data {

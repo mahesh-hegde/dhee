@@ -6,8 +6,12 @@ import (
 )
 
 templ DictionarySearch(data dictionary.SearchResults) {
-	@DictionarySearchWidget(data.DictionaryName, &data.Params)
 	<div class="container">
+		<div class="row my-3">
+			<div class="col-lg-6 offset-lg-6">
+				@DictionarySearchWidget(data.DictionaryName, &data.Params)
+			</div>
+		</div>
 		<h2 class="my-4">Dictionary Search Results</h2>
 		if len(data.Items) > 0 {
 			<table class="table table-striped">
@@ -38,6 +42,6 @@ templ DictionarySearch(data dictionary.SearchResults) {
 				No results found!
 			</div>
 		}
+		@SearchScript()
 	</div>
-	@SearchScript()
 }

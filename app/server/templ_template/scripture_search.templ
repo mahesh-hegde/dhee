@@ -7,8 +7,12 @@ import (
 )
 
 templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
-	@ScriptureSearchWidget(data.Scripture, &data.Search)
 	<div class="container">
+		<div class="row my-3">
+			<div class="col-lg-6 offset-lg-6">
+				@ScriptureSearchWidget(data.Scripture, &data.Search)
+			</div>
+		</div>
 		<h2 class="my-4">Search Results for { fmt.Sprintf("%q", data.Search.Q) }</h2>
 		if data.Excerpts != nil && len(data.Excerpts) > 0 {
 			<table class="table table-striped search-result">

@@ -9,7 +9,7 @@ var defaultScriptureSearchParams = &excerpts.SearchParams{Tl: "slp1", Mode: "exa
 
 templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.SearchParams) {
 	if params == nil {
-		params = defaultScriptureSearchParams
+		{{ params = defaultScriptureSearchParams }}
 	}
 	<form action="/scripture-search" method="GET" class="row g-3 scripture-search-form" data-scripture-name={ scripture.Name }>
 		<input type="hidden" name="scriptures" value={ scripture.Name }/>

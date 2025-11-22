@@ -13,7 +13,7 @@ var defaultDictionarySearchParams = &dictionary.SearchParams{
 
 templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams) {
 	if params == nil {
-		params = defaultDictionarySearchParams
+		{{ params = defaultDictionarySearchParams }}
 	}
 	<form action={ templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)) } method="GET" class="row g-3 dictionary-search-form" data-dict-name={ dictName }>
 		<div class="col-sm-6">
