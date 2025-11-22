@@ -329,9 +329,10 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Check if running in browser
 if (typeof window !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => {
-        const transliterator = new Transliterator({});
+    window.dhee = window.dhee || {};
+    window.dhee.transliterator = new Transliterator({});
 
+    document.addEventListener('DOMContentLoaded', () => {
         function updateSuggestion(form) {
             const input = form.querySelector('.search-input');
             const tlSelect = form.querySelector('.transliteration-select');
@@ -355,7 +356,7 @@ if (typeof window !== 'undefined') {
             }
 
             try {
-                const iast = transliterator.convert(query, sourceTl, TlIAST);
+                const iast = window.dhee.transliterator.convert(query, sourceTl, TlIAST);
                 suggestionEl.textContent = `🔎 ${iast}`;
             } catch (e) {
                 console.error("Transliteration failed", e);

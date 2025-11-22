@@ -152,7 +152,6 @@ templ SelectionSearchScript() {
 
 						window.dhee.popupManager.set(popup);
 
-						const localTransliterator = new Transliterator({});
 						function updateSuggestion() {
 							const query = textInput.value;
 							const sourceTl = tlSelect.value;
@@ -161,7 +160,7 @@ templ SelectionSearchScript() {
 								return;
 							}
 							try {
-								const iast = localTransliterator.convert(query, sourceTl, TlIAST);
+								const iast = window.dhee.transliterator.convert(query, sourceTl, TlIAST);
 								suggestionEl.innerHTML = `🔎 ${iast}`;
 							} catch (e) {
 								console.error("Transliteration failed", e);
