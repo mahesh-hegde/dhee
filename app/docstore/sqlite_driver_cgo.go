@@ -6,6 +6,7 @@ package docstore
 import (
 	"database/sql"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/mattn/go-sqlite3"
@@ -15,9 +16,14 @@ import (
 
 var regexCache = cache.New(2*time.Minute, 5*time.Minute)
 
-func regexMatch(re, s string) (bool, error) {
+func regexMatch(regex, s string) (bool, error) {
 	var compiledRe *regexp.Regexp
 	var err error
+
+	re := regex
+	if !strings.HasPrefix(regex, "(?s)") {
+		re = "(?s)" + regex
+	}
 
 	if reFromCache, found := regexCache.Get(re); found {
 		compiledRe = reFromCache.(*regexp.Regexp)

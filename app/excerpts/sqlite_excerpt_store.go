@@ -33,6 +33,7 @@ func (s *SQLiteExcerptStore) Init() error {
 			sort_index TEXT,
 			view_index TEXT,
 			roman_t TEXT,
+			roman_f TEXT,
 			e BLOB
 		);
 		CREATE INDEX IF NOT EXISTS idx_excerpt_sort_index ON dhee_excerpts(sort_index);
@@ -86,7 +87,7 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 		return fmt.Errorf("scripture not found in config: %s", scripture)
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO dhee_excerpts (id, scripture, sort_index, view_index, roman_t, e) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO dhee_excerpts (id, scripture, sort_index, view_index, roman_t, roman_f, e) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -127,8 +128,9 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 
 		sortIndex := common.PathToSortString(e.Path)
 		romanT := strings.Join(e.RomanText, "\n")
+		romanF := common.FoldAccents(normalizeRomanTextForKwStorage(e.RomanText))
 
-		_, err = stmt.ExecContext(ctx, id, scripture, sortIndex, e.ReadableIndex, romanT, entryJSON)
+		_, err = stmt.ExecContext(ctx, id, scripture, sortIndex, e.ReadableIndex, romanT, romanF, entryJSON)
 		if err != nil {
 			return err
 		}
@@ -283,8 +285,18 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 
 	var fullQuery string
 	if params.Mode == common.SearchRegex {
-		query := `SELECT e FROM dhee_excerpts WHERE scripture IN (` + scripturePlaceholders + `) AND roman_t REGEXP ? ORDER BY sort_index LIMIT 100`
-		args = append(args, q)
+		query := `
+		SELECT e FROM (
+			SELECT e, (roman_t REGEXP ?) AS t_match, (roman_f REGEXP ?) AS f_match, sort_index
+			FROM dhee_excerpts
+			WHERE scripture IN (` + scripturePlaceholders + `) AND (t_match OR f_match)
+			ORDER by t_match desc, sort_index
+		)
+		`
+		newArgs := make([]any, 0, len(args)+2)
+		newArgs = append(newArgs, q, common.FoldAccents(q))
+		newArgs = append(newArgs, args...)
+		args = newArgs
 		fullQuery = query
 	} else if params.Mode == common.SearchTranslations {
 		// Use highlight() on the translations FTS table
