@@ -318,11 +318,12 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 			fullQuery = query
 			args = append(args, ftsQuery)
 		} else {
+			matchClause := fmt.Sprintf("ex_fts.%s MATCH ?", ftsColumn)
 			orderBy = "ORDER BY ex_fts.rank, ex.sort_index"
 			query := `
 				SELECT ex.e, highlight(dhee_excerpts_fts, 1, '<em>', '</em>') as roman_hl
 				FROM dhee_excerpts_fts AS ex_fts JOIN dhee_excerpts AS ex ON ex_fts.rowid = ex.rowid
-				WHERE ex.scripture IN (` + scripturePlaceholders + `) AND ex_fts.roman_t MATCH ?`
+				WHERE ex.scripture IN (` + scripturePlaceholders + `) AND ` + matchClause
 			fullQuery = query + " " + orderBy + " LIMIT 100"
 			args = append(args, ftsQuery)
 		}

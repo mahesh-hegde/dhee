@@ -141,11 +141,11 @@ type Hierarchy struct {
 }
 
 type HighlightedExcerpt struct {
-	Excerpt     Excerpt
-	SourceHl    string // Highlighted source text
-	RomanHl     string // Highlighted roman text, and so on
-	AuxiliaryHl map[string]Auxiliary
-	NotesHl     []string
+	Excerpt       Excerpt
+	SourceHl      string // Highlighted source text
+	RomanHl       string // Highlighted roman text
+	TranslationHl string // Highlighted translation text
+	NotesHl       []string
 }
 
 // Type implements mapping.Classifier.
@@ -173,7 +173,7 @@ type ExcerptTemplateData struct {
 }
 
 type ExcerptSearchData struct {
-	Excerpts  []Excerpt
+	Excerpts  []HighlightedExcerpt
 	Search    SearchParams
 	Scripture config.ScriptureDefn
 }

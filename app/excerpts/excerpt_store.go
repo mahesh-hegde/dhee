@@ -17,7 +17,7 @@ type ExcerptStore interface {
 	// FindBeforeAndAfter, given a set of possible idsBefore and idsAfter in priority order,
 	// finds the immediate previous and next ID with one query
 	FindBeforeAndAfter(ctx context.Context, scripture string, idsBefore []string, idsAfter []string) (prev string, next string)
-	Search(ctx context.Context, scriptures []string, params SearchParams) ([]Excerpt, error)
+	Search(ctx context.Context, scriptures []string, params SearchParams) ([]HighlightedExcerpt, error)
 	GetHier(ctx context.Context, scripture *config.ScriptureDefn, path []int) (*Hierarchy, error)
 }
 
