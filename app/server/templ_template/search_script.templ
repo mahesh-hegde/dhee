@@ -11,9 +11,15 @@ templ SearchScript() {
 			function updateSuggestion(form) {
 				const input = form.querySelector('.search-input');
 				const tlSelect = form.querySelector('.transliteration-select');
+				const modeSelect = form.querySelector('.search-mode-select');
 				const suggestionEl = form.nextElementSibling?.querySelector('.transliteration-suggestion');
 
 				if (!input || !tlSelect || !suggestionEl) {
+					return;
+				}
+
+				if (modeSelect && modeSelect.value === 'translations') {
+					suggestionEl.innerHTML = ' ';
 					return;
 				}
 
@@ -67,6 +73,7 @@ templ SearchScript() {
 				} else {
 					tlSelect.disabled = false;
 				}
+				updateSuggestion(form);
 			}
 
 			document.addEventListener('DOMContentLoaded', function() {

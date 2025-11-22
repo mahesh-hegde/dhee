@@ -44,11 +44,9 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 			<button type="submit" class="btn btn-primary">Find</button>
 		</div>
 	</form>
-	if !compact {
-		<div class="row g-3">
-			<div class="col-sm-6">
-				<small class="form-text text-muted transliteration-suggestion" style="min-height: 1.2rem; display: inline-block;"> </small>
-			</div>
+	<div class="row g-3">
+		<div class="col-sm-6">
+			<small class="form-text text-muted transliteration-suggestion" style="min-height: 1.2rem; display: inline-block;"> </small>
 		</div>
-	}
+	</div>
 }
