@@ -25,7 +25,7 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, c
 	}
 	<form action={ templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)) } method="GET" class={ formClass } data-dict-name={ dictName }>
 		<div class={ inputClass }>
-			<input type="text" class="form-control" name="q" placeholder="Search text" value={ params.OriginalQuery }/>
+			<input type="text" class="form-control search-input" name="q" placeholder="Search text" value={ params.OriginalQuery }/>
 		</div>
 		<div class={ selectClass }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-dict-name={ dictName }>
@@ -48,4 +48,11 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, c
 			<button type="submit" class="btn btn-primary">Find</button>
 		</div>
 	</form>
+	if !compact {
+		<div class="row g-3">
+			<div class="col-sm-6">
+				<small class="form-text text-muted transliteration-suggestion" style="min-height: 1.2rem; display: inline-block;"> </small>
+			</div>
+		</div>
+	}
 }

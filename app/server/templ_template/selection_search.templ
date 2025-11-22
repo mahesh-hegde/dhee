@@ -103,15 +103,47 @@ templ SelectionSearchScript() {
 						if (e.target.closest('.pada-popup, .table-word-popup, .roman-selection-popup')) return;
 
 						const popup = document.createElement('div');
-						popup.className = 'roman-selection-popup';
+						popup.className = 'roman-selection-popup card';
 						popup.style.position = 'absolute';
 						popup.style.zIndex = 1050;
+						popup.style.width = '300px';
 
-						const searchBadge = document.createElement('button');
-						searchBadge.className = 'btn btn-sm btn-info';
-						searchBadge.innerHTML = `🔎 ${selectedText}`;
+						const cardBody = document.createElement('div');
+						cardBody.className = 'card-body p-2';
 
-						popup.appendChild(searchBadge);
+						const inputGroup = document.createElement('div');
+						inputGroup.className = 'input-group input-group-sm mb-2';
+
+						const textInput = document.createElement('input');
+						textInput.type = 'text';
+						textInput.className = 'form-control';
+						textInput.value = selectedText;
+
+						const tlSelect = document.createElement('select');
+						tlSelect.className = 'form-select';
+						tlSelect.innerHTML = `
+							<option value="slp1">SLP1</option>
+							<option value="iast">IAST</option>
+							<option value="hk">Kyoto-Harvard</option>
+							<option value="dn">Devanagari</option>
+						`;
+						tlSelect.value = transliteration;
+
+						inputGroup.appendChild(textInput);
+						inputGroup.appendChild(tlSelect);
+
+						const suggestionEl = document.createElement('div');
+						suggestionEl.className = 'form-text text-muted mb-2';
+						suggestionEl.style.minHeight = '1.2rem';
+
+						const searchButton = document.createElement('button');
+						searchButton.className = 'btn btn-sm btn-primary';
+						searchButton.textContent = 'Search';
+
+						cardBody.appendChild(inputGroup);
+						cardBody.appendChild(suggestionEl);
+						cardBody.appendChild(searchButton);
+						popup.appendChild(cardBody);
 						document.body.appendChild(popup);
 
 						const popupRect = popup.getBoundingClientRect();
@@ -120,7 +152,28 @@ templ SelectionSearchScript() {
 
 						window.dhee.popupManager.set(popup);
 
-						searchBadge.addEventListener('click', function () {
+						const localTransliterator = new Transliterator({});
+						function updateSuggestion() {
+							const query = textInput.value;
+							const sourceTl = tlSelect.value;
+							if (query.trim() === '' || sourceTl === 'iast') {
+								suggestionEl.innerHTML = '';
+								return;
+							}
+							try {
+								const iast = localTransliterator.convert(query, sourceTl, TlIAST);
+								suggestionEl.innerHTML = `🔎 ${iast}`;
+							} catch (e) {
+								console.error("Transliteration failed", e);
+								suggestionEl.innerHTML = '';
+							}
+						}
+
+						textInput.addEventListener('input', updateSuggestion);
+						tlSelect.addEventListener('change', updateSuggestion);
+						updateSuggestion();
+
+						searchButton.addEventListener('click', function () {
 							window.dhee.popupManager.close();
 
 							const existingResultWindow = document.querySelector('.search-result-window');
@@ -128,7 +181,9 @@ templ SelectionSearchScript() {
 								existingResultWindow.remove();
 							}
 
-							const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(selectedText)}&tl=${transliteration}&mode=fuzzy&preview=true&fuzziness=${fuzziness}`;
+							const query = textInput.value;
+							const tl = tlSelect.value;
+							const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(query)}&tl=${tl}&mode=fuzzy&preview=true&fuzziness=${fuzziness}`;
 							fetch(url)
 								.then(response => response.text())
 								.then(html => {

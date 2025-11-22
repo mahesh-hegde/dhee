@@ -22,7 +22,7 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 	<form action="/scripture-search" method="GET" class={ formClass } data-scripture-name={ scripture.Name }>
 		<input type="hidden" name="scriptures" value={ scripture.Name }/>
 		<div class={ inputClass }>
-			<input type="text" class="form-control" name="query" placeholder="Search text" value={ params.OriginalQ }/>
+			<input type="text" class="form-control search-input" name="query" placeholder="Search text" value={ params.OriginalQ }/>
 		</div>
 		<div class={ selectClass }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-scripture-name={ scripture.Name }>
@@ -44,4 +44,11 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 			<button type="submit" class="btn btn-primary">Find</button>
 		</div>
 	</form>
+	if !compact {
+		<div class="row g-3">
+			<div class="col-sm-6">
+				<small class="form-text text-muted transliteration-suggestion" style="min-height: 1.2rem; display: inline-block;"> </small>
+			</div>
+		</div>
+	}
 }
