@@ -25,7 +25,7 @@ templ Home(data *config.DheeConfig) {
 							<h3>Jump to excerpt</h3>
 							<form class="jump-form row g-3" data-scripture-name={ scripture.Name } action={ fmt.Sprintf("scriptures/%s/excerpts", scripture.Name) } method="get">
 								<div class="col-auto">
-									<input type="text" name="path" class="form-control" placeholder="e.g., 1.1.1"/>
+									<input type="text" name="path" class="form-control" placeholder="e.g., 2.12.1"/>
 								</div>
 								<div class="col-auto">
 									<button type="submit" class="btn btn-primary">Go</button>
@@ -67,11 +67,5 @@ templ Home(data *config.DheeConfig) {
 			</p>
 		</div>
 	</div>
-	<style>
-		select:disabled {
-			background-color: #e9ecef;
-			cursor: not-allowed;
-		}
-	</style>
 	@SearchScript()
 }

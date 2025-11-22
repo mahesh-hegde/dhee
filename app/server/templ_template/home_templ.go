@@ -143,7 +143,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" method=\"get\"><div class=\"col-auto\"><input type=\"text\" name=\"path\" class=\"form-control\" placeholder=\"e.g., 1.1.1\"></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Go</button></div></form><h3 class=\"mt-4\">Search</h3>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" method=\"get\"><div class=\"col-auto\"><input type=\"text\" name=\"path\" class=\"form-control\" placeholder=\"e.g., 2.12.1\"></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Go</button></div></form><h3 class=\"mt-4\">Search</h3>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -252,7 +252,7 @@ func Home(data *config.DheeConfig) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div><div class=\"mt-5\" style=\"width: 75%;\"><h2>About</h2><p>Dhee is a website for studying and analyzing old indic texts, specifically Rigveda Samhita.</p><p>Dhee is a work in progress at this moment. It is being built by Mahesh Hegde ( <code>net.mahesh29 [@] gmail.com</code> ).</p></div></div><style>\n\t\tselect:disabled {\n\t\t\tbackground-color: #e9ecef;\n\t\t\tcursor: not-allowed;\n\t\t}\n\t</style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div><div class=\"mt-5\" style=\"width: 75%;\"><h2>About</h2><p>Dhee is a website for studying and analyzing old indic texts, specifically Rigveda Samhita.</p><p>Dhee is a work in progress at this moment. It is being built by Mahesh Hegde ( <code>net.mahesh29 [@] gmail.com</code> ).</p></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

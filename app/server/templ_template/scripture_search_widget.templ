@@ -28,7 +28,7 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-scripture-name={ scripture.Name }>
 				<option value="slp1" selected?={ params.Tl == "slp1" }>SLP1</option>
 				<option value="iast" selected?={ params.Tl == "iast" }>IAST</option>
-				<option value="hk" selected?={ params.Tl == "hk" }>HK</option>
+				<option value="hk" selected?={ params.Tl == "hk" }>Kyoto-Harvard</option>
 				<option value="dn" selected?={ params.Tl == "dn" }>Devanagari</option>
 			</select>
 		</div>
@@ -41,7 +41,7 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 			</select>
 		</div>
 		<div class="col-auto">
-			<button type="submit" class="btn btn-primary">Go</button>
+			<button type="submit" class="btn btn-primary">Find</button>
 		</div>
 	</form>
 }

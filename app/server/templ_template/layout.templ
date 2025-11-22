@@ -58,7 +58,12 @@ templ Layout(conf *config.DheeConfig, page templ.Component) {
             /* background-color: cornsilk;
             --bs-body-bg: cornsilk; */
         }
-
+        select:disabled,
+        select.form-select:disabled {
+            cursor: not-allowed !important;
+            background-color: slategray !important;
+            text-decoration: line-through;
+        }
         .roman-text-search {
             width: 40%;
         }
