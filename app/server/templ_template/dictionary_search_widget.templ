@@ -1,0 +1,43 @@
+package templ_template
+
+import (
+	"fmt"
+	"github.com/mahesh-hegde/dhee/app/dictionary"
+)
+
+var defaultDictionarySearchParams = &dictionary.SearchParams{
+	Query: "",
+	Tl:    "slp1",
+	Mode:  "exact",
+}
+
+templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams) {
+	if params == nil {
+		params = defaultDictionarySearchParams
+	}
+	<form action={ templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)) } method="GET" class="row g-3 dictionary-search-form" data-dict-name={ dictName }>
+		<div class="col-sm-6">
+			<input type="text" class="form-control" name="q" placeholder="Search text" value={ params.Query }/>
+		</div>
+		<div class="col-sm-2">
+			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-dict-name={ dictName }>
+				<option value="slp1" selected?={ params.Tl == "slp1" }>SLP1</option>
+				<option value="iast" selected?={ params.Tl == "iast" }>IAST</option>
+				<option value="hk" selected?={ params.Tl == "hk" }>HK</option>
+				<option value="dn" selected?={ params.Tl == "dn" }>Devanagari</option>
+			</select>
+		</div>
+		<div class="col-sm-2">
+			<select name="mode" class="form-select search-mode-select">
+				<option value="exact" selected?={ params.Mode == "exact" }>Exact</option>
+				<option value="prefix" selected?={ params.Mode == "prefix" }>Prefix</option>
+				<option value="fuzzy" selected?={ params.Mode == "fuzzy" }>Fuzzy</option>
+				<option value="regex" selected?={ params.Mode == "regex" }>Regex</option>
+				<option value="translations" selected?={ params.Mode == "translations" }>Translations</option>
+			</select>
+		</div>
+		<div class="col-auto">
+			<button type="submit" class="btn btn-primary">Find</button>
+		</div>
+	</form>
+}

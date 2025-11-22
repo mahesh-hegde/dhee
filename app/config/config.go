@@ -58,6 +58,15 @@ func (c *DheeConfig) GetScriptureByName(name string) *ScriptureDefn {
 	return nil
 }
 
+func (c *DheeConfig) GetDictByName(name string) *DictDefn {
+	for _, d := range c.Dictionaries {
+		if d.Name == name {
+			return &d
+		}
+	}
+	return nil
+}
+
 func (c *DheeConfig) DictNameToId(dictName string) int {
 	for idx, d := range c.Dictionaries {
 		if d.Name == dictName {

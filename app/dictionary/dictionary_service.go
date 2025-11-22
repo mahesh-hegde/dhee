@@ -17,7 +17,7 @@ type DictionaryService struct {
 
 // GetEntries takes a list of words and returns the full dictionary
 // data about those words
-func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName string, words []string, tl common.Transliteration) (map[string]DictionaryEntry, error) {
+func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName string, words []string, tl common.Transliteration) (DictionaryWordResponse, error) {
 	slp1Words := make([]string, len(words))
 	for i, word := range words {
 		slp1Words[i] = word
@@ -37,10 +37,10 @@ func (s *DictionaryService) GetEntries(ctx context.Context, dictionaryName strin
 	results, err := s.store.Get(ctx, dictionaryName, slp1Words)
 	if err != nil {
 		slog.Error("failed to get entries from store", "err", err)
-		return nil, err
+		return DictionaryWordResponse{}, err
 	}
 
-	return results, nil
+	return DictionaryWordResponse{Words: results, Dictionary: s.conf.GetDictByName(dictionaryName)}, nil
 }
 
 func (s *DictionaryService) Suggest(ctx context.Context, dictName string, partialWord string, tl common.Transliteration) (Suggestions, error) {
@@ -83,6 +83,7 @@ func (s *DictionaryService) Search(ctx context.Context, dictionaryName string, s
 		}
 		res.Items[idx].Nagari = nagari
 	}
+	res.Params = searchParams
 	return res, nil
 }
 

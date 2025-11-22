@@ -65,7 +65,7 @@ func Layout(conf *config.DheeConfig, page templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js\"></script><script type=\"text/javascript\">\n        // Init functions exported by inner template\n        if (typeof initFn !== 'undefined') {\n            initFn()\n        }\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js\"></script><script type=\"text/javascript\">\n        // Init functions exported by inner template\n        if (typeof preInit !== 'undefined' && Array.isArray(preInit)) {\n            preInit.forEach(fn => {\n                if (typeof fn === 'function') {\n                    fn()\n                }\n            })\n        }\n        if (typeof initFn !== 'undefined') {\n            initFn()\n        }\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

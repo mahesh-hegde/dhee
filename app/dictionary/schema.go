@@ -1,6 +1,9 @@
 package dictionary
 
-import "github.com/mahesh-hegde/dhee/app/common"
+import (
+	"github.com/mahesh-hegde/dhee/app/common"
+	"github.com/mahesh-hegde/dhee/app/config"
+)
 
 type SearchParams struct {
 	Query     string
@@ -35,6 +38,7 @@ type DictSearchResult struct {
 type SearchResults struct {
 	DictionaryName string
 	Items          []DictSearchResult
+	Params         SearchParams
 }
 
 type Cognate struct {
@@ -114,4 +118,9 @@ func (d *DictionaryEntryInDB) Type() string {
 type DictionaryEntryBody struct {
 	Plain  string `json:"plain"`
 	Markup string `json:"-"`
+}
+
+type DictionaryWordResponse struct {
+	Words      map[string]DictionaryEntry
+	Dictionary *config.DictDefn
 }

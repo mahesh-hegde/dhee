@@ -6,6 +6,7 @@ import (
 )
 
 templ DictionarySearch(data dictionary.SearchResults) {
+	@DictionarySearchWidget(data.DictionaryName, &data.Params)
 	<div class="container">
 		<h2 class="my-4">Dictionary Search Results</h2>
 		if len(data.Items) > 0 {
@@ -38,4 +39,5 @@ templ DictionarySearch(data dictionary.SearchResults) {
 			</div>
 		}
 	</div>
+	@SearchScript()
 }

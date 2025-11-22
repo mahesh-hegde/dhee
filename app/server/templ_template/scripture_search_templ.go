@@ -35,6 +35,10 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = ScriptureSearchWidget(data.Scripture, &data.Search).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\"><h2 class=\"my-4\">Search Results for ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -42,7 +46,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%q", data.Search.Q))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 11, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 12, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -65,7 +69,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.TranslationAuxiliary)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 20, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 21, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -93,7 +97,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 				var templ_7745c5c3_Var4 templ.SafeURL
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", excerpt.Scripture, excerpt.ReadableIndex)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 31, Col: 115}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 32, Col: 115}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -106,7 +110,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 31, Col: 141}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 32, Col: 141}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -145,7 +149,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(excerpt.Addressees, ", "))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 45, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 46, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -167,6 +171,10 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = SearchScript().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -32,31 +32,7 @@ templ Home(data *config.DheeConfig) {
 								</div>
 							</form>
 							<h3 class="mt-4">Search</h3>
-							<form action="/scripture-search" method="GET" class="row g-3">
-								<input type="hidden" name="scriptures" value={ scripture.Name }/>
-								<div class="col-sm-6">
-									<input type="text" class="form-control" name="query" placeholder="Search text"/>
-								</div>
-								<div class="col-sm-2">
-									<select name="tl" class="form-select">
-										<option value="slp1" selected>SLP1</option>
-										<option value="iast">IAST</option>
-										<option value="hk">HK</option>
-										<option value="dn">Devanagari</option>
-									</select>
-								</div>
-								<div class="col-sm-2">
-									<select name="mode" class="form-select">
-										<option value="exact" selected>Normal</option>
-										<option value="regex">Regex</option>
-										<option value="fuzzy">Fuzzy</option>
-										<option value="translations">Translations</option>
-									</select>
-								</div>
-								<div class="col-auto">
-									<button type="submit" class="btn btn-primary">Go</button>
-								</div>
-							</form>
+							@ScriptureSearchWidget(scripture, nil)
 						</div>
 					</div>
 				</div>
@@ -73,31 +49,7 @@ templ Home(data *config.DheeConfig) {
 					</h2>
 					<div id={ "collapse-" + dictionary.Name } class="accordion-collapse collapse show" aria-labelledby={ "heading-" + dictionary.Name } data-bs-parent="#dictionaryAccordion">
 						<div class="accordion-body">
-							<form action={ fmt.Sprintf("/dictionaries/%s/search", dictionary.Name) } method="GET" class="row g-3">
-								<div class="col-sm-6">
-									<input type="text" class="form-control" name="q" placeholder="Search text"/>
-								</div>
-								<div class="col-sm-2">
-									<select name="tl" class="form-select">
-										<option value="slp1" selected>SLP1</option>
-										<option value="iast">IAST</option>
-										<option value="hk">HK</option>
-										<option value="dn">Devanagari</option>
-									</select>
-								</div>
-								<div class="col-sm-2">
-									<select name="mode" class="form-select">
-										<option value="exact" selected>Exact</option>
-										<option value="prefix">Prefix</option>
-										<option value="fuzzy">Fuzzy</option>
-										<option value="regex">Regex</option>
-										<option value="translations">Translations</option>
-									</select>
-								</div>
-								<div class="col-auto">
-									<button type="submit" class="btn btn-primary">Find</button>
-								</div>
-							</form>
+							@DictionarySearchWidget(dictionary.Name, nil)
 						</div>
 					</div>
 				</div>
@@ -115,4 +67,5 @@ templ Home(data *config.DheeConfig) {
 			</p>
 		</div>
 	</div>
+	@SearchScript()
 }

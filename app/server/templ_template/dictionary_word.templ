@@ -2,17 +2,9 @@ package templ_template
 
 import "github.com/mahesh-hegde/dhee/app/dictionary"
 
-func getDictNameFromMap(data map[string]dictionary.DictionaryEntry) string {
-	for _, entry := range data {
-		return entry.DictName
-	}
-	return ""
-}
-
-templ DictionaryWord(data map[string]dictionary.DictionaryEntry) {
-	if len(data) > 0 {
-		@DictionarySearchWidget(getDictNameFromMap(data), nil)
-	}
+templ DictionaryWord(w dictionary.DictionaryWordResponse) {
+	@DictionarySearchWidget(w.Dictionary.Name, nil)
+	{{ data := w.Words }}
 	<div class="container">
 		if len(data) > 0 {
 			<div class="my-4">

@@ -1,0 +1,39 @@
+package templ_template
+
+import (
+	"github.com/mahesh-hegde/dhee/app/config"
+	"github.com/mahesh-hegde/dhee/app/excerpts"
+)
+
+var defaultScriptureSearchParams = &excerpts.SearchParams{Tl: "slp1", Mode: "exact"}
+
+templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.SearchParams) {
+	if params == nil {
+		params = defaultScriptureSearchParams
+	}
+	<form action="/scripture-search" method="GET" class="row g-3 scripture-search-form" data-scripture-name={ scripture.Name }>
+		<input type="hidden" name="scriptures" value={ scripture.Name }/>
+		<div class="col-sm-6">
+			<input type="text" class="form-control" name="query" placeholder="Search text" value={ params.Q }/>
+		</div>
+		<div class="col-sm-2">
+			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-scripture-name={ scripture.Name }>
+				<option value="slp1" selected?={ params.Tl == "slp1" }>SLP1</option>
+				<option value="iast" selected?={ params.Tl == "iast" }>IAST</option>
+				<option value="hk" selected?={ params.Tl == "hk" }>HK</option>
+				<option value="dn" selected?={ params.Tl == "dn" }>Devanagari</option>
+			</select>
+		</div>
+		<div class="col-sm-2">
+			<select name="mode" class="form-select search-mode-select">
+				<option value="exact" selected?={ params.Mode == "exact" }>Normal</option>
+				<option value="regex" selected?={ params.Mode == "regex" }>Regex</option>
+				<option value="fuzzy" selected?={ params.Mode == "fuzzy" }>Fuzzy</option>
+				<option value="translations" selected?={ params.Mode == "translations" }>Translations</option>
+			</select>
+		</div>
+		<div class="col-auto">
+			<button type="submit" class="btn btn-primary">Go</button>
+		</div>
+	</form>
+}

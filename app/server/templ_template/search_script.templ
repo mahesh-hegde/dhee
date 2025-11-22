@@ -1,0 +1,53 @@
+package templ_template
+
+templ SearchScript() {
+	<script>
+		const initSearchTl = function() {
+			const DHEE_TL_PREF_KEY = 'dhee-tl-pref';
+
+			function updateTlSelects(value) {
+				document.querySelectorAll('.transliteration-select').forEach(function(select) {
+					select.value = value;
+				});
+			}
+
+			function onTlChange(event) {
+				const newValue = event.target.value;
+				localStorage.setItem(DHEE_TL_PREF_KEY, newValue);
+				updateTlSelects(newValue);
+			}
+
+			function onModeChange(event) {
+				const form = event.target.closest('form');
+				if (!form) return;
+				const tlSelect = form.querySelector('.transliteration-select');
+				if (!tlSelect) return;
+
+				if (event.target.value === 'translations') {
+					tlSelect.disabled = true;
+				} else {
+					tlSelect.disabled = false;
+				}
+			}
+
+			document.addEventListener('DOMContentLoaded', function() {
+				const pref = localStorage.getItem(DHEE_TL_PREF_KEY) || 'slp1';
+				updateTlSelects(pref);
+
+				document.querySelectorAll('.transliteration-select').forEach(function(select) {
+					select.addEventListener('change', onTlChange);
+				});
+
+				document.querySelectorAll('.search-mode-select').forEach(function(select) {
+					select.addEventListener('change', onModeChange);
+					// Initial check
+					onModeChange({target: select});
+				});
+			});
+		};
+		if (typeof preInit === "undefined") {
+			preInit = [];
+		}
+		preInit.push(initSearchTl);
+	</script>
+}
