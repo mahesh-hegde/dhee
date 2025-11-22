@@ -14,6 +14,24 @@ templ DictionarySearch(data dictionary.SearchResults, isPreview bool) {
 				</div>
 			</div>
 		}
+		<style>
+			.collapse {
+				max-height: 0;
+				opacity: 0;
+				overflow: hidden;
+				transition: max-height 0.2s ease-out, opacity 0.15s ease-out;
+			}
+
+			.collapse.show {
+				max-height: 1000px;
+				opacity: 1;
+				transition: max-height 0.25s ease-in, opacity 0.2s ease-in;
+			}
+
+			.collapsing {
+				opacity: 0.5;
+			}
+		</style>
 		<h2 class="my-4">Dictionary Search Results</h2>
 		if len(data.Items) > 0 {
 			<table class="table table-striped">
