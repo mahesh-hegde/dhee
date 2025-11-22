@@ -151,6 +151,7 @@ templ Navigation(data *excerpts.ExcerptTemplateData) {
 
 templ Excerpts(data *excerpts.ExcerptTemplateData) {
 	<div class="container">
+		@ScriptureSearchWidget(data.Scripture, nil)
 		<script>
 		const scriptureName = "{{ data.Scripture.Name }}";
 		const scriptureKeys = {{ getKeys(data.Scripture) }};
@@ -919,4 +920,5 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 			</div>
 		}
 	</div>
+	@SearchScript()
 }
