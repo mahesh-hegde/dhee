@@ -77,8 +77,17 @@ templ SearchScript() {
 			}
 
 			document.addEventListener('DOMContentLoaded', function() {
-				const pref = localStorage.getItem(DHEE_TL_PREF_KEY) || 'slp1';
-				updateTlSelects(pref);
+				let queryPopulated = false;
+				document.querySelectorAll('.search-input').forEach(function(input) {
+					if (input.value.trim() !== '') {
+						queryPopulated = true;
+					}
+				});
+
+				if (!queryPopulated) {
+					const pref = localStorage.getItem(DHEE_TL_PREF_KEY) || 'slp1';
+					updateTlSelects(pref);
+				}
 
 				// Initial suggestions
 				document.querySelectorAll('.dictionary-search-form, .scripture-search-form').forEach(form => {
