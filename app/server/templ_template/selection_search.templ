@@ -2,7 +2,7 @@ package templ_template
 
 templ SelectionSearchScript() {
 	<script>
-	(function() {
+	const initPopupManager = (function() {
 		if (window.dhee && window.dhee.popupManager) {
 			return; // Already initialized
 		}
@@ -163,6 +163,10 @@ templ SelectionSearchScript() {
 				}, 10);
 			});
 		}
-	})();
+	});
+	if (typeof preInit === "undefined") {
+		preInit = [];
+	}
+	preInit.push(initPopupManager);
 	</script>
 }

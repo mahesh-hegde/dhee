@@ -61,7 +61,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if data.Excerpts != nil && len(data.Excerpts) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<table class=\"table table-striped search-result\"><thead><tr><th scope=\"col\">Path</th><th scope=\"col\">Roman Text</th><th scope=\"col\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<table id=\"search-results-table\" class=\"table table-striped search-result\"><thead><tr><th scope=\"col\">Path</th><th scope=\"col\">Roman Text</th><th scope=\"col\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -216,6 +216,14 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = SearchScript().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = SelectionSearchScript().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script>\n\t\tvar preInit = preInit || [];\n        preInit.push(function() {\n            if (window.dhee && window.dhee.setupTextSelectionSearch) {\n                window.dhee.setupTextSelectionSearch('search-results-table', 'iast', 2);\n            }\n        });\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
