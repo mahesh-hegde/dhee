@@ -152,8 +152,8 @@ templ Navigation(data *excerpts.ExcerptTemplateData) {
 templ Excerpts(data *excerpts.ExcerptTemplateData) {
 	<div class="container">
 		<div class="row my-3">
-			<div class="col-lg-6 offset-lg-6">
-				@ScriptureSearchWidget(data.Scripture, nil)
+			<div class="col-lg-6 offset-lg-6" style="font-size: 0.7em;">
+				@ScriptureSearchWidget(data.Scripture, nil, true)
 			</div>
 		</div>
 		<script>

@@ -8,8 +8,8 @@ import (
 templ DictionarySearch(data dictionary.SearchResults) {
 	<div class="container">
 		<div class="row my-3">
-			<div class="col-lg-6 offset-lg-6">
-				@DictionarySearchWidget(data.DictionaryName, &data.Params)
+			<div class="col-lg-6 offset-lg-6" style="font-size: 0.7em;">
+				@DictionarySearchWidget(data.DictionaryName, &data.Params, true)
 			</div>
 		</div>
 		<h2 class="my-4">Dictionary Search Results</h2>

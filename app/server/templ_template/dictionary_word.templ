@@ -5,8 +5,8 @@ import "github.com/mahesh-hegde/dhee/app/dictionary"
 templ DictionaryWord(w dictionary.DictionaryWordResponse) {
 	<div class="container">
 		<div class="row my-3">
-			<div class="col-lg-6 offset-lg-6">
-				@DictionarySearchWidget(w.Dictionary.Name, nil)
+			<div class="col-lg-6 offset-lg-6" style="font-size: 0.7em;">
+				@DictionarySearchWidget(w.Dictionary.Name, nil, true)
 			</div>
 		</div>
 		{{ data := w.Words }}

@@ -11,15 +11,21 @@ var defaultDictionarySearchParams = &dictionary.SearchParams{
 	Mode:  "exact",
 }
 
-templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams) {
+templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, compact bool) {
 	if params == nil {
 		{{ params = defaultDictionarySearchParams }}
 	}
+	{{ col6Class := "col-sm-6" }}
+	{{ col2Class := "col-sm-2" }}
+	if compact {
+		{{ col6Class = "col-6" }}
+		{{ col2Class = "col-2" }}
+	}
 	<form action={ templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)) } method="GET" class="row g-3 dictionary-search-form" data-dict-name={ dictName }>
-		<div class="col-sm-6">
+		<div class={ col6Class }>
 			<input type="text" class="form-control" name="q" placeholder="Search text" value={ params.Query }/>
 		</div>
-		<div class="col-sm-2">
+		<div class={ col2Class }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-dict-name={ dictName }>
 				<option value="slp1" selected?={ params.Tl == "slp1" }>SLP1</option>
 				<option value="iast" selected?={ params.Tl == "iast" }>IAST</option>
@@ -27,7 +33,7 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams) {
 				<option value="dn" selected?={ params.Tl == "dn" }>Devanagari</option>
 			</select>
 		</div>
-		<div class="col-sm-2">
+		<div class={ col2Class }>
 			<select name="mode" class="form-select search-mode-select">
 				<option value="exact" selected?={ params.Mode == "exact" }>Exact</option>
 				<option value="prefix" selected?={ params.Mode == "prefix" }>Prefix</option>

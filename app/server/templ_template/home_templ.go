@@ -147,7 +147,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = ScriptureSearchWidget(scripture, nil).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ScriptureSearchWidget(scripture, nil, false).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -243,7 +243,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = DictionarySearchWidget(dictionary.Name, nil).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = DictionarySearchWidget(dictionary.Name, nil, false).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
