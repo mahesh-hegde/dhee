@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
@@ -74,6 +75,12 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 			return nil
 		},
 	}))
+
+	staticDir, err := fs.Sub(staticFs, "static")
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+	e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", http.FileServer(http.FS(staticDir)))))
 
 	e.GET("/favicon.ico", func(c echo.Context) error {
 		file, err := templateFs.ReadFile("templ_template/favicon.ico")

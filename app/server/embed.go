@@ -9,6 +9,9 @@ import (
 //go:embed templ_template/*.ico
 var templateFs embed.FS
 
+//go:embed static
+var staticFs embed.FS
+
 func sliceOf(a any, others ...any) []any {
 	slice := make([]any, 0, len(others)+1)
 	slice = append(slice, a)
