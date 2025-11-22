@@ -1,4 +1,4 @@
-const { Transliterator, TlSLP1, TlIAST, TlHK, TlNagari } = require('./common.js');
+const { Transliterator, TlSLP1, TlIAST, TlHK, TlNagari, foldAccents } = require('./common.js');
 
 let failed = 0;
 let passed = 0;
@@ -100,9 +100,48 @@ function testTransliteratorConvertWithFallback() {
     });
 }
 
+function testFoldAccents() {
+    const testCases = [
+        { name: "Fold single accent", input: "devásya", expected: "devasya" },
+        { name: "Fold multiple accents", input: "br̥hád vadema vidáthe suvī́rāḥ", expected: "br̥had vadema vidathe suvīrāḥ" },
+        { name: "No accents", input: "devasya", expected: "devasya" },
+        { name: "Empty string", input: "", expected: "" },
+        { name: "Fold m with dot", input: "saṁskṛtam", expected: "saṃskṛtam" },
+    ];
+
+    testCases.forEach(tc => {
+        runTest(tc.name, () => {
+            const actual = foldAccents(tc.input);
+            assertEqual(tc.expected, actual, tc.name);
+        });
+    });
+}
+
+function testTransliteratorConvertNormalized() {
+    const transliterator = new Transliterator({});
+    const testCases = [
+        { name: "Fold IAST to SLP1", source: "devásya", sourceTl: TlIAST, targetTl: TlSLP1, expected: "devasya" },
+        { name: "No fold for SLP1 to IAST", source: "devasya", sourceTl: TlSLP1, targetTl: TlIAST, expected: "devasya" },
+        { name: "Fold IAST to Devanagari", source: "agním", sourceTl: TlIAST, targetTl: TlNagari, expected: "अग्निम्" },
+    ];
+
+    testCases.forEach(tc => {
+        runTest(tc.name, () => {
+            let actual;
+            assertNoError(() => {
+                actual = transliterator.convertNormalized(tc.source, tc.sourceTl, tc.targetTl);
+            }, tc.name);
+            assertEqual(tc.expected, actual, tc.name);
+        });
+    });
+}
+
 console.log("Running transliteration tests...");
 testTransliteratorConvert();
 testTransliteratorConvertWithFallback();
+console.log("\nRunning accent folding tests...");
+testFoldAccents();
+testTransliteratorConvertNormalized();
 
 console.log(`\nTests finished. Passed: ${passed}, Failed: ${failed}`);
 if (failed > 0) {

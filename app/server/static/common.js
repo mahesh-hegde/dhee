@@ -1,5 +1,21 @@
 // Dhee client-side utilities
 
+const foldableAccentsList = [
+    "ó", "o", "í", "i", "á", "a", "ā́", "ā", "é",
+    "e", "ú", "u", "à", "a", "ú", "u",
+    "ū́", "ū", "ī́", "ī", "ŕ̥", "ṛ", "r̥", "ṛ", "ṁ", "ṃ", "\u0301", "",
+];
+
+function foldAccents(s) {
+    let result = s;
+    for (let i = 0; i < foldableAccentsList.length; i += 2) {
+        // Use a regex with 'g' flag to replace all occurrences
+        result = result.replace(new RegExp(foldableAccentsList[i], 'g'), foldableAccentsList[i + 1]);
+    }
+    return result;
+}
+
+
 // Paste slp1_mappings.json content here as a JS object.
 // For example: const slp1MappingsJSON = { ... };
 const slp1MappingsJSON = {
@@ -321,8 +337,15 @@ class Transliterator {
 
         return result;
     }
+
+    convertNormalized(source, sourceTl, targetTl) {
+        if (sourceTl === TlIAST) {
+            source = foldAccents(source);
+        }
+        return this.convert(source, sourceTl, targetTl);
+    }
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { Transliterator, TlSLP1, TlIAST, TlHK, TlNagari };
+    module.exports = { Transliterator, TlSLP1, TlIAST, TlHK, TlNagari, foldAccents };
 }

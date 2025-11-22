@@ -119,7 +119,7 @@ templ SelectionSearchScript() {
 						const textInput = document.createElement('input');
 						textInput.type = 'text';
 						textInput.className = 'form-control';
-						textInput.value = window.dhee.transliterator.convert(selectedText, transliteration, preferredTl);
+						textInput.value = window.dhee.transliterator.convertNormalized(selectedText, transliteration, preferredTl);
 
 						const tlSelect = document.createElement('select');
 						tlSelect.className = 'form-select';
@@ -169,7 +169,7 @@ templ SelectionSearchScript() {
 								return;
 							}
 							try {
-								const iast = window.dhee.transliterator.convert(query, sourceTl, TlIAST);
+								const iast = window.dhee.transliterator.convertNormalized(query, sourceTl, TlIAST);
 								suggestionEl.innerHTML = `🔎 ${iast}`;
 							} catch (e) {
 								console.error("Transliteration failed", e);
@@ -180,7 +180,7 @@ templ SelectionSearchScript() {
 						textInput.addEventListener('input', updateSuggestion);
 						tlSelect.addEventListener('change', () => {
 							const newTl = tlSelect.value;
-							textInput.value = window.dhee.transliterator.convert(textInput.value, currentTl, newTl);
+							textInput.value = window.dhee.transliterator.convertNormalized(textInput.value, currentTl, newTl);
 							currentTl = newTl;
 							updateSuggestion();
 						});

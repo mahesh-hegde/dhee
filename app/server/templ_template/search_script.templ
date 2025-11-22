@@ -37,7 +37,7 @@ templ SearchScript() {
 				}
 
 				try {
-					const iast = window.dhee.transliterator.convert(query, sourceTl, TlIAST);
+					const iast = window.dhee.transliterator.convertNormalized(query, sourceTl, TlIAST);
 					suggestionEl.textContent = `🔎 ${iast}`;
 				} catch (e) {
 					console.error("Transliteration failed", e);
