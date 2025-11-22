@@ -34,7 +34,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\"><noscript><div class=\"alert alert-info\" role=\"alert\">JavaScript is required to be enabled for most of the useful features of this website.</div></noscript>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -74,7 +74,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 					var templ_7745c5c3_Var2 string
 					templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(".collapse-result-%d", i))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 51, Col: 164}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 56, Col: 164}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 					if templ_7745c5c3_Err != nil {
@@ -92,7 +92,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 				var templ_7745c5c3_Var3 templ.SafeURL
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/%s/words/%s", data.DictionaryName, item.Word)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 56, Col: 104}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 61, Col: 104}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -105,7 +105,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(item.IAST)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 56, Col: 118}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 61, Col: 118}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -118,7 +118,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(item.Nagari)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 57, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 62, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -136,7 +136,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.Previews[0])
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 60, Col: 30}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 65, Col: 30}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -183,7 +183,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 						var templ_7745c5c3_Var9 string
 						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(preview)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 69, Col: 22}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 74, Col: 22}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 						if templ_7745c5c3_Err != nil {

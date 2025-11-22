@@ -743,7 +743,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			templ_7745c5c3_Var36 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<div class=\"container\"><div class=\"row my-3\"><div class=\"col-lg-6 offset-lg-6\" style=\"font-size: 0.7em;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<div class=\"container\"><noscript><div class=\"alert alert-info\" role=\"alert\">JavaScript is required to be enabled for most of the useful features of this website.</div></noscript><div class=\"row my-3\"><div class=\"col-lg-6 offset-lg-6\" style=\"font-size: 0.7em;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -757,7 +757,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 		}
 		templ_7745c5c3_Var37, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(data.Scripture.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 160, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 165, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var37)
 		if templ_7745c5c3_Err != nil {
@@ -769,7 +769,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 		}
 		templ_7745c5c3_Var38, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(getKeys(data.Scripture))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 161, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 166, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
 		if templ_7745c5c3_Err != nil {
@@ -787,7 +787,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			var templ_7745c5c3_Var39 string
 			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.ReadableName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 166, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 171, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -800,7 +800,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			var templ_7745c5c3_Var40 string
 			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[0].ReadableIndex)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 166, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 171, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 			if templ_7745c5c3_Err != nil {
@@ -814,7 +814,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 				var templ_7745c5c3_Var41 string
 				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(" - ")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 168, Col: 13}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 173, Col: 13}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 				if templ_7745c5c3_Err != nil {
@@ -827,7 +827,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 				var templ_7745c5c3_Var42 string
 				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[len(data.Excerpts)-1].ReadableIndex)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 169, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 174, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 				if templ_7745c5c3_Err != nil {
@@ -841,7 +841,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			var templ_7745c5c3_Var43 string
 			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(data.AddressedTo)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 175, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 180, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 			if templ_7745c5c3_Err != nil {
@@ -854,7 +854,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			var templ_7745c5c3_Var44 string
 			templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[0].Group)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 178, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 183, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 			if templ_7745c5c3_Err != nil {
@@ -872,7 +872,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 				var templ_7745c5c3_Var45 string
 				templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 188, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 193, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 				if templ_7745c5c3_Err != nil {
@@ -890,7 +890,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 					var templ_7745c5c3_Var46 string
 					templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(line)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 191, Col: 31}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 196, Col: 31}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 					if templ_7745c5c3_Err != nil {
@@ -918,7 +918,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 				var templ_7745c5c3_Var47 string
 				templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 203, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 208, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 				if templ_7745c5c3_Err != nil {
@@ -936,7 +936,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 					var templ_7745c5c3_Var48 string
 					templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(line)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 205, Col: 36}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 210, Col: 36}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 					if templ_7745c5c3_Err != nil {
@@ -979,7 +979,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 						var templ_7745c5c3_Var49 string
 						templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 225, Col: 43}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 230, Col: 43}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 						if templ_7745c5c3_Err != nil {
@@ -1024,7 +1024,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			}
 			templ_7745c5c3_Var50, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(data.Scripture.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 413, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 418, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var50)
 			if templ_7745c5c3_Err != nil {
@@ -1042,7 +1042,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 				var templ_7745c5c3_Var51 string
 				templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs("aux-" + aux.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 892, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 897, Col: 90}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 				if templ_7745c5c3_Err != nil {
@@ -1055,7 +1055,7 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 				var templ_7745c5c3_Var52 string
 				templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(aux.ReadableName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 894, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 899, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 				if templ_7745c5c3_Err != nil {

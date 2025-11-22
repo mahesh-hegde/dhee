@@ -7,6 +7,11 @@ import (
 
 templ DictionarySearch(data dictionary.SearchResults, isPreview bool) {
 	<div class="container">
+		<noscript>
+			<div class="alert alert-info" role="alert">
+				JavaScript is required to be enabled for most of the useful features of this website.
+			</div>
+		</noscript>
 		if !isPreview {
 			<div class="row my-3">
 				<div class="col-lg-6 offset-lg-6" style="font-size: 0.7em;">
