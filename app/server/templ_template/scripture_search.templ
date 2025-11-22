@@ -48,7 +48,7 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 									</pre>
 								}
 							</td>
-							<td class="wrap-50">
+							<td class="wrap-50 translation-col">
 								if hExcerpt.TranslationHl != "" {
 									@templ.Raw(hExcerpt.TranslationHl)
 								} else if data.Scripture.TranslationAuxiliary != "" {
@@ -78,6 +78,11 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
             if (window.dhee && window.dhee.setupTextSelectionSearch) {
                 window.dhee.setupTextSelectionSearch('search-results-table', 'iast', 2);
             }
+            document.querySelectorAll('.translation-col').forEach(function(el) {
+                el.addEventListener('mouseup', function(e) {
+                    e.stopPropagation();
+                });
+            });
         });
 	</script>
 }
