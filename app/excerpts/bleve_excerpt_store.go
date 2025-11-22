@@ -228,12 +228,6 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 			bq.Fuzziness = b.conf.Fuzziness
 			return bq
 		}
-	case common.SearchPrefix:
-		queryMaker = func(q string, field string) query.Query {
-			bq := bleve.NewPrefixQuery(q)
-			bq.SetField(field)
-			return bq
-		}
 	case common.SearchTranslations:
 		queryMaker = func(q string, field string) query.Query {
 			// ignore field that is specified
