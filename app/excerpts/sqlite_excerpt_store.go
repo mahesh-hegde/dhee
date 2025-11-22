@@ -126,14 +126,14 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 		}
 
 		sortIndex := common.PathToSortString(e.Path)
-		romanT := strings.Join(e.RomanText, " ")
+		romanT := strings.Join(e.RomanText, "\n")
 
 		_, err = stmt.ExecContext(ctx, id, scripture, sortIndex, e.ReadableIndex, romanT, entryJSON)
 		if err != nil {
 			return err
 		}
 
-		sourceT := html.EscapeString(strings.Join(e.SourceText, " "))
+		sourceT := html.EscapeString(strings.Join(e.SourceText, "\n"))
 		var surfaces []string
 		for _, glossGroup := range e.Glossings {
 			for _, g := range glossGroup {
@@ -146,7 +146,7 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 		var translationText string
 		if scriptureDefn.TranslationAuxiliary != "" {
 			if aux, ok := e.Auxiliaries[scriptureDefn.TranslationAuxiliary]; ok {
-				translationText = html.EscapeString(strings.Join(aux.Text, " "))
+				translationText = html.EscapeString(strings.Join(aux.Text, "\n"))
 			}
 		}
 
