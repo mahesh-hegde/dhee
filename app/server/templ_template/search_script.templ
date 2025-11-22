@@ -2,8 +2,42 @@ package templ_template
 
 templ SearchScript() {
 	<script>
-		const initSearchTl = function() {
+		const initSearchScript = function() {
+			window.dhee = window.dhee || {};
+			window.dhee.transliterator = new Transliterator({});
+
 			const DHEE_TL_PREF_KEY = 'dhee-tl-pref';
+
+			function updateSuggestion(form) {
+				const input = form.querySelector('.search-input');
+				const tlSelect = form.querySelector('.transliteration-select');
+				const suggestionEl = form.nextElementSibling?.querySelector('.transliteration-suggestion');
+
+				if (!input || !tlSelect || !suggestionEl) {
+					return;
+				}
+
+				const query = input.value;
+				const sourceTl = tlSelect.value;
+
+				if (query.trim() === '') {
+					suggestionEl.innerHTML = ' ';
+					return;
+				}
+
+				if (sourceTl === TlIAST) {
+					suggestionEl.innerHTML = ' ';
+					return;
+				}
+
+				try {
+					const iast = window.dhee.transliterator.convert(query, sourceTl, TlIAST);
+					suggestionEl.textContent = `🔎 ${iast}`;
+				} catch (e) {
+					console.error("Transliteration failed", e);
+					suggestionEl.textContent = ' ';
+				}
+			}
 
 			function updateTlSelects(value) {
 				document.querySelectorAll('.transliteration-select').forEach(function(select) {
@@ -15,6 +49,11 @@ templ SearchScript() {
 				const newValue = event.target.value;
 				localStorage.setItem(DHEE_TL_PREF_KEY, newValue);
 				updateTlSelects(newValue);
+
+				// When TL changes, all suggestion should be re-evaluated
+				document.querySelectorAll('.dictionary-search-form, .scripture-search-form').forEach(form => {
+					updateSuggestion(form);
+				});
 			}
 
 			function onModeChange(event) {
@@ -34,20 +73,34 @@ templ SearchScript() {
 				const pref = localStorage.getItem(DHEE_TL_PREF_KEY) || 'slp1';
 				updateTlSelects(pref);
 
+				// Initial suggestions
+				document.querySelectorAll('.dictionary-search-form, .scripture-search-form').forEach(form => {
+					updateSuggestion(form);
+				});
+
 				document.querySelectorAll('.transliteration-select').forEach(function(select) {
 					select.addEventListener('change', onTlChange);
+				});
+
+				document.querySelectorAll('.search-input').forEach(input => {
+					input.addEventListener('input', (event) => {
+						const form = event.target.closest('form');
+						if (form) {
+							updateSuggestion(form);
+						}
+					});
 				});
 
 				document.querySelectorAll('.search-mode-select').forEach(function(select) {
 					select.addEventListener('change', onModeChange);
 					// Initial check
-					onModeChange({target: select});
+					onModeChange({ target: select });
 				});
 			});
 		};
 		if (typeof preInit === "undefined") {
 			preInit = [];
 		}
-		preInit.push(initSearchTl);
+		preInit.push(initSearchScript);
 	</script>
 }
