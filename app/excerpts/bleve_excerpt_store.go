@@ -206,7 +206,14 @@ func (b *BleveExcerptStore) Search(ctx context.Context, scriptures []string, par
 	switch params.Mode {
 	case common.SearchRegex:
 		queryMaker = func(q string, field string) query.Query {
-			bq := bleve.NewRegexpQuery(q)
+			re := q
+			if !strings.HasPrefix(re, "^") && !strings.HasPrefix(re, ".*") {
+				re = ".*" + re
+			}
+			if !strings.HasSuffix(re, "$") && !strings.HasSuffix(re, ".*") {
+				re = re + ".*"
+			}
+			bq := bleve.NewRegexpQuery(re)
 			if field == "roman_t" {
 				// redirect to roman_k which contains whole text (not analyzed).
 				field = "roman_k"

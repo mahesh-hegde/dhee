@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search/query"
@@ -102,9 +103,16 @@ func (b *BleveDictStore) Search(ctx context.Context, dictName string, s SearchPa
 		vq.Fuzziness = b.conf.Fuzziness
 		wordQuery = bleve.NewDisjunctionQuery(q, vq)
 	case "regex":
-		q := bleve.NewRegexpQuery(s.Query)
+		re := s.Query
+		if !strings.HasPrefix(re, "^") && !strings.HasPrefix(re, ".*") {
+			re = ".*" + re
+		}
+		if !strings.HasSuffix(re, "$") && !strings.HasSuffix(re, ".*") {
+			re = re + ".*"
+		}
+		q := bleve.NewRegexpQuery(re)
 		q.SetField("word")
-		vq := bleve.NewPrefixQuery(s.Query)
+		vq := bleve.NewRegexpQuery(re)
 		vq.SetField("variants")
 		wordQuery = bleve.NewDisjunctionQuery(q, vq)
 	case "translations":
