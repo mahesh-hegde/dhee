@@ -6,41 +6,8 @@ import (
 	"github.com/mahesh-hegde/dhee/app/excerpts"
 )
 
-templ grammaticalBadges(g excerpts.WordGlossing, tags map[string]string) {
-	if g.Gramm != "" {
-		<span class="badge bg-light text-dark me-1" data-bs-toggle="tooltip" title={ tags[g.Gramm] }>{ g.Gramm }</span>
-	}
-	if g.Root != "" {
-		<span class="badge bg-secondary me-1">Root={ g.Root }</span>
-	}
-	if g.Number != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Number] }>Number:{ g.Number }</span>
-	}
-	if g.Gender != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Gender] }>Gender:{ g.Gender }</span>
-	}
-	if g.Case != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Case] }>Case:{ g.Case }</span>
-	}
-	if g.Tense != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Tense] }>Tense:{ g.Tense }</span>
-	}
-	if g.Voice != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Voice] }>Voice:{ g.Voice }</span>
-	}
-	if g.Person != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Person] }>Person:{ g.Person }</span>
-	}
-	if g.Mood != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Mood] }>Mood:{ g.Mood }</span>
-	}
-	for _, mod := range g.Modifiers {
-		<span class="badge bg-secondary me-1">{ string(mod) }</span>
-	}
-}
-
 func getKeys(s config.ScriptureDefn) []string {
-	keys := []string{"SourceText", "RomanText", "aux-pada", "Notes", "Glossings"}
+	keys := []string{"SourceText", "RomanText", "aux-pada", "Notes"}
 	for _, aux := range s.Auxiliaries {
 		if aux.Name != "pada" {
 			keys = append(keys, fmt.Sprintf("aux-%s", aux.Name))
@@ -49,52 +16,146 @@ func getKeys(s config.ScriptureDefn) []string {
 	return keys
 }
 
+templ AuxiliaryCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefinition) {
+	if auxText, ok := data.Excerpts[0].Auxiliaries[aux.Name]; ok && len(auxText.Text) > 0 {
+		<div class="card" data-section-key={ "aux-" + aux.Name }>
+			<div class="card-header">
+				{ aux.ReadableName }
+			</div>
+			<div class="card-body">
+				for _, excerpt := range data.Excerpts {
+					<p><strong>{ excerpt.ReadableIndex }</strong></p>
+					if auxiliary, ok := excerpt.Auxiliaries[aux.Name]; ok {
+						for _, text := range auxiliary.Text {
+							<p>{ text }</p>
+						}
+					}
+				}
+				if aux.Attribution != "" {
+					<div class="text-end text-muted" style="font-size: 45%;">
+						@templ.Raw(aux.Attribution)
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+templ PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefinition) {
+	<div class="card" data-section-key="aux-pada">
+		<div class="card-header">
+			{ aux.ReadableName }
+		</div>
+		<div class="card-body">
+			for eidx, excerpt := range data.Excerpts {
+				<p><strong>{ excerpt.ReadableIndex }</strong></p>
+				for pidx, pada := range excerpt.Padas {
+					if pidx > 0 {
+						{ ` | ` }
+					}
+					if pada.Found {
+						{{ var dictLink string = "" }}
+						if pada.SurfaceMeaning.Word != "" {
+							{{ dictLink = pada.SurfaceMeaning.Word }}
+						} else if pada.LemmaMeaning.Word != "" {
+							{{ dictLink = pada.LemmaMeaning.Word }}
+						}
+						<span class="pada-word" data-pada-id={ fmt.Sprintf("pada-%d-%d", eidx, pidx) }>
+							if dictLink != "" {
+								<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/words/%s", dictLink)) } class="text-decoration-none">
+									if pada.ExactMatched {
+										<strong>{ pada.Word }</strong>
+									} else {
+										{ pada.Word }
+									}
+								</a>
+							} else {
+								{ pada.Word }
+							}
+						</span>
+						<div id={ fmt.Sprintf("pada-%d-%d", eidx, pidx) } class="pada-data" style="display: none;">
+							<div class="pada-popup-content">
+								<div class="mt-2">
+									@grammaticalBadges(pada.G, data.GrammaticalTags)
+								</div>
+								if pada.G.Lemma != "" {
+									<p>from <i>{ pada.G.Lemma }</i></p>
+									<hr/>
+								}
+								if len(pada.SurfaceMeaning.Meanings) > 0 {
+									<div class="mb-2">
+										for _, entry := range pada.SurfaceMeaning.Meanings {
+											<div class="mt-1">
+												<span class="dict-iast-surface"><em>{ pada.SurfaceMeaning.IAST }</em></span>
+												{ ": " }
+												{ entry.Body.Plain }
+											</div>
+										}
+										<hr/>
+									</div>
+								}
+								if pada.LemmaMeaning.Word != "" {
+									<div class="mb-2">
+										for _, entry := range pada.LemmaMeaning.Meanings {
+											<div class="mt-1">
+												<span class="dict-iast-lemma"><em>{ pada.LemmaMeaning.IAST }</em></span>
+												{ ": " }
+												{ entry.Body.Plain }
+											</div>
+											<hr/>
+										}
+									</div>
+								}
+								<span class="d-flex justify-content-evenly">
+									if pada.Slp1NormSurface != "" {
+										<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=fuzzy", pada.Slp1NormSurface)) } class="badge bg-secondary me-1">🔎 { pada.G.Surface }</a>
+									}
+									if pada.Slp1NormLemma != "" && pada.Slp1NormLemma != pada.Slp1NormSurface {
+										<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=fuzzy", pada.Slp1NormLemma)) } class="badge bg-secondary me-1">🔎 { pada.G.Lemma }</a>
+									}
+								</span>
+							</div>
+						</div>
+					} else {
+						<span>{ pada.Word }</span>
+					}
+				}
+				<p></p>
+			}
+			if aux.Attribution != "" {
+				<div class="text-end text-muted" style="font-size: 60%;">
+					@templ.Raw(aux.Attribution)
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ Navigation(data *excerpts.ExcerptTemplateData) {
+	<div class="d-flex justify-content-between my-4" style="font-size: 0.6em">
+		if data.Previous != "" {
+			<a href={ data.Previous } class="btn btn-sm btn-primary">&larr; Previous ({ data.Previous })</a>
+		} else {
+			<span></span>
+		}
+		if data.Up != "" {
+			<a href={ data.Up } class="btn btn-sm btn-info">&uarr; { data.UpType } { data.Up }</a>
+		}
+		if data.Next != "" {
+			<a href={ data.Next } class="btn btn-sm btn-primary">Next ({ data.Next }) &rarr;</a>
+		} else {
+			<span></span>
+		}
+	</div>
+}
+
 templ Excerpts(data *excerpts.ExcerptTemplateData) {
 	<div class="container">
 		<script>
 		const scriptureName = "{{ data.Scripture.Name }}";
 		const scriptureKeys = {{ getKeys(data.Scripture) }};
-		// Minimal head script - runs before body renders
-		(function() {
-			if (typeof(Storage) !== "undefined") {
-				try {
-					var ord = JSON.parse(localStorage.getItem('verseDisplayChoices/'+scriptureName) || '[]');
-					if (ord.length > 0) {
-						var style = document.createElement('style');
-						style.id = 'verse-pref-style';
-						var css = '';
-						var allKeys = scriptureKeys;
-						allKeys.forEach(function(key) {
-							// Hide keys not in our local storage settings.
-							if (ord.indexOf(key) === -1) {
-								css += '[data-section-key="' + key + '"] { display: none !important; }\n';
-							}
-						});
-						style.textContent = css;
-						document.head.appendChild(style);
-					}
-				} catch(e) {
-					console.log("Error applying verse display preferences:", e);
-				}
-			}
-		})();
 		</script>
 		if data != nil && len(data.Excerpts) > 0 {
-			<div class="d-flex justify-content-between my-4" style="font-size: 0.6em">
-				if data.Previous != "" {
-					<a href={ data.Previous } class="btn btn-sm btn-primary">&larr; Previous ({ data.Previous })</a>
-				} else {
-					<span></span>
-				}
-				if data.Up != "" {
-					<a href={ data.Up } class="btn btn-sm btn-info">&uarr; { data.UpType } { data.Up }</a>
-				}
-				if data.Next != "" {
-					<a href={ data.Next } class="btn btn-sm btn-primary">Next ({ data.Next }) &rarr;</a>
-				} else {
-					<span></span>
-				}
-			</div>
 			<div class="my-4">
 				<h2 class="text-center">
 					{ data.Scripture.ReadableName } { data.Excerpts[0].ReadableIndex }
@@ -104,16 +165,16 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 					}
 				</h2>
 			</div>
-			<div class="d-flex flex-column justify-content-start my-3">
-				<div class="d-flex justify-content-start mb-2">
+			<div class="d-flex flex-row justify-content-start my-3">
+				<div class="d-flex justify-content-start me-2">
 					<span class="badge bg-success">Addressed to: { data.AddressedTo }</span>
 				</div>
-				<div class="d-flex justify-content-start mb-2">
+				<div class="d-flex justify-content-start me-2">
 					<span class="badge bg-secondary">Group: { data.Excerpts[0].Group }</span>
 				</div>
 			</div>
-			<div>
-				<div class="card my-3" data-section-key="SourceText">
+			<div id="cards-container" class="dual-column">
+				<div class="card" data-section-key="SourceText">
 					<div class="card-header">
 						Text (Devanagari)
 					</div>
@@ -128,7 +189,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 						}
 					</div>
 				</div>
-				<div class="card my-3" data-section-key="RomanText">
+				<div class="card" data-section-key="RomanText">
 					<div class="card-header">
 						Text (Roman)
 					</div>
@@ -143,120 +204,13 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 				</div>
 				for _, aux := range data.Scripture.Auxiliaries {
 					if aux.Name == "pada" {
-						<div class="card my-3" data-section-key="aux-pada">
-							<div class="card-header">
-								{ aux.ReadableName }
-							</div>
-							<div class="card-body">
-								for eidx, excerpt := range data.Excerpts {
-									<p><strong>{ excerpt.ReadableIndex }</strong></p>
-									for pidx, pada := range excerpt.Padas {
-										if pidx > 0 {
-											{ ` | ` }
-										}
-										if pada.Found {
-											{{ var dictLink string = "" }}
-											if pada.SurfaceMeaning.Word != "" {
-												{{ dictLink = pada.SurfaceMeaning.Word }}
-											} else if pada.LemmaMeaning.Word != "" {
-												{{ dictLink = pada.LemmaMeaning.Word }}
-											}
-											<span class="pada-word" data-pada-id={ fmt.Sprintf("pada-%d-%d", eidx, pidx) }>
-												if dictLink != "" {
-													<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/words/%s", dictLink)) } class="text-decoration-none">
-														if pada.ExactMatched {
-															<strong>{ pada.Word }</strong>
-														} else {
-															{ pada.Word }
-														}
-													</a>
-												} else {
-													{ pada.Word }
-												}
-											</span>
-											<div id={ fmt.Sprintf("pada-%d-%d", eidx, pidx) } class="pada-data" style="display: none;">
-												<div class="pada-popup-content">
-													<div class="mt-2">
-														@grammaticalBadges(pada.G, data.GrammaticalTags)
-													</div>
-													if pada.G.Lemma != "" {
-														<p>from <i>{ pada.G.Lemma }</i></p>
-														<hr/>
-													}
-													if len(pada.SurfaceMeaning.Meanings) > 0 {
-														<div class="mb-2">
-															for _, entry := range pada.SurfaceMeaning.Meanings {
-																<div class="mt-1">
-																	<span class="dict-iast-surface"><em>{ pada.SurfaceMeaning.IAST }</em></span>
-																	{ ": " }
-																	{ entry.Body.Plain }
-																</div>
-															}
-															<hr/>
-														</div>
-													}
-													if pada.LemmaMeaning.Word != "" {
-														<div class="mb-2">
-															for _, entry := range pada.LemmaMeaning.Meanings {
-																<div class="mt-1">
-																	<span class="dict-iast-lemma"><em>{ pada.LemmaMeaning.IAST }</em></span>
-																	{ ": " }
-																	{ entry.Body.Plain }
-																</div>
-																<hr/>
-															}
-														</div>
-													}
-													<span class="d-flex justify-content-evenly">
-														if pada.Slp1NormSurface != "" {
-															<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=fuzzy", pada.Slp1NormSurface)) } class="badge bg-secondary me-1">🔎 { pada.G.Surface }</a>
-														}
-														if pada.Slp1NormLemma != "" && pada.Slp1NormLemma != pada.Slp1NormSurface {
-															<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=fuzzy", pada.Slp1NormLemma)) } class="badge bg-secondary me-1">🔎 { pada.G.Lemma }</a>
-														}
-													</span>
-												</div>
-											</div>
-										} else {
-											<span>{ pada.Word }</span>
-										}
-									}
-									<p></p>
-								}
-								if aux.Attribution != "" {
-									<div class="text-end text-muted" style="font-size: 60%;">
-										@templ.Raw(aux.Attribution)
-									</div>
-								}
-							</div>
-						</div>
+						@PadaCard(data, &aux)
 					} else {
-						if auxText, ok := data.Excerpts[0].Auxiliaries[aux.Name]; ok && len(auxText.Text) > 0 {
-							<div class="card my-3" data-section-key={ "aux-" + aux.Name }>
-								<div class="card-header">
-									{ aux.ReadableName }
-								</div>
-								<div class="card-body">
-									for _, excerpt := range data.Excerpts {
-										<p><strong>{ excerpt.ReadableIndex }</strong></p>
-										if auxiliary, ok := excerpt.Auxiliaries[aux.Name]; ok {
-											for _, text := range auxiliary.Text {
-												<p>{ text }</p>
-											}
-										}
-									}
-									if aux.Attribution != "" {
-										<div class="text-end text-muted" style="font-size: 45%;">
-											@templ.Raw(aux.Attribution)
-										</div>
-									}
-								</div>
-							</div>
-						}
+						@AuxiliaryCard(data, &aux)
 					}
 				}
 				if data.Excerpts[0].Notes != nil {
-					<div class="card my-3" data-section-key="Notes">
+					<div class="card" data-section-key="Notes">
 						<div class="card-header">
 							Notes
 						</div>
@@ -274,102 +228,47 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 						</div>
 					</div>
 				}
-				<div class="card my-3" data-section-key="Glossings">
-					<div class="card-header d-flex justify-content-between align-items-center">
-						<div>Grammatical analysis</div>
-						<div>
-							<button class="btn btn-sm btn-outline-info me-2" type="button" data-bs-toggle="collapse" data-bs-target="#grammaticalCollapse" aria-expanded="true" aria-controls="grammaticalCollapse">
-								Toggle table
-							</button>
-						</div>
+			</div>
+			<div class="card my-3">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<div>Grammatical analysis</div>
+					<div>
+						<button class="btn btn-sm btn-outline-info me-2" type="button" data-bs-toggle="collapse" data-bs-target="#grammaticalCollapse" aria-expanded="true" aria-controls="grammaticalCollapse">
+							Toggle table
+						</button>
 					</div>
-					<div class="card-body collapse" id="grammaticalCollapse">
-						<div class="table-responsive">
-							<table class="table table-sm table-striped align-middle">
-								<thead>
-									<tr>
-										<th>Source index</th>
-										<th>Surface</th>
-										<th>Lemma</th>
-										<th>Information</th>
-									</tr>
-								</thead>
-								<tbody>
-									for _, ew := range data.Excerpts {
-										for rindex, row := range ew.Glossings {
-											for windex, g := range row {
-												<tr>
-													<td class="text-muted small">{ ew.ReadableIndex }</td>
-													<td>
-														{{ surfEntry := ew.Words[g.Surface] }}
-														if surfEntry.IAST != "" {
-															<span class="table-word table-word-underline" data-word-id={ fmt.Sprintf("surf-%d-%d", rindex, windex) }>{ g.Surface }</span>
-														} else {
-															<span class="table-word" data-word-id={ fmt.Sprintf("surf-%d-%d", rindex, windex) }>{ g.Surface }</span>
-														}
-														<div id={ fmt.Sprintf("surf-%d-%d", rindex, windex) } class="table-word-data" style="display: none;">
-															<div class="table-word-popup-content">
-																if surfEntry.IAST != "" {
-																	for i, e := range surfEntry.Meanings {
-																		<div class="mb-2">
-																			<span class="dict-iast-surface"><em>{ surfEntry.IAST }</em></span>
-																			{ ": " }
-																			{ e.Body.Plain }
-																		</div>
-																		if i < len(surfEntry.Meanings)-1 {
-																			<hr/>
-																		}
-																	}
-																	<hr/>
-																}
-																<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=fuzzy", g.Surface)) } class="badge bg-secondary">🔎 { g.Surface }</a>
-															</div>
-														</div>
-													</td>
-													<td>
-														{{ lemmaEntry := ew.Words[g.Lemma] }}
-														if g.Lemma != "" {
-															if lemmaEntry.Word != "" {
-																<span class="table-word table-word-underline" data-word-id={ fmt.Sprintf("lemma-%d-%d", rindex, windex) }>{ g.Lemma }</span>
-															} else {
-																<span class="table-word" data-word-id={ fmt.Sprintf("lemma-%d-%d", rindex, windex) }>{ g.Lemma }</span>
-															}
-															<div id={ fmt.Sprintf("lemma-%d-%d", rindex, windex) } class="table-word-data" style="display: none;">
-																<div class="table-word-popup-content">
-																	if lemmaEntry.Word != "" {
-																		for i, e := range lemmaEntry.Meanings {
-																			<div class="mb-2">
-																				<span class="dict-iast-lemma"><em>{ lemmaEntry.IAST }</em></span>
-																				{ ": " }
-																				{ e.Body.Plain }
-																			</div>
-																			if i < len(lemmaEntry.Meanings)-1 {
-																				<hr/>
-																			}
-																		}
-																		<hr/>
-																	}
-																	<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=fuzzy", g.Lemma)) } class="badge bg-secondary">🔎 { g.Lemma }</a>
-																</div>
-															</div>
-														} else {
-															<span class="text-muted">N/A</span>
-														}
-													</td>
-													<td>
-														@grammaticalBadges(g, data.GrammaticalTags)
-													</td>
-												</tr>
-											}
-										}
-									}
-								</tbody>
-							</table>
-						</div>
-					</div>
+				</div>
+				<div class="card-body collapse" id="grammaticalCollapse">
+					@morphologyTable(data)
 				</div>
 			</div>
 			<style>
+		#cards-container.single-column {
+			display: flex;
+			flex-direction: column;
+		}
+
+		#cards-container.single-column .card {
+			margin-top: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		#cards-container.dual-column {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 1rem;
+			margin-top: 0;
+		}
+
+		@media (min-width: 992px) {
+			#cards-container.dual-column {
+				grid-template-columns: 1fr 1fr;
+			}
+		}
+
+		#cards-container .card:last-child:nth-child(odd) {
+			grid-column: 1 / -1;
+		}
         .dotted-underline {
             border-bottom: 1px dotted currentColor;
             cursor: help;
@@ -506,12 +405,12 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 		}
 			</style>
 			<script>
+		const scripture = '{{ data.Scripture.Name }}';
 		const setupOrderPrefs = function() {
 			// Display preferences management
 			var prefContainer = document.getElementById('display-prefs');
 			if (!prefContainer) return;
 
-			var scripture = '{{ data.Scripture.Name }}';
 			var checkboxItems = prefContainer.querySelectorAll('.pref-checkbox-item');
 			var prefDraggedItem = null;
 
@@ -700,6 +599,42 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 			});
 
 			loadPreferences();
+		}
+
+		const setupLayoutPrefs = function() {
+			// Layout preferences
+			const layoutRadios = document.querySelectorAll('input[name="layout"]');
+			layoutRadios.forEach(function(radio) {
+				radio.disabled = false;
+				radio.addEventListener('change', function() {
+					const container = document.getElementById('cards-container');
+					if (this.value === 'single') {
+						container.classList.remove('dual-column');
+						container.classList.add('single-column');
+					} else {
+						container.classList.remove('single-column');
+						container.classList.add('dual-column');
+					}
+					
+					if (typeof(Storage) !== "undefined") {
+						localStorage.setItem('layoutPref/' + scripture, this.value);
+					}
+				});
+			});
+
+			// Load saved layout preference
+			if (typeof(Storage) !== "undefined") {
+				const savedLayout = localStorage.getItem('layoutPref/' + scripture);
+				if (savedLayout) {
+					const radio = document.querySelector('input[name="layout"][value="' + savedLayout + '"]');
+					if (radio) {
+						radio.checked = true;
+						const container = document.getElementById('cards-container');
+						container.classList.remove('single-column', 'dual-column');
+						container.classList.add(savedLayout === 'single' ? 'single-column' : 'dual-column');
+					}
+				}
+			}
 		}
 
         // Pada word popup handler and table word popup handler
@@ -932,6 +867,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 
 			try {
 				setupOrderPrefs();
+				setupLayoutPrefs()
 			} catch (e) {
 				console.error("Failed to setup display order preferences:", e);
 			}
@@ -957,27 +893,21 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 						<input type="checkbox" checked disabled class="me-1"/>
 						<span>Notes</span>
 					</label>
-					<label class="pref-checkbox-item" draggable="true" data-pref-key="Glossings">
-						<input type="checkbox" checked disabled class="me-1"/>
-						<span>Morphology</span>
+				</div>
+			</div>
+			<div class="d-flex justify-content-start mt-2">
+				<div id="layout-prefs" class="d-flex align-items-center gap-3" style="font-size: 0.7em;">
+					<label class="form-check-label">
+						<input type="radio" name="layout" value="single" disabled class="form-check-input me-1"/>
+						<span>Single column</span>
+					</label>
+					<label class="form-check-label">
+						<input type="radio" name="layout" value="dual" checked disabled class="form-check-input me-1"/>
+						<span>Dual column</span>
 					</label>
 				</div>
 			</div>
-			<div class="d-flex justify-content-between my-4" style="font-size: 0.6em">
-				if data.Previous != "" {
-					<a href={ data.Previous } class="btn btn-sm btn-primary">&larr; Previous ({ data.Previous })</a>
-				} else {
-					<span></span>
-				}
-				if data.Up != "" {
-					<a href={ data.Up } class="btn btn-sm btn-info">&uarr; { data.UpType } { data.Up }</a>
-				}
-				if data.Next != "" {
-					<a href={ data.Next } class="btn btn-sm btn-primary">Next ({ data.Next }) &rarr;</a>
-				} else {
-					<span></span>
-				}
-			</div>
+			@Navigation(data)
 			if data.Scripture.Attribution != "" {
 				<div class="text-center my-4 text-muted" style="font-size: 60%;">
 					@templ.Raw(data.Scripture.Attribution)

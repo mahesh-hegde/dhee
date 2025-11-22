@@ -1,0 +1,124 @@
+package templ_template
+
+import (
+	"fmt"
+	"github.com/mahesh-hegde/dhee/app/excerpts"
+)
+
+templ grammaticalBadges(g excerpts.WordGlossing, tags map[string]string) {
+	if g.Gramm != "" {
+		<span class="badge bg-light text-dark me-1" data-bs-toggle="tooltip" title={ tags[g.Gramm] }>{ g.Gramm }</span>
+	}
+	if g.Root != "" {
+		<span class="badge bg-secondary me-1">Root={ g.Root }</span>
+	}
+	if g.Number != "" {
+		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Number] }>Number:{ g.Number }</span>
+	}
+	if g.Gender != "" {
+		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Gender] }>Gender:{ g.Gender }</span>
+	}
+	if g.Case != "" {
+		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Case] }>Case:{ g.Case }</span>
+	}
+	if g.Tense != "" {
+		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Tense] }>Tense:{ g.Tense }</span>
+	}
+	if g.Voice != "" {
+		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Voice] }>Voice:{ g.Voice }</span>
+	}
+	if g.Person != "" {
+		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Person] }>Person:{ g.Person }</span>
+	}
+	if g.Mood != "" {
+		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Mood] }>Mood:{ g.Mood }</span>
+	}
+	for _, mod := range g.Modifiers {
+		<span class="badge bg-secondary me-1">{ string(mod) }</span>
+	}
+}
+
+templ morphologyTable(data *excerpts.ExcerptTemplateData) {
+	<div class="table-responsive">
+		<table class="table table-sm table-striped align-middle">
+			<thead>
+				<tr>
+					<th>Source index</th>
+					<th>Surface</th>
+					<th>Lemma</th>
+					<th>Information</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, ew := range data.Excerpts {
+					for rindex, row := range ew.Glossings {
+						for windex, g := range row {
+							<tr>
+								<td class="text-muted small">{ ew.ReadableIndex }</td>
+								<td>
+									{{ surfEntry := ew.Words[g.Surface] }}
+									if surfEntry.IAST != "" {
+										<span class="table-word table-word-underline" data-word-id={ fmt.Sprintf("surf-%d-%d", rindex, windex) }>{ g.Surface }</span>
+									} else {
+										<span class="table-word" data-word-id={ fmt.Sprintf("surf-%d-%d", rindex, windex) }>{ g.Surface }</span>
+									}
+									<div id={ fmt.Sprintf("surf-%d-%d", rindex, windex) } class="table-word-data" style="display: none;">
+										<div class="table-word-popup-content">
+											if surfEntry.IAST != "" {
+												for i, e := range surfEntry.Meanings {
+													<div class="mb-2">
+														<span class="dict-iast-surface"><em>{ surfEntry.IAST }</em></span>
+														{ ": " }
+														{ e.Body.Plain }
+													</div>
+													if i < len(surfEntry.Meanings)-1 {
+														<hr/>
+													}
+												}
+												<hr/>
+											}
+											<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=fuzzy", g.Surface)) } class="badge bg-secondary">🔎 { g.Surface }</a>
+										</div>
+									</div>
+								</td>
+								<td>
+									{{ lemmaEntry := ew.Words[g.Lemma] }}
+									if g.Lemma != "" {
+										if lemmaEntry.Word != "" {
+											<span class="table-word table-word-underline" data-word-id={ fmt.Sprintf("lemma-%d-%d", rindex, windex) }>{ g.Lemma }</span>
+										} else {
+											<span class="table-word" data-word-id={ fmt.Sprintf("lemma-%d-%d", rindex, windex) }>{ g.Lemma }</span>
+										}
+										<div id={ fmt.Sprintf("lemma-%d-%d", rindex, windex) } class="table-word-data" style="display: none;">
+											<div class="table-word-popup-content">
+												if lemmaEntry.Word != "" {
+													for i, e := range lemmaEntry.Meanings {
+														<div class="mb-2">
+															<span class="dict-iast-lemma"><em>{ lemmaEntry.IAST }</em></span>
+															{ ": " }
+															{ e.Body.Plain }
+														</div>
+														if i < len(lemmaEntry.Meanings)-1 {
+															<hr/>
+														}
+													}
+													<hr/>
+												}
+												<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=fuzzy", g.Lemma)) } class="badge bg-secondary">🔎 { g.Lemma }</a>
+											</div>
+										</div>
+									} else {
+										<span class="text-muted">N/A</span>
+									}
+								</td>
+								<td>
+									@grammaticalBadges(g, data.GrammaticalTags)
+								</td>
+							</tr>
+						}
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+}
