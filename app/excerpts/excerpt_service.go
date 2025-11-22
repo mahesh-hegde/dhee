@@ -3,7 +3,9 @@ package excerpts
 import (
 	"context"
 	"fmt"
+	"html"
 	"log/slog"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -281,6 +283,21 @@ func (s *ExcerptService) Search(ctx context.Context, search SearchParams) (*Exce
 	if err != nil {
 		return nil, common.WrapErrorForResponse(err, "failed to search excerpts")
 	}
+
+	if search.Mode == "regex" {
+		re, err := regexp.Compile(search.Q)
+		if err != nil {
+			slog.Warn("invalid regex for highlighting", "query", search.Q, "err", err)
+		} else {
+			for i := range excerpts {
+				fullRomanText := strings.Join(excerpts[i].Excerpt.RomanText, " ")
+				escapedText := html.EscapeString(fullRomanText)
+				highlightedText := re.ReplaceAllString(escapedText, "<em>$0</em>")
+				excerpts[i].RomanHl = highlightedText
+			}
+		}
+	}
+
 	scripture := ""
 	if len(search.Scriptures) == 1 {
 		scripture = search.Scriptures[0]
