@@ -19,6 +19,7 @@ templ DictionarySearch(data dictionary.SearchResults, isPreview bool) {
 			<table class="table table-striped">
 				<thead>
 					<tr>
+						<th scope="col" style="width: 1rem;"></th>
 						<th scope="col">Word (IAST)</th>
 						<th scope="col">Word (Devanagari)</th>
 						<th scope="col">Overview</th>
@@ -29,12 +30,12 @@ templ DictionarySearch(data dictionary.SearchResults, isPreview bool) {
 						<tr>
 							<td>
 								if len(item.Previews) > 1 {
-									<button class="btn btn-sm btn-link text-decoration-none me-2" type="button" data-bs-toggle="collapse" data-bs-target={ fmt.Sprintf(".collapse-result-%d", i) } aria-expanded="false">
+									<button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target={ fmt.Sprintf(".collapse-result-%d", i) } aria-expanded="false">
 										<i class="bi bi-plus-square"></i>
 									</button>
 								}
-								<a href={ templ.URL(fmt.Sprintf("/dictionaries/%s/words/%s", data.DictionaryName, item.Word)) }>{ item.IAST }</a>
 							</td>
+							<td><a href={ templ.URL(fmt.Sprintf("/dictionaries/%s/words/%s", data.DictionaryName, item.Word)) }>{ item.IAST }</a></td>
 							<td>{ item.Nagari }</td>
 							<!-- TODO: show main H1, H2, H3 entries -->
 							if len(item.Previews) > 0 {
@@ -46,7 +47,7 @@ templ DictionarySearch(data dictionary.SearchResults, isPreview bool) {
 						if len(item.Previews) > 1 {
 							for _, preview := range item.Previews[1:] {
 								<tr class={ "collapse " + fmt.Sprintf("collapse-result-%d", i) }>
-									<td colspan="2"></td>
+									<td colspan="3"></td>
 									<td>{ preview }</td>
 								</tr>
 							}
