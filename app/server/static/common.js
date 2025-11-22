@@ -72,6 +72,12 @@ class Transliterator {
     }
 
     _init() {
+        this.dnMatraToSlp1 = {
+            'ा': "A", 'ि': "i", 'ी': "I", 'ु': "u", 'ू': "U",
+            'ृ': "f", 'ॄ': "F", 'ॢ': "x", 'ॣ': "X", 'े': "e",
+            'ै': "E", 'ो': "o", 'ौ': "O",
+        };
+
         const mappingsData = slp1MappingsJSON;
 
         const baseMap = mappingsData.mappings["slp1_to_iast"];
@@ -249,11 +255,6 @@ class Transliterator {
         let result = "";
         const sourceRunes = Array.from(source);
 
-        const matraToVowel = {
-            'ा': "A", 'ि': "i", 'ी': "I", 'ु': "u", 'ू': "U",
-            'ृ': "f", 'ॄ': "F", 'ॢ': "x", 'ॣ': "X", 'े': "e",
-            'ै': "E", 'ो': "o", 'ौ': "O",
-        };
         const virama = '्';
 
         let i = 0;
@@ -268,9 +269,10 @@ class Transliterator {
                 if (isConsonant) {
                     if (i + 1 < sourceRunes.length) {
                         const nextChar = sourceRunes[i + 1];
-                        if (matraToVowel[nextChar]) {
+                        const slp1Vowel = this.dnMatraToSlp1[nextChar];
+                        if (slp1Vowel) {
                             result += slp1Char;
-                            result += matraToVowel[nextChar];
+                            result += slp1Vowel;
                             i += 2;
                             continue;
                         } else if (nextChar === virama) {
@@ -287,7 +289,10 @@ class Transliterator {
                     i++;
                 }
             } else {
-                if (this.options.FallbackCharacter) {
+                const slp1Vowel = this.dnMatraToSlp1[char];
+                if (slp1Vowel) {
+                    result += slp1Vowel;
+                } else if (this.options.FallbackCharacter) {
                     result += this.options.FallbackCharacter;
                 } else {
                     result += char;
