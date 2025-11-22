@@ -42,7 +42,7 @@ templ AuxiliaryCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDef
 }
 
 templ PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefinition) {
-	<div class="card" data-section-key="aux-pada">
+	<div class="card" data-section-key="aux-pada" id="pada-section">
 		<div class="card-header">
 			{ aux.ReadableName }
 		</div>
@@ -335,43 +335,6 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
             line-height: 1.4;
         }
 
-        .search-result-window {
-            position: fixed;
-            top: 10vh;
-            left: 30vw;
-            z-index: 1060;
-            background-color: var(--bs-body-bg);
-            color: var(--bs-body-color);
-            border: 1px solid var(--bs-border-color);
-            border-radius: .3rem;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
-            max-width: 40vw;
-            max-height: 50vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .search-result-title-bar {
-            height: 2em;
-            background-color: #003300;
-            cursor: move;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            flex-shrink: 0;
-        }
-
-        .search-result-content {
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-
-        .search-result-window .btn-close {
-            margin-right: 0.5em;
-            filter: invert(1) grayscale(100%) brightness(200%);
-        }
-
 		.pref-checkbox-item {
 			cursor: move;
 			padding: 0.25rem 0.5rem;
@@ -655,8 +618,6 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
                 new bootstrap.Tooltip(tooltipTriggerEl)
             })
 
-            var activePopup = null;
-
             // Pada word hover cards
             document.querySelectorAll('.pada-word').forEach(function (wordEl) {
                 var padaId = wordEl.getAttribute('data-pada-id');
@@ -665,11 +626,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
                 if (!dataEl) return;
 
                 wordEl.addEventListener('mouseenter', function (e) {
-                    // Remove any existing popup
-                    if (activePopup) {
-                        activePopup.remove();
-                        activePopup = null;
-                    }
+                    window.dhee.popupManager.close();
 
                     // Create popup
                     var popup = document.createElement('div');
@@ -682,15 +639,15 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
                     popup.style.left = rect.left + 'px';
                     popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';
 
-                    activePopup = popup;
+                    window.dhee.popupManager.set(popup);
                 });
 
                 wordEl.addEventListener('mouseleave', function (e) {
                     setTimeout(function () {
-                        if (activePopup && !activePopup.matches(':hover')) {
-                            activePopup.remove();
-                            activePopup = null;
-                        }
+						const p = window.dhee.popupManager.get();
+                        if (p && !p.matches(':hover')) {
+							window.dhee.popupManager.close();
+						}
                     }, 100);
                 });
             });
@@ -703,11 +660,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
                 if (!dataEl) return;
 
                 wordEl.addEventListener('mouseenter', function (e) {
-                    // Remove any existing popup
-                    if (activePopup) {
-                        activePopup.remove();
-                        activePopup = null;
-                    }
+                    window.dhee.popupManager.close();
 
                     // Create popup
                     var popup = document.createElement('div');
@@ -720,160 +673,22 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
                     popup.style.left = rect.left + 'px';
                     popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';
 
-                    activePopup = popup;
+                    window.dhee.popupManager.set(popup);
                 });
 
                 wordEl.addEventListener('mouseleave', function (e) {
                     setTimeout(function () {
-                        if (activePopup && !activePopup.matches(':hover')) {
-                            activePopup.remove();
-                            activePopup = null;
-                        }
+						const p = window.dhee.popupManager.get();
+                        if (p && !p.matches(':hover')) {
+							window.dhee.popupManager.close();
+						}
                     }, 100);
                 });
             });
 
-            function makeDraggable(element) {
-                let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-                const dragHandle = element.querySelector('.search-result-title-bar');
-                if (!dragHandle) { return; }
-                dragHandle.onmousedown = dragMouseDown;
-
-                function dragMouseDown(e) {
-                    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a, button')) {
-                        return;
-                    }
-                    e = e || window.event;
-                    e.preventDefault();
-                    pos3 = e.clientX;
-                    pos4 = e.clientY;
-                    document.onmouseup = closeDragElement;
-                    document.onmousemove = elementDrag;
-                }
-
-                function elementDrag(e) {
-                    e = e || window.event;
-                    e.preventDefault();
-                    pos1 = pos3 - e.clientX;
-                    pos2 = pos4 - e.clientY;
-                    pos3 = e.clientX;
-                    pos4 = e.clientY;
-                    element.style.top = (element.offsetTop - pos2) + "px";
-                    element.style.left = (element.offsetLeft - pos1) + "px";
-                }
-
-                function closeDragElement() {
-                    document.onmouseup = null;
-                    document.onmousemove = null;
-                }
-            }
-
-            // Text selection search popup
-            function setupTextSelectionSearch(elementId, transliteration, fuzziness) {
-                const textEl = document.getElementById(elementId);
-                if (!textEl) return;
-
-                textEl.addEventListener('mouseup', function (e) {
-                    const searchResultWindow = document.querySelector('.search-result-window');
-                    if (searchResultWindow && searchResultWindow.contains(e.target)) {
-                        return;
-                    }
-
-                    if (activePopup) {
-                        activePopup.remove();
-                        activePopup = null;
-                    }
-
-                    setTimeout(() => {
-                        const selection = window.getSelection();
-                        if (!selection.rangeCount) return;
-                        const selectedText = selection.toString().trim();
-
-                        if (selectedText.length > 0 && (selectedText.match(/\s/g) || []).length <= 2) {
-                            const range = selection.getRangeAt(0);
-                            const rect = range.getBoundingClientRect();
-
-                            if (e.target.closest('.pada-popup, .table-word-popup, .roman-selection-popup')) return;
-
-                            const popup = document.createElement('div');
-                            popup.className = 'roman-selection-popup';
-                            popup.style.position = 'absolute';
-                            popup.style.zIndex = 1050;
-
-                            const searchBadge = document.createElement('button');
-                            searchBadge.className = 'btn btn-sm btn-info';
-                            searchBadge.innerHTML = `🔎 ${selectedText}`;
-
-                            popup.appendChild(searchBadge);
-                            document.body.appendChild(popup);
-
-                            const popupRect = popup.getBoundingClientRect();
-                            popup.style.left = `${rect.right + window.scrollX - popupRect.width}px`;
-                            popup.style.top = `${rect.bottom + window.scrollY + 5}px`;
-
-                            activePopup = popup;
-
-                            searchBadge.addEventListener('click', function () {
-                                if (activePopup) {
-                                    activePopup.remove();
-                                    activePopup = null;
-                                }
-
-                                const existingResultWindow = document.querySelector('.search-result-window');
-                                if (existingResultWindow) {
-                                    existingResultWindow.remove();
-                                }
-
-                                const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(selectedText)}&tl=${transliteration}&mode=fuzzy&preview=true&fuzziness=${fuzziness}`;
-                                fetch(url)
-                                    .then(response => response.text())
-                                    .then(html => {
-                                        const resultWindow = document.createElement('div');
-                                        resultWindow.className = 'search-result-window';
-
-                                        const titleBar = document.createElement('div');
-                                        titleBar.className = 'search-result-title-bar';
-
-                                        const closeButton = document.createElement('button');
-                                        closeButton.className = 'btn-close';
-                                        closeButton.setAttribute('aria-label', 'Close');
-                                        titleBar.appendChild(closeButton);
-
-                                        const contentDiv = document.createElement('div');
-                                        contentDiv.className = 'search-result-content';
-                                        contentDiv.innerHTML = html;
-
-                                        resultWindow.appendChild(titleBar);
-                                        resultWindow.appendChild(contentDiv);
-
-                                        document.body.appendChild(resultWindow);
-
-                                        closeButton.onclick = function () {
-                                            resultWindow.remove();
-                                        };
-
-                                        makeDraggable(resultWindow);
-                                    }).catch(err => console.error("Failed to fetch search preview:", err));
-                            });
-                        }
-                    }, 10);
-                });
-            }
-            setupTextSelectionSearch('roman-text-section', 'iast', 2);
-            setupTextSelectionSearch('source-text-section', 'dn', 3);
-
-            // Close popup when clicking outside
-            document.addEventListener('click', function (e) {
-                if (activePopup && !activePopup.contains(e.target) && !e.target.closest('.pada-word') && !e.target.closest('.table-word')) {
-                    activePopup.remove();
-                    activePopup = null;
-                }
-
-                const resultWindow = document.querySelector('.search-result-window');
-                if (resultWindow && !resultWindow.contains(e.target) && !e.target.closest('.roman-selection-popup')) {
-                    resultWindow.remove();
-                }
-            });
+            window.dhee.setupTextSelectionSearch('roman-text-section', 'iast', 2);
+            window.dhee.setupTextSelectionSearch('source-text-section', 'dn', 3);
+            window.dhee.setupTextSelectionSearch('pada-section', 'iast', 2);
 
 			try {
 				setupOrderPrefs();

@@ -15,7 +15,7 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 		</div>
 		<h2 class="my-4">Search Results for { fmt.Sprintf("%q", data.Search.Q) }</h2>
 		if data.Excerpts != nil && len(data.Excerpts) > 0 {
-			<table class="table table-striped search-result">
+			<table id="search-results-table" class="table table-striped search-result">
 				<thead>
 					<tr>
 						<th scope="col">Path</th>
@@ -71,4 +71,12 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 		}
 	</div>
 	@SearchScript()
+	<script>
+		var preInit = preInit || [];
+        preInit.push(function() {
+            if (window.dhee && window.dhee.setupTextSelectionSearch) {
+                window.dhee.setupTextSelectionSearch('search-results-table', 'iast', 2);
+            }
+        });
+	</script>
 }
