@@ -80,6 +80,7 @@ templ SelectionSearchScript() {
 		}
 
 		window.dhee.setupTextSelectionSearch = function(elementId, transliteration, fuzziness) {
+			const DHEE_TL_PREF_KEY = 'dhee-tl-pref';
 			const textEl = document.getElementById(elementId);
 			if (!textEl) return;
 
@@ -112,12 +113,13 @@ templ SelectionSearchScript() {
 						cardBody.className = 'card-body p-2';
 
 						const inputGroup = document.createElement('div');
-						inputGroup.className = 'input-group input-group-sm mb-2';
+						inputGroup.className = 'input-group input-group-sm';
 
+						const preferredTl = localStorage.getItem(DHEE_TL_PREF_KEY) || 'slp1';
 						const textInput = document.createElement('input');
 						textInput.type = 'text';
 						textInput.className = 'form-control';
-						textInput.value = selectedText;
+						textInput.value = window.dhee.transliterator.convert(selectedText, transliteration, preferredTl);
 
 						const tlSelect = document.createElement('select');
 						tlSelect.className = 'form-select';
@@ -127,22 +129,27 @@ templ SelectionSearchScript() {
 							<option value="hk">Kyoto-Harvard</option>
 							<option value="dn">Devanagari</option>
 						`;
-						tlSelect.value = transliteration;
+						tlSelect.value = preferredTl;
 
 						inputGroup.appendChild(textInput);
 						inputGroup.appendChild(tlSelect);
 
+						const bottomRow = document.createElement('div');
+						bottomRow.className = 'd-flex justify-content-between align-items-center mt-2';
+
 						const suggestionEl = document.createElement('div');
-						suggestionEl.className = 'form-text text-muted mb-2';
+						suggestionEl.className = 'form-text text-muted';
 						suggestionEl.style.minHeight = '1.2rem';
 
 						const searchButton = document.createElement('button');
 						searchButton.className = 'btn btn-sm btn-primary';
 						searchButton.textContent = 'Search';
 
+						bottomRow.appendChild(suggestionEl);
+						bottomRow.appendChild(searchButton);
+
 						cardBody.appendChild(inputGroup);
-						cardBody.appendChild(suggestionEl);
-						cardBody.appendChild(searchButton);
+						cardBody.appendChild(bottomRow);
 						popup.appendChild(cardBody);
 						document.body.appendChild(popup);
 
@@ -151,6 +158,8 @@ templ SelectionSearchScript() {
 						popup.style.top = `${rect.bottom + window.scrollY + 5}px`;
 
 						window.dhee.popupManager.set(popup);
+
+						let currentTl = preferredTl;
 
 						function updateSuggestion() {
 							const query = textInput.value;
@@ -169,7 +178,12 @@ templ SelectionSearchScript() {
 						}
 
 						textInput.addEventListener('input', updateSuggestion);
-						tlSelect.addEventListener('change', updateSuggestion);
+						tlSelect.addEventListener('change', () => {
+							const newTl = tlSelect.value;
+							textInput.value = window.dhee.transliterator.convert(textInput.value, currentTl, newTl);
+							currentTl = newTl;
+							updateSuggestion();
+						});
 						updateSuggestion();
 
 						searchButton.addEventListener('click', function () {
