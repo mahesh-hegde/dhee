@@ -5,7 +5,7 @@ import (
 	"github.com/mahesh-hegde/dhee/app/excerpts"
 )
 
-var defaultScriptureSearchParams = &excerpts.SearchParams{Tl: "slp1", Mode: "exact"}
+var defaultScriptureSearchParams = &excerpts.SearchParams{OriginalQ: "", Q: "", Tl: "slp1", Mode: "exact"}
 
 templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.SearchParams, compact bool) {
 	if params == nil {
@@ -22,7 +22,7 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 	<form action="/scripture-search" method="GET" class={ formClass } data-scripture-name={ scripture.Name }>
 		<input type="hidden" name="scriptures" value={ scripture.Name }/>
 		<div class={ inputClass }>
-			<input type="text" class="form-control" name="query" placeholder="Search text" value={ params.Q }/>
+			<input type="text" class="form-control" name="query" placeholder="Search text" value={ params.OriginalQ }/>
 		</div>
 		<div class={ selectClass }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-scripture-name={ scripture.Name }>

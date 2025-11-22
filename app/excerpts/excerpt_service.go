@@ -273,6 +273,7 @@ func (s *ExcerptService) Search(ctx context.Context, search SearchParams) (*Exce
 			slog.Warn("transliteration failed for scripture search", "query", search.Q, "err", err)
 			iastQuery = search.Q
 		}
+		search.OriginalQ = search.Q
 		search.Q = iastQuery
 	}
 

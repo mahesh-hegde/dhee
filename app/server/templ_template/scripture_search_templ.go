@@ -174,7 +174,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div><style>\n\t\tselect:disabled {\n\t\t\tbackground-color: #e9ecef;\n\t\t\tcursor: not-allowed;\n\t\t}\n\t</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

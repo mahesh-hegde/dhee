@@ -6,10 +6,11 @@ import (
 )
 
 type SearchParams struct {
-	Query     string
-	Tl        common.Transliteration
-	Mode      common.SearchMode
-	TextQuery string
+	Query         string
+	OriginalQuery string
+	Tl            common.Transliteration
+	Mode          common.SearchMode
+	TextQuery     string
 }
 
 type SuggestParams struct {

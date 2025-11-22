@@ -57,6 +57,7 @@ type SearchParams struct {
 	Scriptures []string
 	Mode       common.SearchMode
 	Q          string
+	OriginalQ  string
 	Tl         string
 	// Name of auxiliary, or "0" for sanskrit text, or "1" for roman text. Empty implies all auxiliaries, roman and source text
 	SearchIn []string

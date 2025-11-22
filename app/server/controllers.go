@@ -153,6 +153,7 @@ func (c *DheeController) SearchScripture(ctx echo.Context) error {
 
 	params := excerpts.SearchParams{
 		Q:          query,
+		OriginalQ:  query,
 		Tl:         tl,
 		Mode:       common.SearchMode(modeStr),
 		Scriptures: strings.Split(scriptures, ","),
@@ -218,10 +219,11 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 	}
 
 	params := dictionary.SearchParams{
-		Query:     query,
-		TextQuery: textQuery,
-		Mode:      common.SearchMode(modeStr),
-		Tl:        tl,
+		Query:         query,
+		OriginalQuery: query,
+		TextQuery:     textQuery,
+		Mode:          common.SearchMode(modeStr),
+		Tl:            tl,
 	}
 
 	results, err := c.ds.Search(ctx.Request().Context(), dictionaryName, params)
