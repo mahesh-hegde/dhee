@@ -119,43 +119,6 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 		}
 		id := fmt.Sprintf("%d:%s", s.conf.ScriptureNameToId(scripture), e.ReadableIndex)
 
-		// --- HTML-escape searchable text & auxiliaries BEFORE serializing ---
-		for i := range e.SourceText {
-			e.SourceText[i] = html.EscapeString(e.SourceText[i])
-		}
-		for i := range e.RomanText {
-			e.RomanText[i] = html.EscapeString(e.RomanText[i])
-		}
-		for i := range e.Notes {
-			e.Notes[i] = html.EscapeString(e.Notes[i])
-		}
-		// auxTextsEscaped := make([]string, 0, len(e.Auxiliaries))
-		// for k, auxObj := range e.Auxiliaries {
-		// 	for i := range auxObj.Text {
-		// 		auxObj.Text[i] = html.EscapeString(auxObj.Text[i])
-		// 	}
-		// 	// store back the escaped auxiliary in the JSON representation
-		// 	e.Auxiliaries[k] = auxObj
-		// 	auxTextsEscaped = append(auxTextsEscaped, strings.Join(auxObj.Text, " "))
-		// }
-
-		// HTML-escape searchable strings before serializing to db
-		for i := range e.SourceText {
-			e.SourceText[i] = html.EscapeString(e.SourceText[i])
-		}
-		for i := range e.RomanText {
-			e.RomanText[i] = html.EscapeString(e.RomanText[i])
-		}
-		for i := range e.Notes {
-			e.Notes[i] = html.EscapeString(e.Notes[i])
-		}
-		for k, aux := range e.Auxiliaries {
-			for i := range aux.Text {
-				aux.Text[i] = html.EscapeString(aux.Text[i])
-			}
-			e.Auxiliaries[k] = aux
-		}
-
 		entryJSON, _ := json.Marshal(e)
 
 		if err != nil {
@@ -170,7 +133,7 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			return err
 		}
 
-		sourceT := strings.Join(e.SourceText, " ")
+		sourceT := html.EscapeString(strings.Join(e.SourceText, " "))
 		var surfaces []string
 		for _, glossGroup := range e.Glossings {
 			for _, g := range glossGroup {
@@ -180,18 +143,17 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			}
 		}
 
-		// translation text is already escaped if present
 		var translationText string
 		if scriptureDefn.TranslationAuxiliary != "" {
 			if aux, ok := e.Auxiliaries[scriptureDefn.TranslationAuxiliary]; ok {
-				translationText = strings.Join(aux.Text, " ")
+				translationText = html.EscapeString(strings.Join(aux.Text, " "))
 			}
 		}
 
 		// insert into main excerpts_fts (no translation column)
 		_, err = ftsStmt.ExecContext(ctx,
 			sourceT,
-			romanT,
+			html.EscapeString(romanT),
 			strings.Join(e.Addressees, ", "),
 			strings.Join(e.Authors, ", "),
 			e.Meter,
@@ -205,7 +167,7 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 		if translationText != "" {
 			_, err := translFtsStmt.ExecContext(
 				ctx, translationText,
-				strings.Join(e.Notes, ","), strings.Join(e.Addressees, ", "),
+				html.EscapeString(strings.Join(e.Notes, ",")), strings.Join(e.Addressees, ", "),
 				strings.Join(e.Authors, ", "), e.Meter,
 			)
 			if err != nil {
@@ -307,7 +269,7 @@ func (s *SQLiteExcerptStore) FindBeforeAndAfter(ctx context.Context, scripture s
 	return before, after
 }
 
-func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, params SearchParams) ([]Excerpt, error) {
+func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, params SearchParams) ([]HighlightedExcerpt, error) {
 	q := params.Q
 	scripturePlaceholders := "?"
 	if len(scriptures) > 1 {
@@ -357,11 +319,10 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 			args = append(args, ftsQuery)
 		} else {
 			orderBy = "ORDER BY ex_fts.rank, ex.sort_index"
-			matchClause := fmt.Sprintf("ex_fts.%s MATCH ?", ftsColumn)
 			query := `
-				SELECT ex.e
+				SELECT ex.e, highlight(dhee_excerpts_fts, 1, '<em>', '</em>') as roman_hl
 				FROM dhee_excerpts_fts AS ex_fts JOIN dhee_excerpts AS ex ON ex_fts.rowid = ex.rowid
-				WHERE ex.scripture IN (` + scripturePlaceholders + `) AND ` + matchClause
+				WHERE ex.scripture IN (` + scripturePlaceholders + `) AND ex_fts.roman_t MATCH ?`
 			fullQuery = query + " " + orderBy + " LIMIT 100"
 			args = append(args, ftsQuery)
 		}
@@ -373,39 +334,40 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 	}
 	defer rows.Close()
 
-	var excerpts []Excerpt
+	var excerpts []HighlightedExcerpt
 
 	for rows.Next() {
-		// when translation search: we selected (ex.e, translation_hl), else only ex.e
 		var excerptJSON []byte
-		var translationHl sql.NullString
-		if params.Mode == common.SearchTranslations {
-			if err := rows.Scan(&excerptJSON, &translationHl); err != nil {
-				return nil, err
-			}
-		} else {
+		var translationHl, romanHl sql.NullString
+
+		if params.Mode == common.SearchRegex {
 			if err := rows.Scan(&excerptJSON); err != nil {
 				return nil, err
 			}
+		} else if params.Mode == common.SearchTranslations {
+			if err := rows.Scan(&excerptJSON, &translationHl); err != nil {
+				return nil, err
+			}
+		} else { // All other FTS modes
+			if err := rows.Scan(&excerptJSON, &romanHl); err != nil {
+				return nil, err
+			}
 		}
+
 		var excerpt Excerpt
 		if err := json.Unmarshal(excerptJSON, &excerpt); err != nil {
 			return nil, err
 		}
-		// If we obtained a highlighted translation snippet, override the translation auxiliary in the excerpt
-		if params.Mode == common.SearchTranslations && translationHl.Valid {
-			if scriptureDefn := s.conf.GetScriptureByName(excerpt.Scripture); scriptureDefn != nil && scriptureDefn.TranslationAuxiliary != "" {
-				if excerpt.Auxiliaries == nil {
-					excerpt.Auxiliaries = make(map[string]Auxiliary)
-				}
 
-				// translationHl contains <strong>...</strong> fragments (already escaped / safe as produced by highlight)
-				excerpt.Auxiliaries[scriptureDefn.TranslationAuxiliary] = Auxiliary{
-					Text: []string{translationHl.String},
-				}
-			}
+		hlExcerpt := HighlightedExcerpt{Excerpt: excerpt}
+
+		if translationHl.Valid {
+			hlExcerpt.TranslationHl = translationHl.String
 		}
-		excerpts = append(excerpts, excerpt)
+		if romanHl.Valid {
+			hlExcerpt.RomanHl = romanHl.String
+		}
+		excerpts = append(excerpts, hlExcerpt)
 	}
 
 	return excerpts, rows.Err()

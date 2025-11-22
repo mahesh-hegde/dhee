@@ -31,19 +31,27 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 					</tr>
 				</thead>
 				<tbody>
-					for _, excerpt := range data.Excerpts {
+					for _, hExcerpt := range data.Excerpts {
+						var excerpt = hExcerpt.Excerpt
 						<tr>
 							<td><a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", excerpt.Scripture, excerpt.ReadableIndex)) }>{ excerpt.ReadableIndex }</a></td>
 							<td class="roman-text-search">
-								for _, line := range excerpt.RomanText {
-									@templ.Raw(line)
-									<br/>
+								if hExcerpt.RomanHl != "" {
+									@templ.Raw(hExcerpt.RomanHl)
+								} else {
+									for _, line := range excerpt.RomanText {
+										{ line }<br/>
+									}
 								}
 							</td>
 							<td class="wrap-50">
-								if griffith, ok := excerpt.Auxiliaries["griffith"]; ok {
-									for _, text := range griffith.Text {
-										@templ.Raw(text)
+								if hExcerpt.TranslationHl != "" {
+									@templ.Raw(hExcerpt.TranslationHl)
+								} else if data.Scripture.TranslationAuxiliary != "" {
+									if aux, ok := excerpt.Auxiliaries[data.Scripture.TranslationAuxiliary]; ok {
+										for _, text := range aux.Text {
+											{ text }
+										}
 									}
 								}
 							</td>
