@@ -71,6 +71,7 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 		}
 	</div>
 	@SearchScript()
+	@SelectionSearchScript()
 	<script>
 		var preInit = preInit || [];
         preInit.push(function() {
