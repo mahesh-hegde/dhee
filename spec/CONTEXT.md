@@ -33,3 +33,6 @@ Depending on which part(s) of the app you are modifying, you can run the followi
 - Server `go run ./cmd/dhee server --data-dir ./data`
   - This will start serving on port 8080
 
+## Misc Features
+* Automatically linking Monier-williams dictionary entries with Padapatha, as popups for easy reading
+* Ability to select part of roman text and search it in dictionary without switching pages, implemented in 

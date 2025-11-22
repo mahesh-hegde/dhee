@@ -103,7 +103,7 @@ function testTransliteratorConvertWithFallback() {
 function testFoldAccents() {
     const testCases = [
         { name: "Fold single accent", input: "devásya", expected: "devasya" },
-        { name: "Fold multiple accents", input: "br̥hád vadema vidáthe suvī́rāḥ", expected: "br̥had vadema vidathe suvīrāḥ" },
+        { name: "Fold multiple accents", input: "br̥hád vadema vidáthe suvī́rāḥ", expected: "bṛhad vadema vidathe suvīrāḥ" },
         { name: "No accents", input: "devasya", expected: "devasya" },
         { name: "Empty string", input: "", expected: "" },
         { name: "Fold m with dot", input: "saṁskṛtam", expected: "saṃskṛtam" },

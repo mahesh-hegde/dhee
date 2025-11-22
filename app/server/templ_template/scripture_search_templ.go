@@ -159,7 +159,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</td><td class=\"wrap-50\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</td><td class=\"wrap-50 translation-col\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -223,7 +223,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script>\n\t\tvar preInit = preInit || [];\n        preInit.push(function() {\n            if (window.dhee && window.dhee.setupTextSelectionSearch) {\n                window.dhee.setupTextSelectionSearch('search-results-table', 'iast', 2);\n            }\n        });\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script>\n\t\tvar preInit = preInit || [];\n        preInit.push(function() {\n            if (window.dhee && window.dhee.setupTextSelectionSearch) {\n                window.dhee.setupTextSelectionSearch('search-results-table', 'iast', 2);\n            }\n            document.querySelectorAll('.translation-col').forEach(function(el) {\n                el.addEventListener('mouseup', function(e) {\n                    e.stopPropagation();\n                });\n            });\n        });\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
