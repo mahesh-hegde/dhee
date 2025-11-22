@@ -32,7 +32,7 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 				</thead>
 				<tbody>
 					for _, hExcerpt := range data.Excerpts {
-						var excerpt = hExcerpt.Excerpt
+						{{ var excerpt = hExcerpt.Excerpt }}
 						<tr>
 							<td><a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", excerpt.Scripture, excerpt.ReadableIndex)) }>{ excerpt.ReadableIndex }</a></td>
 							<td class="roman-text-search">
@@ -40,7 +40,8 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 									@templ.Raw(hExcerpt.RomanHl)
 								} else {
 									for _, line := range excerpt.RomanText {
-										{ line }<br/>
+										{ line }
+										<br/>
 									}
 								}
 							</td>
