@@ -15,7 +15,8 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/text"
+	"github.com/yuin/goldmark/renderer"
+	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/util"
 )
 
@@ -61,97 +62,127 @@ type dheeMarkdownExtension struct {
 
 // Extend adds custom parsing to goldmark.
 func (e *dheeMarkdownExtension) Extend(m goldmark.Markdown) {
-	m.Parser().AddOptions(
-		parser.WithASTTransformers(
-			util.Prioritized(&dheeASTTransformer{mc: e.mc}, 100),
-		),
-	)
-}
-
-type dheeASTTransformer struct {
-	mc *MarkdownConverter
+	m.Renderer().AddOptions(renderer.WithNodeRenderers(
+		util.Prioritized(&dheeHTMLRenderer{mc: e.mc}, 500),
+	))
 }
 
 var linkRegex = regexp.MustCompile(`@([a-zA-Z0-9_-]+)#([0-9.]+)`)
 
-// Transform traverses the Markdown AST and applies custom transformations.
-func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
-	err := ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
-		if !entering {
-			return ast.WalkContinue, nil
-		}
+type dheeHTMLRenderer struct {
+	mc *MarkdownConverter
+}
 
-		switch n.Kind() {
-		case ast.KindEmphasis:
-			if n.(*ast.Emphasis).Level == 1 {
-				var next ast.Node
-				for c := n.FirstChild(); c != nil; c = next {
-					next = c.NextSibling()
-					if c.Kind() == ast.KindText {
-						txt := c.(*ast.Text)
-						wordHK := string(txt.Segment.Value(reader.Source()))
-						if wordIAST, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
-							newNode := ast.NewString([]byte(wordIAST))
-							n.ReplaceChild(n, c, newNode)
-						}
-					}
-				}
-			}
-		case ast.KindCodeSpan:
-			var content strings.Builder
-			for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-				if textNode, ok := c.(*ast.Text); ok {
-					content.Write(textNode.Segment.Value(reader.Source()))
-				}
-			}
-			wordHK := content.String()
-			if wordHK == "" {
-				return ast.WalkContinue, nil
-			}
+// RegisterFuncs registers the custom rendering functions.
+func (r *dheeHTMLRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	reg.Register(ast.KindEmphasis, r.renderEmphasis)
+	reg.Register(ast.KindCodeSpan, r.renderCodeSpan)
+	reg.Register(ast.KindLink, r.renderLink)
+}
 
-			wordSLP1, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlSLP1)
-			if err != nil {
-				// Fallback to just transliterating to IAST
-				if wordIAST, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
-					newNode := ast.NewString([]byte(wordIAST))
-					n.Parent().ReplaceChild(n.Parent(), n, newNode)
-				}
-				return ast.WalkContinue, nil
-			}
-
-			dictName := t.mc.conf.DefaultDict
-			entries, _ := t.mc.dictStore.Get(context.Background(), dictName, []string{wordSLP1})
-
-			wordIAST, _ := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST)
-			parent := n.Parent()
-			if len(entries) > 0 {
-				link := ast.NewLink()
-				link.Destination = fmt.Appendf(nil, "/dictionaries/%s/words/%s", dictName, wordSLP1)
-				link.SetAttributeString("style", []byte("text-decoration: underline;"))
-				link.AppendChild(link, ast.NewString([]byte(wordIAST)))
-				parent.ReplaceChild(parent, n, link)
+func (r *dheeHTMLRenderer) renderEmphasis(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	n := node.(*ast.Emphasis)
+	if n.Level != 1 {
+		if entering {
+			if n.Level == 2 {
+				_, _ = w.WriteString("<strong>")
 			} else {
-				parent.ReplaceChild(parent, n, ast.NewString([]byte(wordIAST)))
+				_, _ = w.WriteString("<em>")
 			}
-			textValue := string(parent.Text(reader.Source()))
-			slog.Debug("visiting node", "kind", n.Kind().String(), "text", textValue)
-
-		case ast.KindLink:
-			link := n.(*ast.Link)
-			destination := string(link.Destination)
-			if strings.HasPrefix(destination, "@") {
-				matches := linkRegex.FindStringSubmatch(destination)
-				if len(matches) == 3 {
-					scriptureName := matches[1]
-					path := matches[2]
-					newDestination := fmt.Sprintf("/scriptures/%s/excerpts/%s", scriptureName, path)
-					link.Destination = []byte(newDestination)
-				}
+		} else {
+			if n.Level == 2 {
+				_, _ = w.WriteString("</strong>")
+			} else {
+				_, _ = w.WriteString("</em>")
 			}
 		}
 		return ast.WalkContinue, nil
-	})
-	if err != nil {
-		slog.Error("error transforming markdown AST", "error", err)
 	}
+
+	if entering {
+		wordHK := string(node.Text(source))
+		if wordIAST, err := r.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
+			_, _ = w.WriteString("<em>")
+			_, _ = w.Write(util.EscapeHTML([]byte(wordIAST)))
+			_, _ = w.WriteString("</em>")
+			return ast.WalkSkipChildren, nil
+		}
+
+		// Fallback for failed transliteration
+		_, _ = w.WriteString("<em>")
+	} else {
+		_, _ = w.WriteString("</em>")
+	}
+	return ast.WalkContinue, nil
+}
+
+func (r *dheeHTMLRenderer) renderCodeSpan(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+	if !entering {
+		return ast.WalkContinue, nil
+	}
+
+	wordHK := string(n.Text(source))
+	if wordHK == "" {
+		return ast.WalkSkipChildren, nil
+	}
+
+	wordIAST, err := r.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST)
+	if err != nil {
+		wordIAST = wordHK // fallback
+	}
+
+	wordSLP1, err := r.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlSLP1)
+	if err != nil {
+		// Just render as text if we can't get SLP1 for dictionary lookup.
+		_, _ = w.Write(util.EscapeHTML([]byte(wordIAST)))
+		return ast.WalkSkipChildren, nil
+	}
+
+	dictName := r.mc.conf.DefaultDict
+	entries, _ := r.mc.dictStore.Get(context.Background(), dictName, []string{wordSLP1})
+
+	if len(entries) > 0 {
+		url := fmt.Sprintf("/dictionaries/%s/words/%s", dictName, wordSLP1)
+		_, _ = w.WriteString(`<a href="`)
+		_, _ = w.Write(util.EscapeHTML(util.URLEscape([]byte(url), true)))
+		_, _ = w.WriteString(`" style="text-decoration: underline;">`)
+		_, _ = w.Write(util.EscapeHTML([]byte(wordIAST)))
+		_, _ = w.WriteString("</a>")
+	} else {
+		_, _ = w.Write(util.EscapeHTML([]byte(wordIAST)))
+	}
+
+	return ast.WalkSkipChildren, nil
+}
+
+func (r *dheeHTMLRenderer) renderLink(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	n := node.(*ast.Link)
+	if entering {
+		destination := string(n.Destination)
+		if strings.HasPrefix(destination, "@") {
+			matches := linkRegex.FindStringSubmatch(destination)
+			if len(matches) == 3 {
+				scriptureName := matches[1]
+				path := matches[2]
+				newDestination := fmt.Sprintf("/scriptures/%s/excerpts/%s", scriptureName, path)
+				n.Destination = []byte(newDestination)
+			}
+		}
+
+		_, _ = w.WriteString("<a href=\"")
+		_, _ = w.Write(util.EscapeHTML(util.URLEscape(n.Destination, true)))
+		_ = w.WriteByte('"')
+		if n.Title != nil {
+			_, _ = w.WriteString(" title=\"")
+			_, _ = w.Write(util.EscapeHTML(n.Title))
+			_ = w.WriteByte('"')
+		}
+		if n.Attributes() != nil {
+			html.RenderAttributes(w, n)
+		}
+		_ = w.WriteByte('>')
+	} else {
+		_, _ = w.WriteString("</a>")
+	}
+	return ast.WalkContinue, nil
 }
