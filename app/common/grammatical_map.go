@@ -16,14 +16,14 @@ var GrammaticalTags = map[string]GrammaticalTagStyle{
 	"3": {ReadableName: "third person", SanskritName: "प्रथमपुरुषः", Color: "var(--bs-secondary-text-emphasis)"},
 
 	// Cases
-	"ABL": {ReadableName: "ablative", SanskritName: "पञ्चमी", BackgroundColor: "var(--bs-primary-bg-subtle)"},
-	"ACC": {ReadableName: "accusative", SanskritName: "द्वितीया", BackgroundColor: "var(--bs-secondary-bg-subtle)"},
-	"DAT": {ReadableName: "dative", SanskritName: "चतुर्थी", BackgroundColor: "var(--bs-success-bg-subtle)"},
-	"GEN": {ReadableName: "genitive", SanskritName: "षष्ठी", BackgroundColor: "var(--bs-danger-bg-subtle)"},
-	"INS": {ReadableName: "instrumental", SanskritName: "तृतीया", BackgroundColor: "var(--bs-warning-bg-subtle)"},
-	"LOC": {ReadableName: "locative", SanskritName: "सप्तमी", BackgroundColor: "var(--bs-info-bg-subtle)"},
-	"NOM": {ReadableName: "nominative", SanskritName: "प्रथमा", BackgroundColor: "var(--bs-light-bg-subtle)"},
-	"VOC": {ReadableName: "vocative", SanskritName: "संबोधन", BackgroundColor: "var(--bs-dark-bg-subtle)"},
+	"ABL": {ReadableName: "ablative", SanskritName: "पञ्चमी", BackgroundColor: "#cfe2ff", Color: "#000"},
+	"ACC": {ReadableName: "accusative", SanskritName: "द्वितीया", BackgroundColor: "#e2e3e5", Color: "#000"},
+	"DAT": {ReadableName: "dative", SanskritName: "चतुर्थी", BackgroundColor: "#d1e7dd", Color: "#000"},
+	"GEN": {ReadableName: "genitive", SanskritName: "षष्ठी", BackgroundColor: "#f8d7da", Color: "#000"},
+	"INS": {ReadableName: "instrumental", SanskritName: "तृतीया", BackgroundColor: "#fff3cd", Color: "#000"},
+	"LOC": {ReadableName: "locative", SanskritName: "सप्तमी", BackgroundColor: "#cff4fc", Color: "#000"},
+	"NOM": {ReadableName: "nominative", SanskritName: "प्रथमा", BackgroundColor: "#f8f9fa", Color: "#000"},
+	"VOC": {ReadableName: "vocative", SanskritName: "संबोधन", BackgroundColor: "#ced4da", Color: "#000"},
 
 	// Voices
 	"ACT":  {ReadableName: "active", SanskritName: "कर्तरि"},
@@ -31,18 +31,18 @@ var GrammaticalTags = map[string]GrammaticalTagStyle{
 	"PASS": {ReadableName: "passive voice", SanskritName: "कर्मणि"},
 
 	// Tenses/Moods
-	"AOR":    {ReadableName: "aorist", SanskritName: "लुङ्", BackgroundColor: "var(--bs-warning-bg-subtle)"},
+	"AOR":    {ReadableName: "aorist", SanskritName: "लुङ्", BackgroundColor: "#fff3cd", Color: "#000"},
 	"COND":   {ReadableName: "conditional", SanskritName: "लृङ्"},
-	"FUT":    {ReadableName: "future", SanskritName: "लृट्", BackgroundColor: "var(--bs-danger-bg-subtle)"},
+	"FUT":    {ReadableName: "future", SanskritName: "लृट्", BackgroundColor: "#f8d7da", Color: "#000"},
 	"IMP":    {ReadableName: "imperative", SanskritName: "लोट्"},
 	"IND":    {ReadableName: "indicative", SanskritName: "निर्देश"},
 	"INF":    {ReadableName: "infinitive", SanskritName: "तुमुन्"},
 	"INJ":    {ReadableName: "injuctive", SanskritName: "आगमरहित लुङ्"},
-	"IPRF":   {ReadableName: "imperfect", SanskritName: "लङ्", BackgroundColor: "var(--bs-secondary-bg-subtle)"},
+	"IPRF":   {ReadableName: "imperfect", SanskritName: "लङ्", BackgroundColor: "#e2e3e5", Color: "#000"},
 	"OPT":    {ReadableName: "optative", SanskritName: "विधिलिङ्"},
-	"PLUPRF": {ReadableName: "past perfect", SanskritName: "लुङ् (sometimes)", BackgroundColor: "var(--bs-info-bg-subtle)"},
-	"PRF":    {ReadableName: "perfect", SanskritName: "लिट्", BackgroundColor: "var(--bs-success-bg-subtle)"},
-	"PRS":    {ReadableName: "present", SanskritName: "लट्", BackgroundColor: "var(--bs-primary-bg-subtle)"},
+	"PLUPRF": {ReadableName: "past perfect", SanskritName: "लुङ् (sometimes)", BackgroundColor: "#cff4fc", Color: "#000"},
+	"PRF":    {ReadableName: "perfect", SanskritName: "लिट्", BackgroundColor: "#d1e7dd", Color: "#000"},
+	"PRS":    {ReadableName: "present", SanskritName: "लट्", BackgroundColor: "#cfe2ff", Color: "#000"},
 	"SBJV":   {ReadableName: "subjunctive", SanskritName: "लेट्"},
 
 	// Numbers
