@@ -11,52 +11,52 @@ type GrammaticalTagStyle struct {
 
 var GrammaticalTags = map[string]GrammaticalTagStyle{
 	// Persons
-	"1": {ReadableName: "first person", SanskritName: "उत्तमपुरुषः", Color: "var(--bs-primary-text-emphasis)"},
-	"2": {ReadableName: "second person", SanskritName: "मध्यमपुरुषः", Color: "var(--bs-success-text-emphasis)"},
-	"3": {ReadableName: "third person", SanskritName: "प्रथमपुरुषः", Color: "var(--bs-secondary-text-emphasis)"},
+	"1": {ReadableName: "first person", SanskritName: "uttamapuruṣaḥ", Color: "var(--bs-primary-text-emphasis)"},
+	"2": {ReadableName: "second person", SanskritName: "madhyamapuruṣaḥ", Color: "var(--bs-success-text-emphasis)"},
+	"3": {ReadableName: "third person", SanskritName: "prathamapuruṣaḥ", Color: "var(--bs-secondary-text-emphasis)"},
 
 	// Cases
-	"ABL": {ReadableName: "ablative", SanskritName: "पञ्चमी", BackgroundColor: "#cfe2ff", Color: "#000"},
-	"ACC": {ReadableName: "accusative", SanskritName: "द्वितीया", BackgroundColor: "#e2e3e5", Color: "#000"},
-	"DAT": {ReadableName: "dative", SanskritName: "चतुर्थी", BackgroundColor: "#d1e7dd", Color: "#000"},
-	"GEN": {ReadableName: "genitive", SanskritName: "षष्ठी", BackgroundColor: "#f8d7da", Color: "#000"},
-	"INS": {ReadableName: "instrumental", SanskritName: "तृतीया", BackgroundColor: "#fff3cd", Color: "#000"},
-	"LOC": {ReadableName: "locative", SanskritName: "सप्तमी", BackgroundColor: "#cff4fc", Color: "#000"},
-	"NOM": {ReadableName: "nominative", SanskritName: "प्रथमा", BackgroundColor: "#f8f9fa", Color: "#000"},
-	"VOC": {ReadableName: "vocative", SanskritName: "संबोधन", BackgroundColor: "#ced4da", Color: "#000"},
+	"ABL": {ReadableName: "ablative", SanskritName: "pañcamī", BackgroundColor: "#cfe2ff", Color: "#000"},
+	"ACC": {ReadableName: "accusative", SanskritName: "dvitīyā", BackgroundColor: "#e2e3e5", Color: "#000"},
+	"DAT": {ReadableName: "dative", SanskritName: "caturthī", BackgroundColor: "#d1e7dd", Color: "#000"},
+	"GEN": {ReadableName: "genitive", SanskritName: "ṣaṣṭhī", BackgroundColor: "#f8d7da", Color: "#000"},
+	"INS": {ReadableName: "instrumental", SanskritName: "tṛtīyā", BackgroundColor: "#fff3cd", Color: "#000"},
+	"LOC": {ReadableName: "locative", SanskritName: "saptamī", BackgroundColor: "#cff4fc", Color: "#000"},
+	"NOM": {ReadableName: "nominative", SanskritName: "prathamā", BackgroundColor: "#f8f9fa", Color: "#000"},
+	"VOC": {ReadableName: "vocative", SanskritName: "saṃbodhana", BackgroundColor: "#ced4da", Color: "#000"},
 
 	// Voices
-	"ACT":  {ReadableName: "active", SanskritName: "कर्तरि"},
-	"MED":  {ReadableName: "middle voice", SanskritName: "आत्मनेपद"},
-	"PASS": {ReadableName: "passive voice", SanskritName: "कर्मणि"},
+	"ACT":  {ReadableName: "active", SanskritName: "kartari"},
+	"MED":  {ReadableName: "middle voice", SanskritName: "ātmanepada"},
+	"PASS": {ReadableName: "passive voice", SanskritName: "karmaṇi"},
 
 	// Tenses/Moods
-	"AOR":    {ReadableName: "aorist", SanskritName: "लुङ्", BackgroundColor: "#fff3cd", Color: "#000"},
-	"COND":   {ReadableName: "conditional", SanskritName: "लृङ्"},
-	"FUT":    {ReadableName: "future", SanskritName: "लृट्", BackgroundColor: "#f8d7da", Color: "#000"},
-	"IMP":    {ReadableName: "imperative", SanskritName: "लोट्"},
-	"IND":    {ReadableName: "indicative", SanskritName: "निर्देश"},
-	"INF":    {ReadableName: "infinitive", SanskritName: "तुमुन्"},
-	"INJ":    {ReadableName: "injuctive", SanskritName: "आगमरहित लुङ्"},
-	"IPRF":   {ReadableName: "imperfect", SanskritName: "लङ्", BackgroundColor: "#e2e3e5", Color: "#000"},
-	"OPT":    {ReadableName: "optative", SanskritName: "विधिलिङ्"},
-	"PLUPRF": {ReadableName: "past perfect", SanskritName: "लुङ् (sometimes)", BackgroundColor: "#cff4fc", Color: "#000"},
-	"PRF":    {ReadableName: "perfect", SanskritName: "लिट्", BackgroundColor: "#d1e7dd", Color: "#000"},
-	"PRS":    {ReadableName: "present", SanskritName: "लट्", BackgroundColor: "#cfe2ff", Color: "#000"},
-	"SBJV":   {ReadableName: "subjunctive", SanskritName: "लेट्"},
+	"AOR":    {ReadableName: "aorist", SanskritName: "luṅ", BackgroundColor: "#fff3cd", Color: "#000"},
+	"COND":   {ReadableName: "conditional", SanskritName: "lṛṅ"},
+	"FUT":    {ReadableName: "future", SanskritName: "lṛṭ", BackgroundColor: "#f8d7da", Color: "#000"},
+	"IMP":    {ReadableName: "imperative", SanskritName: "loṭ"},
+	"IND":    {ReadableName: "indicative", SanskritName: "nirdeśa"},
+	"INF":    {ReadableName: "infinitive", SanskritName: "tumun"},
+	"INJ":    {ReadableName: "injuctive", SanskritName: "āgamarahita luṅ"},
+	"IPRF":   {ReadableName: "imperfect", SanskritName: "laṅ", BackgroundColor: "#e2e3e5", Color: "#000"},
+	"OPT":    {ReadableName: "optative", SanskritName: "vidhiliṅ"},
+	"PLUPRF": {ReadableName: "past perfect", SanskritName: "luṅ (sometimes)", BackgroundColor: "#cff4fc", Color: "#000"},
+	"PRF":    {ReadableName: "perfect", SanskritName: "liṭ", BackgroundColor: "#d1e7dd", Color: "#000"},
+	"PRS":    {ReadableName: "present", SanskritName: "laṭ", BackgroundColor: "#cfe2ff", Color: "#000"},
+	"SBJV":   {ReadableName: "subjunctive", SanskritName: "leṭ"},
 
 	// Numbers
-	"DU": {ReadableName: "dual", SanskritName: "द्विवचनम्", BorderStyle: "secondary"},
-	"PL": {ReadableName: "plural", SanskritName: "बहुवचनम्", BorderStyle: "success"},
-	"SG": {ReadableName: "singular", SanskritName: "एकवचनम्", BorderStyle: "primary"},
+	"DU": {ReadableName: "dual", SanskritName: "dvivacanam", BorderStyle: "secondary"},
+	"PL": {ReadableName: "plural", SanskritName: "bahuvacanam", BorderStyle: "success"},
+	"SG": {ReadableName: "singular", SanskritName: "ekavacanam", BorderStyle: "primary"},
 
 	// Genders
-	"F": {ReadableName: "feminine", SanskritName: "स्त्रीलिङ्ग", UnderlineStyle: "dotted"},
-	"M": {ReadableName: "masculine", SanskritName: "पुंल्लिङ्ग", UnderlineStyle: "dashed"},
-	"N": {ReadableName: "neuter", SanskritName: "नपुंसकलिङ्ग"},
+	"F": {ReadableName: "feminine", SanskritName: "strīliṅga", UnderlineStyle: "dotted"},
+	"M": {ReadableName: "masculine", SanskritName: "puṃlliṅga", UnderlineStyle: "dashed"},
+	"N": {ReadableName: "neuter", SanskritName: "napuṃsakaliṅga"},
 
 	// Participles and other
-	"CVB":  {ReadableName: "converb", SanskritName: "क्त्वा"},
-	"PPP":  {ReadableName: "participle perfective passive", SanskritName: "क्त"},
-	"PTCP": {ReadableName: "participle", SanskritName: "कृदन्त"},
+	"CVB":  {ReadableName: "converb", SanskritName: "ktvā"},
+	"PPP":  {ReadableName: "participle perfective passive", SanskritName: "kta"},
+	"PTCP": {ReadableName: "participle", SanskritName: "kṛdanta"},
 }
