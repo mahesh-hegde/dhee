@@ -26,18 +26,18 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 		</div>
 		<div class={ selectClass }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-scripture-name={ scripture.Name }>
+				<option value="hk" selected?={ params.Tl == "hk" }>Kyoto-Harvard</option>
 				<option value="slp1" selected?={ params.Tl == "slp1" }>SLP1</option>
 				<option value="iast" selected?={ params.Tl == "iast" }>IAST</option>
-				<option value="hk" selected?={ params.Tl == "hk" }>Kyoto-Harvard</option>
 				<option value="dn" selected?={ params.Tl == "dn" }>Devanagari</option>
 			</select>
 		</div>
 		<div class={ selectClass }>
 			<select name="mode" class="form-select search-mode-select">
-				<option value="exact" selected?={ params.Mode == "exact" }>Normal</option>
+				<option value="exact" selected?={ params.Mode == "exact" }>Word (s)</option>
 				<option value="regex" selected?={ params.Mode == "regex" }>Regex</option>
-				<option value="fuzzy" selected?={ params.Mode == "fuzzy" }>Fuzzy</option>
-				<option value="translations" selected?={ params.Mode == "translations" }>Translations</option>
+				<!--<option value="fuzzy" selected?={ params.Mode == "fuzzy" }>Fuzzy</option>-->
+				<option value="translations" selected?={ params.Mode == "translations" }>Translations (FTS)</option>
 			</select>
 		</div>
 		<div class="col-auto">
@@ -46,7 +46,7 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 	</form>
 	<div class="row g-3">
 		<div class="col-sm-6">
-			<small class="form-text text-muted transliteration-suggestion" style="min-height: 1.2rem; display: inline-block;"> </small>
+			<small class="form-text text-muted transliteration-suggestion" style="min-height: 1.2rem; display: inline-block;"></small>
 		</div>
 	</div>
 }

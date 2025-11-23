@@ -37,11 +37,11 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, c
 		</div>
 		<div class={ selectClass }>
 			<select name="mode" class="form-select search-mode-select">
-				<option value="exact" selected?={ params.Mode == "exact" }>Exact</option>
+				<option value="exact" selected?={ params.Mode == "exact" }>Exact Word</option>
 				<option value="prefix" selected?={ params.Mode == "prefix" }>Prefix</option>
-				<option value="fuzzy" selected?={ params.Mode == "fuzzy" }>Fuzzy</option>
+				<!-- <option value="fuzzy" selected?={ params.Mode == "fuzzy" }>Fuzzy</option> -->
 				<option value="regex" selected?={ params.Mode == "regex" }>Regex</option>
-				<option value="translations" selected?={ params.Mode == "translations" }>Translations</option>
+				<option value="translations" selected?={ params.Mode == "translations" }>Translations (FTS)</option>
 			</select>
 		</div>
 		<div class="col-auto">
@@ -50,7 +50,7 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, c
 	</form>
 	<div class="row g-3">
 		<div class="col-sm-6">
-			<small class="form-text text-muted transliteration-suggestion" style="min-height: 1.2rem; display: inline-block;"> </small>
+			<small class="form-text text-muted transliteration-suggestion" style="min-height: 1.2rem; display: inline-block;"></small>
 		</div>
 	</div>
 }

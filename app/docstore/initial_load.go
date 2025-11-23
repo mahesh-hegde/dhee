@@ -342,13 +342,6 @@ func LoadInitialData(dictStore dictionary.DictStore, excerptStore excerpts.Excer
 	}
 	mc := NewMarkdownConverter(dictStore, transliterator, config)
 
-	// Load scriptures
-	for _, sc := range config.Scriptures {
-		if err := loadExcerptsData(excerptStore, sc, dataDir, mc); err != nil {
-			return fmt.Errorf("failed to load scripture %s: %w", sc.Name, err)
-		}
-	}
-
 	// Load dictionaries
 	for _, dict := range config.Dictionaries {
 		slog.Info("Loading dictionary", "name", dict.Name)
@@ -356,6 +349,14 @@ func LoadInitialData(dictStore dictionary.DictStore, excerptStore excerpts.Excer
 			return fmt.Errorf("failed to load dictionary %s: %w", dict.Name, err)
 		}
 	}
+
+	// Load scriptures
+	for _, sc := range config.Scriptures {
+		if err := loadExcerptsData(excerptStore, sc, dataDir, mc); err != nil {
+			return fmt.Errorf("failed to load scripture %s: %w", sc.Name, err)
+		}
+	}
+
 	return nil
 }
 

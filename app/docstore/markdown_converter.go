@@ -142,5 +142,4 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 		}
 		return ast.WalkContinue, nil
 	})
-	return
 }
