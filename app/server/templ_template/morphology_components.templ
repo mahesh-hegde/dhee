@@ -2,37 +2,55 @@ package templ_template
 
 import (
 	"fmt"
+	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/excerpts"
+	"strings"
 )
 
-templ grammaticalBadges(g excerpts.WordGlossing, tags map[string]string) {
-	if g.Gramm != "" {
-		<span class="badge bg-light text-dark me-1" data-bs-toggle="tooltip" title={ tags[g.Gramm] }>{ g.Gramm }</span>
+func getTagStyle(tag common.GrammaticalTagStyle) string {
+	var styles []string
+	if tag.BackgroundColor != "" {
+		styles = append(styles, "background-color: "+tag.BackgroundColor+" !important;")
 	}
+	if tag.Color != "" {
+		styles = append(styles, "color: "+tag.Color+" !important;")
+	}
+	if tag.UnderlineStyle != "" && tag.UnderlineStyle != "none" {
+		styles = append(styles, "text-decoration: underline; text-decoration-style: "+tag.UnderlineStyle+";")
+	}
+	return strings.Join(styles, " ")
+}
+
+func getTagClass(tag common.GrammaticalTagStyle) string {
+	classes := []string{"badge", "me-1"}
+	if tag.BackgroundColor == "" {
+		classes = append(classes, "bg-secondary-subtle")
+	}
+	if tag.BorderStyle != "" && tag.BorderStyle != "none" {
+		classes = append(classes, "border", "border-"+tag.BorderStyle)
+	}
+	return strings.Join(classes, " ")
+}
+
+templ grammaticalBadge(tagKey string, tags map[string]common.GrammaticalTagStyle) {
+	if tagKey != "" {
+		{{ tagStyle := tags[tagKey] }}
+		<span class={ getTagClass(tagStyle) } style={ getTagStyle(tagStyle) } title={ fmt.Sprintf("%s (%s)", tagStyle.ReadableName, tagStyle.SanskritName) }>{ tagKey }</span>
+	}
+}
+
+templ grammaticalBadges(g excerpts.WordGlossing, tags map[string]common.GrammaticalTagStyle) {
+	@grammaticalBadge(g.Gramm, tags)
 	if g.Root != "" {
-		<span class="badge bg-secondary me-1">Root={ g.Root }</span>
+		<span class="badge bg-secondary me-1" title="Root">{"√" + g.Root}</span>
 	}
-	if g.Number != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Number] }>Number:{ g.Number }</span>
-	}
-	if g.Gender != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Gender] }>Gender:{ g.Gender }</span>
-	}
-	if g.Case != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Case] }>Case:{ g.Case }</span>
-	}
-	if g.Tense != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Tense] }>Tense:{ g.Tense }</span>
-	}
-	if g.Voice != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Voice] }>Voice:{ g.Voice }</span>
-	}
-	if g.Person != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Person] }>Person:{ g.Person }</span>
-	}
-	if g.Mood != "" {
-		<span class="badge bg-secondary me-1" data-bs-toggle="tooltip" title={ tags[g.Mood] }>Mood:{ g.Mood }</span>
-	}
+	@grammaticalBadge(g.Number, tags)
+	@grammaticalBadge(g.Gender, tags)
+	@grammaticalBadge(g.Case, tags)
+	@grammaticalBadge(g.Tense, tags)
+	@grammaticalBadge(g.Voice, tags)
+	@grammaticalBadge(g.Person, tags)
+	@grammaticalBadge(g.Mood, tags)
 	for _, mod := range g.Modifiers {
 		<span class="badge bg-secondary me-1">{ string(mod) }</span>
 	}

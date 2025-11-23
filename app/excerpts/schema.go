@@ -169,7 +169,7 @@ type ExcerptTemplateData struct {
 	Previous        string
 	Up              string
 	UpType          string
-	GrammaticalTags map[string]string
+	GrammaticalTags map[string]common.GrammaticalTagStyle
 }
 
 type ExcerptSearchData struct {
