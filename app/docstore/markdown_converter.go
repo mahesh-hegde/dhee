@@ -99,32 +99,39 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 				}
 			}
 		case ast.KindCodeSpan:
-			if textNode := n.FirstChild(); textNode != nil && textNode.Kind() == ast.KindText {
-				txt := textNode.(*ast.Text)
-				wordHK := string(txt.Segment.Value(reader.Source()))
-				wordSLP1, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlSLP1)
-				if err != nil {
-					// Fallback to just transliterating to IAST
-					if wordIAST, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
-						newNode := ast.NewString([]byte(wordIAST))
-						n.Parent().ReplaceChild(n.Parent(), n, newNode)
-					}
-					return ast.WalkContinue, nil
+			var content strings.Builder
+			for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+				if textNode, ok := c.(*ast.Text); ok {
+					content.Write(textNode.Segment.Value(reader.Source()))
 				}
+			}
+			wordHK := content.String()
+			if wordHK == "" {
+				return ast.WalkContinue, nil
+			}
 
-				dictName := t.mc.conf.DefaultDict
-				entries, _ := t.mc.dictStore.Get(context.Background(), dictName, []string{wordSLP1})
-
-				wordIAST, _ := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST)
-				if len(entries) > 0 {
-					link := ast.NewLink()
-					link.Destination = []byte(fmt.Sprintf("/dictionaries/%s/words/%s", dictName, wordSLP1))
-					link.SetAttributeString("style", []byte("text-decoration: underline;"))
-					link.AppendChild(link, ast.NewString([]byte(wordIAST)))
-					n.Parent().ReplaceChild(n.Parent(), n, link)
-				} else {
-					n.Parent().ReplaceChild(n.Parent(), n, ast.NewString([]byte(wordIAST)))
+			wordSLP1, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlSLP1)
+			if err != nil {
+				// Fallback to just transliterating to IAST
+				if wordIAST, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
+					newNode := ast.NewString([]byte(wordIAST))
+					n.Parent().ReplaceChild(n.Parent(), n, newNode)
 				}
+				return ast.WalkContinue, nil
+			}
+
+			dictName := t.mc.conf.DefaultDict
+			entries, _ := t.mc.dictStore.Get(context.Background(), dictName, []string{wordSLP1})
+
+			wordIAST, _ := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST)
+			if len(entries) > 0 {
+				link := ast.NewLink()
+				link.Destination = []byte(fmt.Sprintf("/dictionaries/%s/words/%s", dictName, wordSLP1))
+				link.SetAttributeString("style", []byte("text-decoration: underline;"))
+				link.AppendChild(link, ast.NewString([]byte(wordIAST)))
+				n.Parent().ReplaceChild(n.Parent(), n, link)
+			} else {
+				n.Parent().ReplaceChild(n.Parent(), n, ast.NewString([]byte(wordIAST)))
 			}
 
 		case ast.KindLink:
