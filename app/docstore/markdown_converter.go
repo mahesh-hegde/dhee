@@ -80,6 +80,8 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 		if !entering {
 			return ast.WalkContinue, nil
 		}
+		textValue := string(n.Text(reader.Source()))
+		slog.Debug("visiting node", "kind", n.Kind().String(), "text", textValue)
 
 		switch n.Kind() {
 		case ast.KindEmphasis:
