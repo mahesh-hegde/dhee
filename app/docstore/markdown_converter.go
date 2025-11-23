@@ -68,6 +68,16 @@ func (e *dheeMarkdownExtension) Extend(m goldmark.Markdown) {
 
 var linkRegex = regexp.MustCompile(`@([a-zA-Z0-9_-]+)#([0-9.]+)`)
 
+func extractNodeText(node ast.Node, source []byte) string {
+	var b bytes.Buffer
+	for c := node.FirstChild(); c != nil; c = c.NextSibling() {
+		if s, ok := c.(*ast.Text); ok {
+			b.Write(s.Segment.Value(source))
+		}
+	}
+	return b.String()
+}
+
 type dheeHTMLRenderer struct {
 	mc *MarkdownConverter
 }
@@ -99,7 +109,7 @@ func (r *dheeHTMLRenderer) renderEmphasis(w util.BufWriter, source []byte, node 
 	}
 
 	if entering {
-		wordHK := string(node.Text(source))
+		wordHK := extractNodeText(node, source)
 		if wordIAST, err := r.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
 			_, _ = w.WriteString("<em>")
 			_, _ = w.Write(util.EscapeHTML([]byte(wordIAST)))
@@ -120,7 +130,7 @@ func (r *dheeHTMLRenderer) renderCodeSpan(w util.BufWriter, source []byte, n ast
 		return ast.WalkContinue, nil
 	}
 
-	wordHK := string(n.Text(source))
+	wordHK := extractNodeText(n, source)
 	if wordHK == "" {
 		return ast.WalkSkipChildren, nil
 	}
