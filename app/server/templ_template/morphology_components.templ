@@ -32,10 +32,17 @@ func getTagClass(tag common.GrammaticalTagStyle) string {
 	return strings.Join(classes, " ")
 }
 
+func getTagTitle(tag common.GrammaticalTagStyle) string {
+	if tag.SanskritName != "" {
+		return fmt.Sprintf("%s (%s)", tag.ReadableName, tag.SanskritName)
+	}
+	return tag.ReadableName
+}
+
 templ grammaticalBadge(tagKey string, tags map[string]common.GrammaticalTagStyle) {
 	if tagKey != "" {
 		{{ tagStyle := tags[tagKey] }}
-		<span class={ getTagClass(tagStyle) } style={ getTagStyle(tagStyle) } title={ fmt.Sprintf("%s (%s)", tagStyle.ReadableName, tagStyle.SanskritName) }>{ tagKey }</span>
+		<span class={ getTagClass(tagStyle) } style={ getTagStyle(tagStyle) } title={ getTagTitle(tagStyle) }>{ tagKey }</span>
 	}
 }
 
