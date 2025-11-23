@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log/slog"
 	"regexp"
 	"strings"
 
@@ -178,7 +177,7 @@ func (r *dheeHTMLRenderer) renderLink(w util.BufWriter, source []byte, node ast.
 			_ = w.WriteByte('"')
 		}
 		if n.Attributes() != nil {
-			html.RenderAttributes(w, n)
+			html.RenderAttributes(w, n, nil)
 		}
 		_ = w.WriteByte('>')
 	} else {
