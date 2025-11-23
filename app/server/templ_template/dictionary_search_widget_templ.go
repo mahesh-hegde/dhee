@@ -22,19 +22,20 @@ var defaultDictionarySearchParams = &dictionary.SearchParams{
 const dictionarySearchWidgetHelpText = `
 	<p>This search widget will find dictionary entries based on the selected search mode.</p>
 	<p>You can type text using the chosen transliteration scheme.</p>
+	<br />
+	<h5>Transliteration Schemes</h5>
+	<p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p>
+	<ul>
+		<li><a href="https://en.wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li>
+		<li><a href="https://en.wikipedia.org/wiki/SLP1" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li>
+	</ul>
+	<br />
 	<h5>Search Modes</h5>
 	<ul>
 		<li><strong>Exact Word:</strong> Finds entries that exactly match the search term.</li>
 		<li><strong>Prefix:</strong> Finds words that start with the search term.</li>
 		<li><strong>Regex:</strong> Use regular expressions to match the word or its variants.</li>
 		<li><strong>Translations (FTS):</strong> Full-text search in entry meanings. Use "word*" for prefix matching.</li>
-	</ul>
-	<br />
-	<h5>Transliteration Schemes</h5>
-	<p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p>
-	<ul>
-		<li><a href="https://wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li>
-		<li><a href="https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li>
 	</ul>
 `
 
@@ -82,7 +83,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var3 templ.SafeURL
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 45, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 46, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -108,7 +109,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(dictName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 45, Col: 136}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 46, Col: 136}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -143,7 +144,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(params.OriginalQuery)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 47, Col: 114}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 48, Col: 114}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -178,7 +179,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(dictName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 50, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 51, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {

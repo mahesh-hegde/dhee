@@ -26,24 +26,24 @@ var GrammaticalTags = map[string]GrammaticalTagStyle{
 	"VOC": {ReadableName: "vocative", SanskritName: "saṃbodhana", BackgroundColor: "#ced4da", Color: "#000"},
 
 	// Voices
-	"ACT":  {ReadableName: "active", SanskritName: "kartari"},
+	"ACT":  {ReadableName: "active", SanskritName: ""},
 	"MED":  {ReadableName: "middle voice", SanskritName: "ātmanepada"},
-	"PASS": {ReadableName: "passive voice", SanskritName: "karmaṇi"},
+	"PASS": {ReadableName: "passive voice", SanskritName: ""},
 
 	// Tenses/Moods
-	"AOR":    {ReadableName: "aorist", SanskritName: "luṅ", BackgroundColor: "#fff3cd", Color: "#000"},
-	"COND":   {ReadableName: "conditional", SanskritName: "lṛṅ"},
-	"FUT":    {ReadableName: "future", SanskritName: "lṛṭ", BackgroundColor: "#f8d7da", Color: "#000"},
-	"IMP":    {ReadableName: "imperative", SanskritName: "loṭ"},
-	"IND":    {ReadableName: "indicative", SanskritName: "nirdeśa"},
-	"INF":    {ReadableName: "infinitive", SanskritName: "tumun"},
-	"INJ":    {ReadableName: "injuctive", SanskritName: "āgamarahita luṅ"},
-	"IPRF":   {ReadableName: "imperfect", SanskritName: "laṅ", BackgroundColor: "#e2e3e5", Color: "#000"},
-	"OPT":    {ReadableName: "optative", SanskritName: "vidhiliṅ"},
-	"PLUPRF": {ReadableName: "past perfect", SanskritName: "luṅ (sometimes)", BackgroundColor: "#cff4fc", Color: "#000"},
-	"PRF":    {ReadableName: "perfect", SanskritName: "liṭ", BackgroundColor: "#d1e7dd", Color: "#000"},
-	"PRS":    {ReadableName: "present", SanskritName: "laṭ", BackgroundColor: "#cfe2ff", Color: "#000"},
-	"SBJV":   {ReadableName: "subjunctive", SanskritName: "leṭ"},
+	"AOR":    {ReadableName: "aorist", SanskritName: "", BackgroundColor: "#fff3cd", Color: "#000"},
+	"COND":   {ReadableName: "conditional", SanskritName: ""},
+	"FUT":    {ReadableName: "future", SanskritName: "", BackgroundColor: "#f8d7da", Color: "#000"},
+	"IMP":    {ReadableName: "imperative", SanskritName: ""},
+	"IND":    {ReadableName: "indicative", SanskritName: ""},
+	"INF":    {ReadableName: "infinitive", SanskritName: ""},
+	"INJ":    {ReadableName: "injuctive", SanskritName: ""},
+	"IPRF":   {ReadableName: "imperfect", SanskritName: "", BackgroundColor: "#e2e3e5", Color: "#000"},
+	"OPT":    {ReadableName: "optative", SanskritName: ""},
+	"PLUPRF": {ReadableName: "past perfect", SanskritName: "", BackgroundColor: "#cff4fc", Color: "#000"},
+	"PRF":    {ReadableName: "perfect", SanskritName: "", BackgroundColor: "#d1e7dd", Color: "#000"},
+	"PRS":    {ReadableName: "present", SanskritName: "", BackgroundColor: "#cfe2ff", Color: "#000"},
+	"SBJV":   {ReadableName: "subjunctive", SanskritName: ""},
 
 	// Numbers
 	"DU": {ReadableName: "dual", SanskritName: "dvivacanam", BorderStyle: "secondary"},
@@ -56,7 +56,7 @@ var GrammaticalTags = map[string]GrammaticalTagStyle{
 	"N": {ReadableName: "neuter", SanskritName: "napuṃsakaliṅga"},
 
 	// Participles and other
-	"CVB":  {ReadableName: "converb", SanskritName: "ktvā"},
-	"PPP":  {ReadableName: "participle perfective passive", SanskritName: "kta"},
-	"PTCP": {ReadableName: "participle", SanskritName: "kṛdanta"},
+	"CVB":  {ReadableName: "converb", SanskritName: ""},
+	"PPP":  {ReadableName: "participle perfective passive", SanskritName: ""},
+	"PTCP": {ReadableName: "participle", SanskritName: ""},
 }
