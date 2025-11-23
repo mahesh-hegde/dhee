@@ -11,7 +11,23 @@ var defaultDictionarySearchParams = &dictionary.SearchParams{
 	Mode:  "exact",
 }
 
-const dictionarySearchWidgetHelpText = `<p>This search widget will find dictionary entries based on the selected search mode.</p><p>You can type text using the chosen transliteration scheme.</p><h5>Search Modes</h5><ul><li><strong>Exact Word:</strong> Finds entries that exactly match the search term.</li><li><strong>Prefix:</strong> Finds entries that start with the search term.</li><li><strong>Regex:</strong> Use regular expressions for advanced search patterns.</li><li><strong>Translations (FTS):</strong> Full-text search in entry meanings. Use "word*" for prefix matching.</li></ul><h5>Transliteration Schemes</h5><p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p><ul><li><a href="https://wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li><li><a href="https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li></ul>`
+const dictionarySearchWidgetHelpText = `
+	<p>This search widget will find dictionary entries based on the selected search mode.</p>
+	<p>You can type text using the chosen transliteration scheme.</p>
+	<h5>Search Modes</h5>
+	<ul>
+		<li><strong>Exact Word:</strong> Finds entries that exactly match the search term.</li>
+		<li><strong>Prefix:</strong> Finds entries that start with the search term.</li>
+		<li><strong>Regex:</strong> Use regular expressions for advanced search patterns.</li>
+		<li><strong>Translations (FTS):</strong> Full-text search in entry meanings. Use "word*" for prefix matching.</li>
+	</ul>
+	<h5>Transliteration Schemes</h5>
+	<p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p>
+	<ul>
+		<li><a href="https://wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li>
+		<li><a href="https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li>
+	</ul>
+`
 
 templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, compact bool) {
 	if params == nil {
