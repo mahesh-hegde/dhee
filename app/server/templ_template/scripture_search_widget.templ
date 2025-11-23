@@ -7,6 +7,26 @@ import (
 
 var defaultScriptureSearchParams = &excerpts.SearchParams{OriginalQ: "", Q: "", Tl: "slp1", Mode: "exact"}
 
+const scriptureSearchWidgetHelpText = `This search widget will find verses based on the selected search mode.
+
+You can type text using the chosen transliteration scheme.
+
+### Search Modes
+- **Word(s):** Search for exact word(s) in the selected transliteration.  
+- **Regex:** Use regular expressions for advanced search patterns.  
+- **Translations (FTS):** Full-text search in translations. Use "word*" for prefix matching.
+
+### Transliteration Schemes
+Read about transliteration schemes for typing Sanskrit text with an English keyboard:
+
+- [Harvard-Kyoto](https://wikipedia.org/wiki/Harvard-Kyoto)
+- [SLP1 (Sanskrit Library Phonetic Alphabet)](https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet)
+`
+
+func getScriptureSearchHelp() string {
+	return "<div style='white-space: pre-wrap; text-align: left;'>" + scriptureSearchWidgetHelpText + "</div>"
+}
+
 templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.SearchParams, compact bool) {
 	if params == nil {
 		{{ params = defaultScriptureSearchParams }}
@@ -26,7 +46,7 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 		</div>
 		<div class={ selectClass }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-scripture-name={ scripture.Name }>
-				<option value="hk" selected?={ params.Tl == "hk" }>Kyoto-Harvard</option>
+				<option value="hk" selected?={ params.Tl == "hk" }>Harvard-Kyoto</option>
 				<option value="slp1" selected?={ params.Tl == "slp1" }>SLP1</option>
 				<option value="iast" selected?={ params.Tl == "iast" }>IAST</option>
 				<option value="dn" selected?={ params.Tl == "dn" }>Devanagari</option>
@@ -44,7 +64,7 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 			<button type="submit" class="btn btn-primary">Find</button>
 		</div>
 		<div class="col-auto d-flex align-items-center">
-			<span class="badge rounded-pill bg-secondary" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="<div style='white-space: pre-wrap; text-align: left;'></div>">?</span>
+			<span class="badge rounded-pill bg-secondary" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title={ getScriptureSearchHelp() }>?</span>
 		</div>
 	</form>
 	<div class="row g-3">
