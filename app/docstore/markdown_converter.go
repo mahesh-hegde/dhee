@@ -113,7 +113,6 @@ func (r *dheeHTMLRenderer) renderEmphasis(w util.BufWriter, source []byte, node 
 		if wordIAST, err := r.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
 			_, _ = w.WriteString("<em>")
 			_, _ = w.Write(util.EscapeHTML([]byte(wordIAST)))
-			_, _ = w.WriteString("</em>")
 			return ast.WalkSkipChildren, nil
 		}
 
