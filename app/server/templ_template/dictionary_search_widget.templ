@@ -25,7 +25,7 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, c
 	}
 	<form action={ templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)) } method="GET" class={ formClass } data-dict-name={ dictName }>
 		<div class={ inputClass }>
-			<input type="text" class="form-control search-input" name="q" placeholder="Search text" value={ params.OriginalQuery }/>
+			<input type="text" class="form-control search-input" name="q" placeholder="Search" value={ params.OriginalQuery }/>
 		</div>
 		<div class={ selectClass }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-dict-name={ dictName }>

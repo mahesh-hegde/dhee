@@ -117,14 +117,14 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><input type=\"text\" class=\"form-control search-input\" name=\"q\" placeholder=\"Search text\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><input type=\"text\" class=\"form-control search-input\" name=\"q\" placeholder=\"Search\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(params.OriginalQuery)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 28, Col: 119}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 28, Col: 114}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

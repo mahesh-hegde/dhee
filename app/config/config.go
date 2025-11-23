@@ -23,6 +23,7 @@ type ScriptureDefn struct {
 	TranslationAuxiliary string                `json:"translation_auxiliary,omitempty"`
 	DataFile             string                `json:"data_file"`
 	NotesFile            string                `json:"notes_file,omitempty"`
+	NotesBy              string                `json:"notes_by,omitempty"`
 }
 
 type DictDefn struct {

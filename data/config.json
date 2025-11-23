@@ -45,7 +45,8 @@
                 }
             ],
             "data_file": "rv.jsonl",
-            "notes_file": "rv_notes.md"
+            "notes_file": "rv_notes.md",
+            "notes_by": "Apratiratha"
         }
     ]
 }

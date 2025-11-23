@@ -222,7 +222,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 				if data.Excerpts[0].Notes != nil {
 					<div class="card" data-section-key="Notes">
 						<div class="card-header">
-							Notes
+							Notes by { data.Scripture.NotesBy }
 						</div>
 						<div class="card-body">
 							for _, excerpt := range data.Excerpts {
@@ -716,7 +716,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 					}
 					<label class="pref-checkbox-item" draggable="true" data-pref-key="Notes">
 						<input type="checkbox" checked disabled class="me-1"/>
-						<span>Notes</span>
+						<span>Notes by { data.Scripture.NotesBy }</span>
 					</label>
 				</div>
 			</div>

@@ -135,7 +135,7 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 				if len(matches) == 3 {
 					scriptureName := matches[1]
 					path := matches[2]
-					newDestination := fmt.Sprintf("/scriptures/%s/%s", scriptureName, path)
+					newDestination := fmt.Sprintf("/scriptures/%s/excerpts/%s", scriptureName, path)
 					link.Destination = []byte(newDestination)
 				}
 			}
