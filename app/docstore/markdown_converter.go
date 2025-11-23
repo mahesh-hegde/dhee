@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strings"
 
@@ -75,7 +76,7 @@ var linkRegex = regexp.MustCompile(`@([a-zA-Z0-9_-]+)#([0-9.]+)`)
 
 // Transform traverses the Markdown AST and applies custom transformations.
 func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
-	_ = ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	err := ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
@@ -89,11 +90,9 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 					if c.Kind() == ast.KindText {
 						txt := c.(*ast.Text)
 						wordHK := string(txt.Segment.Value(reader.Source()))
-						if !strings.Contains(wordHK, " ") {
-							if wordIAST, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
-								newNode := ast.NewString([]byte(wordIAST))
-								n.ReplaceChild(n, c, newNode)
-							}
+						if wordIAST, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
+							newNode := ast.NewString([]byte(wordIAST))
+							n.ReplaceChild(n, c, newNode)
 						}
 					}
 				}
@@ -126,7 +125,7 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 			wordIAST, _ := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST)
 			if len(entries) > 0 {
 				link := ast.NewLink()
-				link.Destination = []byte(fmt.Sprintf("/dictionaries/%s/words/%s", dictName, wordSLP1))
+				link.Destination = fmt.Appendf(nil, "/dictionaries/%s/words/%s", dictName, wordSLP1)
 				link.SetAttributeString("style", []byte("text-decoration: underline;"))
 				link.AppendChild(link, ast.NewString([]byte(wordIAST)))
 				n.Parent().ReplaceChild(n.Parent(), n, link)
@@ -149,4 +148,7 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 		}
 		return ast.WalkContinue, nil
 	})
+	if err != nil {
+		slog.Error("error transforming markdown AST", "error", err)
+	}
 }
