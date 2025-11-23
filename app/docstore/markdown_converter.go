@@ -127,43 +127,18 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 				}
 			}
 
-		case ast.KindText:
-			txtNode := n.(*ast.Text)
-			content := string(txtNode.Segment.Value(reader.Source()))
-			if !strings.Contains(content, "@") {
-				return ast.WalkContinue, nil
-			}
-
-			matches := linkRegex.FindAllStringSubmatchIndex(content, -1)
-			if len(matches) == 0 {
-				return ast.WalkContinue, nil
-			}
-
-			var newNodes []ast.Node
-			lastIndex := 0
-			for _, match := range matches {
-				start, end := match[0], match[1]
-				if start > lastIndex {
-					newNodes = append(newNodes, ast.NewString([]byte(content[lastIndex:start])))
+		case ast.KindLink:
+			link := n.(*ast.Link)
+			destination := string(link.Destination)
+			if strings.HasPrefix(destination, "@") {
+				matches := linkRegex.FindStringSubmatch(destination)
+				if len(matches) == 3 {
+					scriptureName := matches[1]
+					path := matches[2]
+					newDestination := fmt.Sprintf("/scriptures/%s/%s", scriptureName, path)
+					link.Destination = []byte(newDestination)
 				}
-				scriptureName := content[match[2]:match[3]]
-				path := content[match[4]:match[5]]
-				link := ast.NewLink()
-				link.Destination = []byte(fmt.Sprintf("/scriptures/%s/%s", scriptureName, path))
-				link.AppendChild(link, ast.NewString([]byte(fmt.Sprintf("@%s#%s", scriptureName, path))))
-				newNodes = append(newNodes, link)
-				lastIndex = end
 			}
-			if lastIndex < len(content) {
-				newNodes = append(newNodes, ast.NewString([]byte(content[lastIndex:])))
-			}
-
-			parent := n.Parent()
-			for _, newNode := range newNodes {
-				parent.InsertBefore(parent, n, newNode)
-			}
-			parent.RemoveChild(parent, n)
-			return ast.WalkSkipChildren, nil
 		}
 		return ast.WalkContinue, nil
 	})
