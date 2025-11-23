@@ -3,7 +3,9 @@
 const foldableAccentsList = [
     "ó", "o", "í", "i", "á", "a", "ā́", "ā", "é",
     "e", "ú", "u", "à", "a", "ú", "u",
-    "ū́", "ū", "ī́", "ī", "ŕ̥", "ṛ", "r̥", "ṛ", "ṁ", "ṃ", "\u0301", "",
+    "ū́", "ū", "ī́", "ī", "ŕ̥", "ṛ", "r̥", "ṛ", "ṁ", "ṃ",
+    // Accent marks in roman and devanagari
+    "\u0301", "", "\u0951", "", "\u0952", "",
 ];
 
 function foldAccents(s) {
@@ -344,7 +346,7 @@ class Transliterator {
     }
 
     convertNormalized(source, sourceTl, targetTl) {
-        if (sourceTl === TlIAST) {
+        if (sourceTl === TlIAST || sourceTl === TlNagari) {
             source = foldAccents(source);
         }
         return this.convert(source, sourceTl, targetTl);

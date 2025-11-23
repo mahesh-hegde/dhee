@@ -23,30 +23,6 @@ type ExcerptService struct {
 	scriptureMap   map[string]config.ScriptureDefn
 }
 
-func normalizeLemma(lemma string) string {
-	lemma = strings.TrimSuffix(lemma, "-")
-	lemma = strings.TrimRight(lemma, "ⁱ")
-	lemma = strings.TrimPrefix(lemma, "√")
-	if strings.Contains(lemma, "- ") {
-		lemma, _, _ = strings.Cut(lemma, "- ")
-	}
-	return common.FoldAccents(lemma)
-}
-
-func normalizeSurface(surface string) string {
-	surface = common.FoldAccents(surface)
-	return strings.TrimSuffix(surface, " +")
-}
-
-func normalizePadaWord(pw string) string {
-	// MW dictionary has no words containing -
-	pw = strings.ReplaceAll(pw, "-", "")
-	// PadapATha items often end with " iti"
-	pw = strings.TrimSuffix(pw, " iti")
-	pw = strings.TrimPrefix(pw, "/ ")
-	return common.FoldAccents(pw)
-}
-
 // Get returns the excerpts given by paths. If any of the excerpts could not be found, it returns an error.
 //
 // Get also batch-fetches the dictionary words for surfaces,
@@ -73,9 +49,9 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 	for eidx, e := range excerpts {
 		for _, g := range e.Glossings {
 			for _, gl := range g {
-				foldedSurface := normalizeSurface(gl.Surface)
+				foldedSurface := common.NormalizeSurface(gl.Surface)
 				wordsToFetch[foldedSurface] = ""
-				lemma := normalizeLemma(gl.Lemma)
+				lemma := common.NormalizeLemma(gl.Lemma)
 				wordsToFetch[lemma] = ""
 			}
 		}
@@ -91,7 +67,7 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		for _, padaLine := range padaLines {
 			split := strings.SplitSeq(padaLine, " | ")
 			for padaWord := range split {
-				padaWord = normalizePadaWord(padaWord)
+				padaWord = common.NormalizePadaWord(padaWord)
 				padaWords = append(padaWords, strings.TrimSpace(padaWord))
 				wordsToFetch[padaWord] = ""
 				// if first, _, hyphenated := strings.Cut(padaWord, "-"); hyphenated {
@@ -138,13 +114,13 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		for _, g := range e.Glossings {
 			for _, gl := range g {
 				var lemmaMeaning, surfaceMeaning dictionary.DictionaryEntry
-				foldedSurface := normalizeSurface(gl.Surface)
+				foldedSurface := common.NormalizeSurface(gl.Surface)
 				slpWord := wordsToFetch[foldedSurface]
 				if entry, ok := wordMap[slpWord]; ok {
 					surfaceMeaning = entry
 					ew.Words[gl.Surface] = entry
 				}
-				lemma := normalizeLemma(gl.Lemma)
+				lemma := common.NormalizeLemma(gl.Lemma)
 				slpLemma := wordsToFetch[lemma]
 				if entry, ok := wordMap[slpLemma]; ok {
 					if slpWord != slpLemma {
@@ -168,13 +144,13 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 		padaWords := padaWordsByExcerpt[eidx]
 		glossingMap := make(map[string][]int)
 		for i, pe := range glossingPEs {
-			normalizedSurface := normalizePadaWord(pe.G.Surface)
+			normalizedSurface := common.NormalizePadaWord(pe.G.Surface)
 			glossingMap[normalizedSurface] = append(glossingMap[normalizedSurface], i)
 		}
 
 		glossingCursor := 0
 		for _, padaWord := range padaWords {
-			normPW := normalizePadaWord(padaWord)
+			normPW := common.NormalizePadaWord(padaWord)
 			glossingIndex := -1
 
 			// Attempt to match using the map first, looking forward from cursor

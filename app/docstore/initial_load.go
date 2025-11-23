@@ -356,7 +356,8 @@ func LoadInitialData(dictStore dictionary.DictStore, excerptStore excerpts.Excer
 }
 
 func InitDB(store, dataDir string, config *config.DheeConfig) (io.Closer, error) {
-	if store == "bleve" {
+	switch store {
+	case "bleve":
 		dbPath := filepath.Join(dataDir, "docstore.bleve")
 
 		_, err := os.Stat(dbPath)
@@ -391,7 +392,7 @@ func InitDB(store, dataDir string, config *config.DheeConfig) (io.Closer, error)
 		}
 		slog.Info("Opened existing bleve index", "path", dbPath)
 		return index, nil
-	} else if store == "sqlite" {
+	case "sqlite":
 		dbPath := path.Join(dataDir, "dhee.db")
 		_, err := os.Stat(dbPath)
 		if errors.Is(err, os.ErrNotExist) {

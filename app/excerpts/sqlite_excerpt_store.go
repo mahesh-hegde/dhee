@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"log/slog"
 	"sort"
 	"strings"
 
@@ -51,6 +52,7 @@ func (s *SQLiteExcerptStore) Init() error {
 			authors,
 			meter,
 			surfaces,
+			lemmas,
 			tokenize = 'unicode61 remove_diacritics 2'
 		);
 	`)
@@ -95,8 +97,8 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 
 	ftsStmt, err := tx.Prepare(`
 		INSERT INTO dhee_excerpts_fts (
-			source_t, roman_t, addressees, authors, meter, surfaces
-		) VALUES (?, ?, ?, ?, ?, ?)
+			source_t, roman_t, addressees, authors, meter, surfaces, lemmas
+		) VALUES (?, ?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
 		return err
@@ -137,10 +139,14 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 
 		sourceT := html.EscapeString(strings.Join(e.SourceText, "\n"))
 		var surfaces []string
+		var lemmas []string
 		for _, glossGroup := range e.Glossings {
 			for _, g := range glossGroup {
 				if g.Surface != "" {
-					surfaces = append(surfaces, g.Surface)
+					surfaces = append(surfaces, common.NormalizeSurface(g.Surface))
+				}
+				if g.Lemma != "" {
+					lemmas = append(lemmas, common.NormalizeLemma(g.Lemma))
 				}
 			}
 		}
@@ -160,6 +166,7 @@ func (s *SQLiteExcerptStore) Add(ctx context.Context, scripture string, es []Exc
 			strings.Join(e.Authors, ", "),
 			e.Meter,
 			strings.Join(surfaces, " "),
+			strings.Join(lemmas, " "),
 		)
 		if err != nil {
 			return err
@@ -284,7 +291,8 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 	}
 
 	var fullQuery string
-	if params.Mode == common.SearchRegex {
+	switch params.Mode {
+	case common.SearchRegex:
 		query := `
 		SELECT e FROM (
 			SELECT e, (roman_t REGEXP ?) AS t_match, (roman_f REGEXP ?) AS f_match, sort_index
@@ -298,7 +306,7 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 		newArgs = append(newArgs, args...)
 		args = newArgs
 		fullQuery = query
-	} else if params.Mode == common.SearchTranslations {
+	case common.SearchTranslations:
 		// Use highlight() on the translations FTS table
 		orderBy := "ORDER BY t_fts.rank, ex.sort_index"
 		query := `
@@ -309,7 +317,7 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 			` + orderBy + ` LIMIT 100`
 		fullQuery = query
 		args = append(args, q)
-	} else {
+	default:
 		var ftsQuery, ftsColumn string
 		switch params.Mode {
 		case common.SearchASCII:
@@ -325,12 +333,13 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 			ftsColumn = "roman_t"
 		}
 
-		matchClause := fmt.Sprintf("ex_fts.%s MATCH ?", ftsColumn)
+		slog.Debug("Not using FTS column", "ftsColumn", ftsColumn)
+
 		orderBy := "ORDER BY ex_fts.rank, ex.sort_index"
 		query := `
 			SELECT ex.e, highlight(dhee_excerpts_fts, 1, '<em>', '</em>') as roman_hl
 			FROM dhee_excerpts_fts AS ex_fts JOIN dhee_excerpts AS ex ON ex_fts.rowid = ex.rowid
-			WHERE ex.scripture IN (` + scripturePlaceholders + `) AND ` + matchClause
+			WHERE ex.scripture IN (` + scripturePlaceholders + `) AND dhee_excerpts_fts MATCH ?`
 		fullQuery = query + " " + orderBy + " LIMIT 100"
 		args = append(args, ftsQuery)
 	}
@@ -347,15 +356,16 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 		var excerptJSON []byte
 		var translationHl, romanHl sql.NullString
 
-		if params.Mode == common.SearchRegex {
+		switch params.Mode {
+		case common.SearchRegex:
 			if err := rows.Scan(&excerptJSON); err != nil {
 				return nil, err
 			}
-		} else if params.Mode == common.SearchTranslations {
+		case common.SearchTranslations:
 			if err := rows.Scan(&excerptJSON, &translationHl); err != nil {
 				return nil, err
 			}
-		} else { // All other FTS modes
+		default: // All other FTS modes
 			if err := rows.Scan(&excerptJSON, &romanHl); err != nil {
 				return nil, err
 			}
