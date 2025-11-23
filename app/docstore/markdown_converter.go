@@ -18,7 +18,7 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-var scriptureContextKey = parser.NewContextKey("scripture")
+var scriptureContextKey = parser.NewContextKey()
 
 // MarkdownConverter holds state for converting custom markdown.
 type MarkdownConverter struct {
