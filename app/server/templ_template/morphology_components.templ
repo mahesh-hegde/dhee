@@ -7,18 +7,19 @@ import (
 	"strings"
 )
 
-func getTagStyle(tag common.GrammaticalTagStyle) string {
-	var styles []string
+func getTagStyle(tag common.GrammaticalTagStyle) map[string]string {
+	styles := make(map[string]string)
 	if tag.BackgroundColor != "" {
-		styles = append(styles, "background-color: "+tag.BackgroundColor+" !important;")
+		styles["background-color"] = tag.BackgroundColor + " !important"
 	}
 	if tag.Color != "" {
-		styles = append(styles, "color: "+tag.Color+" !important;")
+		styles["color"] = tag.Color + " !important"
 	}
 	if tag.UnderlineStyle != "" && tag.UnderlineStyle != "none" {
-		styles = append(styles, "text-decoration: underline; text-decoration-style: "+tag.UnderlineStyle+";")
+		styles["text-decoration"] = "underline"
+		styles["text-decoration-style"] = tag.UnderlineStyle
 	}
-	return strings.Join(styles, " ")
+	return styles
 }
 
 func getTagClass(tag common.GrammaticalTagStyle) string {
