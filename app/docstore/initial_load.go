@@ -2,7 +2,6 @@ package docstore
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -23,13 +22,13 @@ import (
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/excerpts"
+	"github.com/mahesh-hegde/dhee/app/transliteration"
 
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
 	"github.com/blevesearch/bleve/v2/analysis/token/porter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/registry"
-	"github.com/yuin/goldmark"
 )
 
 // Possible auxiliaries from all texts we know
@@ -51,7 +50,7 @@ func init() {
 	})
 }
 
-func parseNotesFile(filePath string) (map[string]string, error) {
+func parseNotesFile(filePath string, mc *MarkdownConverter, scripture config.ScriptureDefn) (map[string]string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("opening notes file: %w", err)
@@ -63,17 +62,15 @@ func parseNotesFile(filePath string) (map[string]string, error) {
 	var currentID string
 	var currentContent strings.Builder
 
-	md := goldmark.New()
-
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "## ") {
 			if currentID != "" && currentContent.Len() > 0 {
-				var buf bytes.Buffer
-				if err := md.Convert([]byte(currentContent.String()), &buf); err != nil {
+				html, err := mc.ConvertToHTML(currentContent.String(), scripture)
+				if err != nil {
 					slog.Warn("failed to convert markdown to html", "id", currentID, "err", err)
 				} else {
-					notes[currentID] = buf.String()
+					notes[currentID] = html
 				}
 			}
 			currentID = strings.TrimSpace(strings.TrimPrefix(line, "## "))
@@ -86,11 +83,11 @@ func parseNotesFile(filePath string) (map[string]string, error) {
 		}
 	}
 	if currentID != "" && currentContent.Len() > 0 {
-		var buf bytes.Buffer
-		if err := md.Convert([]byte(currentContent.String()), &buf); err != nil {
+		html, err := mc.ConvertToHTML(currentContent.String(), scripture)
+		if err != nil {
 			slog.Warn("failed to convert markdown to html", "id", currentID, "err", err)
 		} else {
-			notes[currentID] = buf.String()
+			notes[currentID] = html
 		}
 	}
 
@@ -273,13 +270,13 @@ func loadDictionaryData(store dictionary.DictStore, dict config.DictDefn, dataDi
 	return nil
 }
 
-func loadExcerptsData(store excerpts.ExcerptStore, sc config.ScriptureDefn, dataDir string) error {
+func loadExcerptsData(store excerpts.ExcerptStore, sc config.ScriptureDefn, dataDir string, mc *MarkdownConverter) error {
 	slog.Info("Loading scripture", "name", sc.Name)
 
 	var notes map[string]string
 	if sc.NotesFile != "" {
 		var err error
-		notes, err = parseNotesFile(path.Join(dataDir, sc.NotesFile))
+		notes, err = parseNotesFile(path.Join(dataDir, sc.NotesFile), mc, sc)
 		if err != nil {
 			return fmt.Errorf("failed to parse notes for %s: %w", sc.Name, err)
 		}
@@ -338,9 +335,16 @@ func LoadInitialData(dictStore dictionary.DictStore, excerptStore excerpts.Excer
 	if err := excerptStore.Init(); err != nil {
 		return fmt.Errorf("failed to init excerpt store: %w", err)
 	}
+
+	transliterator, err := transliteration.NewTransliterator(transliteration.TlOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to create transliterator: %w", err)
+	}
+	mc := NewMarkdownConverter(dictStore, transliterator, config)
+
 	// Load scriptures
 	for _, sc := range config.Scriptures {
-		if err := loadExcerptsData(excerptStore, sc, dataDir); err != nil {
+		if err := loadExcerptsData(excerptStore, sc, dataDir, mc); err != nil {
 			return fmt.Errorf("failed to load scripture %s: %w", sc.Name, err)
 		}
 	}
