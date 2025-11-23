@@ -80,8 +80,6 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 		if !entering {
 			return ast.WalkContinue, nil
 		}
-		textValue := string(n.Text(reader.Source()))
-		slog.Debug("visiting node", "kind", n.Kind().String(), "text", textValue)
 
 		switch n.Kind() {
 		case ast.KindEmphasis:
@@ -125,15 +123,18 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 			entries, _ := t.mc.dictStore.Get(context.Background(), dictName, []string{wordSLP1})
 
 			wordIAST, _ := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST)
+			parent := n.Parent()
 			if len(entries) > 0 {
 				link := ast.NewLink()
 				link.Destination = fmt.Appendf(nil, "/dictionaries/%s/words/%s", dictName, wordSLP1)
 				link.SetAttributeString("style", []byte("text-decoration: underline;"))
 				link.AppendChild(link, ast.NewString([]byte(wordIAST)))
-				n.Parent().ReplaceChild(n.Parent(), n, link)
+				parent.ReplaceChild(parent, n, link)
 			} else {
-				n.Parent().ReplaceChild(n.Parent(), n, ast.NewString([]byte(wordIAST)))
+				parent.ReplaceChild(parent, n, ast.NewString([]byte(wordIAST)))
 			}
+			textValue := string(parent.Text(reader.Source()))
+			slog.Debug("visiting node", "kind", n.Kind().String(), "text", textValue)
 
 		case ast.KindLink:
 			link := n.(*ast.Link)
