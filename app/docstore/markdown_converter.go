@@ -118,7 +118,7 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 				wordIAST, _ := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST)
 				if len(entries) > 0 {
 					link := ast.NewLink()
-					link.Destination = []byte(fmt.Sprintf("/dictionary/%s/%s", dictName, wordSLP1))
+					link.Destination = []byte(fmt.Sprintf("/dictionaries/%s/words/%s", dictName, wordSLP1))
 					link.SetAttributeString("style", []byte("text-decoration: underline;"))
 					link.AppendChild(link, ast.NewString([]byte(wordIAST)))
 					n.Parent().ReplaceChild(n.Parent(), n, link)
