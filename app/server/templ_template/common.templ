@@ -44,6 +44,8 @@ templ CssTooltip(helpText string) {
 	</style>
 	<div class="css-tooltip-container">
 		<span class="badge rounded-pill bg-secondary" style="cursor: help;">?</span>
-		<div class="css-tooltip-text">{ templ.Raw(helpText) }</div>
+		<div class="css-tooltip-text">
+			@templ.Raw(helpText)
+		</div>
 	</div>
 }

@@ -19,6 +19,8 @@ var defaultDictionarySearchParams = &dictionary.SearchParams{
 	Mode:  "exact",
 }
 
+const dictionarySearchWidgetHelpText = `<p>This search widget will find dictionary entries based on the selected search mode.</p><p>You can type text using the chosen transliteration scheme.</p><h5>Search Modes</h5><ul><li><strong>Exact Word:</strong> Finds entries that exactly match the search term.</li><li><strong>Prefix:</strong> Finds entries that start with the search term.</li><li><strong>Regex:</strong> Use regular expressions for advanced search patterns.</li><li><strong>Translations (FTS):</strong> Full-text search in entry meanings. Use "word*" for prefix matching.</li></ul><h5>Transliteration Schemes</h5><p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p><ul><li><a href="https://wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li><li><a href="https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li></ul>`
+
 func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, compact bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -63,7 +65,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var3 templ.SafeURL
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 26, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 28, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -89,7 +91,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(dictName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 26, Col: 136}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 28, Col: 136}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -124,7 +126,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(params.OriginalQuery)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 28, Col: 114}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 30, Col: 114}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -159,7 +161,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(dictName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 31, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 33, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -195,7 +197,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ">Kyoto-Harvard</option> <option value=\"dn\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ">Harvard-Kyoto</option> <option value=\"dn\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -267,7 +269,15 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, ">Translations (FTS)</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Find</button></div><div class=\"col-auto d-flex align-items-center\"><span class=\"badge rounded-pill bg-secondary\" style=\"cursor: help;\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-html=\"true\" data-bs-title=\"<div style='white-space: pre-wrap; text-align: left;'></div>\">?</span></div></form><div class=\"row g-3\"><div class=\"col-sm-6\"><small class=\"form-text text-muted transliteration-suggestion\" style=\"min-height: 1.2rem; display: inline-block;\"></small></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, ">Translations (FTS)</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Find</button></div><div class=\"col-auto d-flex align-items-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = CssTooltip(dictionarySearchWidgetHelpText).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div></form><div class=\"row g-3\"><div class=\"col-sm-6\"><small class=\"form-text text-muted transliteration-suggestion\" style=\"min-height: 1.2rem; display: inline-block;\"></small></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

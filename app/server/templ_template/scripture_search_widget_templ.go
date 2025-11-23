@@ -15,6 +15,8 @@ import (
 
 var defaultScriptureSearchParams = &excerpts.SearchParams{OriginalQ: "", Q: "", Tl: "slp1", Mode: "exact"}
 
+const scriptureSearchWidgetHelpText = `<p>This search widget will find verses based on the selected search mode.</p><p>You can type text using the chosen transliteration scheme.</p><h5>Search Modes</h5><ul><li><strong>Word(s):</strong> Search for exact word(s) in the selected transliteration.</li><li><strong>Regex:</strong> Use regular expressions for advanced search patterns.</li><li><strong>Translations (FTS):</strong> Full-text search in translations. Use "word*" for prefix matching.</li></ul><h5>Transliteration Schemes</h5><p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p><ul><li><a href="https://wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li><li><a href="https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li></ul>`
+
 func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.SearchParams, compact bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -72,7 +74,7 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(scripture.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 22, Col: 103}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 24, Col: 103}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -85,7 +87,7 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(scripture.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 23, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 25, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -120,7 +122,7 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("Search " + scripture.ReadableName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 25, Col: 117}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 27, Col: 117}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -133,7 +135,7 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(params.OriginalQ)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 25, Col: 144}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 27, Col: 144}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -168,7 +170,7 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(scripture.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 28, Col: 115}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search_widget.templ`, Line: 30, Col: 115}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -184,7 +186,7 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ">Kyoto-Harvard</option> <option value=\"slp1\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ">Harvard-Kyoto</option> <option value=\"slp1\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -266,7 +268,15 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, ">Translations (FTS)</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Find</button></div><div class=\"col-auto d-flex align-items-center\"><span class=\"badge rounded-pill bg-secondary\" style=\"cursor: help;\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-html=\"true\" data-bs-title=\"<div style='white-space: pre-wrap; text-align: left;'></div>\">?</span></div></form><div class=\"row g-3\"><div class=\"col-sm-6\"><small class=\"form-text text-muted transliteration-suggestion\" style=\"min-height: 1.2rem; display: inline-block;\"></small></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, ">Translations (FTS)</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Find</button></div><div class=\"col-auto d-flex align-items-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = CssTooltip(scriptureSearchWidgetHelpText).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div></form><div class=\"row g-3\"><div class=\"col-sm-6\"><small class=\"form-text text-muted transliteration-suggestion\" style=\"min-height: 1.2rem; display: inline-block;\"></small></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
