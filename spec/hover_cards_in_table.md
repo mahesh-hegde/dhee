@@ -26,6 +26,6 @@ entryN
 <a href=>[search emoji] {{ word }}</a>
 ```
 
-the search should use IAST as the transliteration (TL), eg: "/dictionaries/monier-williams/search?q={{word}}&tl=iast&mode=fuzzy".
+the search should use IAST as the transliteration (TL), eg: "/dictionaries/monier-williams/search?q={{word}}&tl=iast&mode=prefix".
 
 `word` of course refers to the word or lemma being highlighted, which we are already looking up.

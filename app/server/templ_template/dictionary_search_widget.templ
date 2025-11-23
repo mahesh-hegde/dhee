@@ -44,11 +44,11 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, c
 				<option value="translations" selected?={ params.Mode == "translations" }>Translations (FTS)</option>
 			</select>
 		</div>
-		<div class="col-auto d-flex align-items-center">
-			<span class="badge rounded-pill bg-secondary" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="<div style='white-space: pre-wrap; text-align: left;'></div>">?</span>
-		</div>
 		<div class="col-auto">
 			<button type="submit" class="btn btn-primary">Find</button>
+		</div>
+		<div class="col-auto d-flex align-items-center">
+			<span class="badge rounded-pill bg-secondary" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="<div style='white-space: pre-wrap; text-align: left;'></div>">?</span>
 		</div>
 	</form>
 	<div class="row g-3">

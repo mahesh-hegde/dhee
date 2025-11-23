@@ -77,7 +77,7 @@ templ morphologyTable(data *excerpts.ExcerptTemplateData) {
 												}
 												<hr/>
 											}
-											<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=fuzzy", g.Surface)) } class="badge bg-secondary">🔎 { g.Surface }</a>
+											<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=prefix", g.Surface)) } class="badge bg-secondary">🔎 { g.Surface }</a>
 										</div>
 									</div>
 								</td>
@@ -104,7 +104,7 @@ templ morphologyTable(data *excerpts.ExcerptTemplateData) {
 													}
 													<hr/>
 												}
-												<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=fuzzy", g.Lemma)) } class="badge bg-secondary">🔎 { g.Lemma }</a>
+												<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=iast&mode=prefix", g.Lemma)) } class="badge bg-secondary">🔎 { g.Lemma }</a>
 											</div>
 										</div>
 									} else {

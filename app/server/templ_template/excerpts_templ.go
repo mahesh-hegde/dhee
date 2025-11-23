@@ -461,9 +461,9 @@ func PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefinitio
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var23 templ.SafeURL
-						templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=fuzzy", pada.Slp1NormSurface)))
+						templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=prefix", pada.Slp1NormSurface)))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 111, Col: 128}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 111, Col: 129}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 						if templ_7745c5c3_Err != nil {
@@ -476,7 +476,7 @@ func PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefinitio
 						var templ_7745c5c3_Var24 string
 						templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(pada.G.Surface)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 111, Col: 184}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 111, Col: 185}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 						if templ_7745c5c3_Err != nil {
@@ -493,9 +493,9 @@ func PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefinitio
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var25 templ.SafeURL
-						templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=fuzzy", pada.Slp1NormLemma)))
+						templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=prefix", pada.Slp1NormLemma)))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 114, Col: 126}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 114, Col: 127}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 						if templ_7745c5c3_Err != nil {
@@ -508,7 +508,7 @@ func PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefinitio
 						var templ_7745c5c3_Var26 string
 						templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(pada.G.Lemma)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 114, Col: 180}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 114, Col: 181}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 						if templ_7745c5c3_Err != nil {

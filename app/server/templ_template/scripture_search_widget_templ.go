@@ -266,7 +266,7 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, ">Translations (FTS)</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Find</button></div></form><div class=\"row g-3\"><div class=\"col-sm-6\"><small class=\"form-text text-muted transliteration-suggestion\" style=\"min-height: 1.2rem; display: inline-block;\"></small></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, ">Translations (FTS)</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Find</button></div><div class=\"col-auto d-flex align-items-center\"><span class=\"badge rounded-pill bg-secondary\" style=\"cursor: help;\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-html=\"true\" data-bs-title=\"<div style='white-space: pre-wrap; text-align: left;'></div>\">?</span></div></form><div class=\"row g-3\"><div class=\"col-sm-6\"><small class=\"form-text text-muted transliteration-suggestion\" style=\"min-height: 1.2rem; display: inline-block;\"></small></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -108,10 +108,10 @@ templ PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefiniti
 								}
 								<span class="d-flex justify-content-evenly">
 									if pada.Slp1NormSurface != "" {
-										<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=fuzzy", pada.Slp1NormSurface)) } class="badge bg-secondary me-1">🔎 { pada.G.Surface }</a>
+										<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=prefix", pada.Slp1NormSurface)) } class="badge bg-secondary me-1">🔎 { pada.G.Surface }</a>
 									}
 									if pada.Slp1NormLemma != "" && pada.Slp1NormLemma != pada.Slp1NormSurface {
-										<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=fuzzy", pada.Slp1NormLemma)) } class="badge bg-secondary me-1">🔎 { pada.G.Lemma }</a>
+										<a href={ templ.URL(fmt.Sprintf("/dictionaries/monier-williams/search?q=%s&tl=slp1&mode=prefix", pada.Slp1NormLemma)) } class="badge bg-secondary me-1">🔎 { pada.G.Lemma }</a>
 									}
 								</span>
 							</div>

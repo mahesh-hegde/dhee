@@ -196,7 +196,7 @@ templ SelectionSearchScript() {
 
 							const query = textInput.value;
 							const tl = tlSelect.value;
-							const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(query)}&tl=${tl}&mode=fuzzy&preview=true&fuzziness=${fuzziness}`;
+							const url = `/dictionaries/monier-williams/search?q=${encodeURIComponent(query)}&tl=${tl}&mode=prefix&preview=true&fuzziness=${fuzziness}`;
 							fetch(url)
 								.then(response => response.text())
 								.then(html => {
