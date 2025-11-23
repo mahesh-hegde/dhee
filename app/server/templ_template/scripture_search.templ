@@ -18,6 +18,7 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 			<table id="search-results-table" class="table table-striped search-result">
 				<thead>
 					<tr>
+						<th scope="col">#</th>
 						<th scope="col">Path</th>
 						<th scope="col">Roman Text</th>
 						<th scope="col">
@@ -31,9 +32,10 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 					</tr>
 				</thead>
 				<tbody>
-					for _, hExcerpt := range data.Excerpts {
+					for i, hExcerpt := range data.Excerpts {
 						{{ var excerpt = hExcerpt.Excerpt }}
 						<tr>
+							<td>{ fmt.Sprintf("%d", i+1) }</td>
 							<td><a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", excerpt.Scripture, excerpt.ReadableIndex)) }>{ excerpt.ReadableIndex }</a></td>
 							<td class="roman-text-search">
 								if hExcerpt.RomanHl != "" {
@@ -76,7 +78,7 @@ templ ScriptureSearch(data *excerpts.ExcerptSearchData) {
 		var preInit = preInit || [];
         preInit.push(function() {
             if (window.dhee && window.dhee.setupTextSelectionSearch) {
-                window.dhee.setupTextSelectionSearch('search-results-table', 'iast', 2);
+                window.dhee.setupTextSelectionSearch('search-results-table', 'iast', 3);
             }
             document.querySelectorAll('.translation-col').forEach(function(el) {
                 el.addEventListener('mouseup', function(e) {
