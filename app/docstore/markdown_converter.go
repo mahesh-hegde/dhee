@@ -18,9 +18,9 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-type contextKey string
+type contextKey struct{}
 
-const scriptureContextKey contextKey = "scripture"
+var scriptureContextKey = contextKey{}
 
 // MarkdownConverter holds state for converting custom markdown.
 type MarkdownConverter struct {
@@ -85,13 +85,16 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 		switch n.Kind() {
 		case ast.KindEmphasis:
 			if n.(*ast.Emphasis).Level == 1 {
-				for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+				var next ast.Node
+				for c := n.FirstChild(); c != nil; c = next {
+					next = c.NextSibling()
 					if c.Kind() == ast.KindText {
 						txt := c.(*ast.Text)
 						wordHK := string(txt.Segment.Value(reader.Source()))
 						if !strings.Contains(wordHK, " ") {
 							if wordIAST, err := t.mc.transliterator.Convert(wordHK, common.Transliteration("hk"), common.TlIAST); err == nil {
-								txt.Value = []byte(wordIAST)
+								newNode := ast.NewString([]byte(wordIAST))
+								n.ReplaceChild(n, c, newNode)
 							}
 						}
 					}
@@ -128,7 +131,7 @@ func (t *dheeASTTransformer) Transform(node *ast.Document, reader text.Reader, p
 
 		case ast.KindText:
 			txtNode := n.(*ast.Text)
-			content := string(txtNode.Value)
+			content := string(txtNode.Segment.Value(reader.Source()))
 			if !strings.Contains(content, "@") {
 				return ast.WalkContinue, nil
 			}
