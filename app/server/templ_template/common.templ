@@ -1,0 +1,49 @@
+package templ_template
+
+templ CssTooltip(helpText string) {
+	<style>
+		.css-tooltip-container {
+			position: relative;
+			display: inline-flex;
+			align-items: center;
+		}
+		.css-tooltip-text {
+			visibility: hidden;
+			opacity: 0;
+			transition: opacity 0.15s linear;
+			min-width: 350px;
+			background-color: #212529;
+			color: #fff;
+			text-align: left;
+			border-radius: 0.375rem;
+			padding: 0.5rem 1rem;
+			position: absolute;
+			z-index: 1080;
+			bottom: 125%;
+			left: 50%;
+			transform: translateX(-50%);
+		}
+		.css-tooltip-text ul {
+			padding-left: 1.2rem;
+			margin-bottom: 0;
+		}
+		.css-tooltip-container:hover .css-tooltip-text {
+			visibility: visible;
+			opacity: 0.9;
+		}
+		.css-tooltip-text::after {
+			content: "";
+			position: absolute;
+			top: 100%;
+			left: 50%;
+			margin-left: -5px;
+			border-width: 5px;
+			border-style: solid;
+			border-color: #212529 transparent transparent transparent;
+		}
+	</style>
+	<div class="css-tooltip-container">
+		<span class="badge rounded-pill bg-secondary" style="cursor: help;">?</span>
+		<div class="css-tooltip-text">{ templ.Raw(helpText) }</div>
+	</div>
+}

@@ -7,25 +7,7 @@ import (
 
 var defaultScriptureSearchParams = &excerpts.SearchParams{OriginalQ: "", Q: "", Tl: "slp1", Mode: "exact"}
 
-const scriptureSearchWidgetHelpText = `This search widget will find verses based on the selected search mode.
-
-You can type text using the chosen transliteration scheme.
-
-### Search Modes
-- **Word(s):** Search for exact word(s) in the selected transliteration.  
-- **Regex:** Use regular expressions for advanced search patterns.  
-- **Translations (FTS):** Full-text search in translations. Use "word*" for prefix matching.
-
-### Transliteration Schemes
-Read about transliteration schemes for typing Sanskrit text with an English keyboard:
-
-- [Harvard-Kyoto](https://wikipedia.org/wiki/Harvard-Kyoto)
-- [SLP1 (Sanskrit Library Phonetic Alphabet)](https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet)
-`
-
-func getScriptureSearchHelp() string {
-	return "<div style='white-space: pre-wrap; text-align: left;'>" + scriptureSearchWidgetHelpText + "</div>"
-}
+const scriptureSearchWidgetHelpText = `<p>This search widget will find verses based on the selected search mode.</p><p>You can type text using the chosen transliteration scheme.</p><h5>Search Modes</h5><ul><li><strong>Word(s):</strong> Search for exact word(s) in the selected transliteration.</li><li><strong>Regex:</strong> Use regular expressions for advanced search patterns.</li><li><strong>Translations (FTS):</strong> Full-text search in translations. Use "word*" for prefix matching.</li></ul><h5>Transliteration Schemes</h5><p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p><ul><li><a href="https://wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li><li><a href="https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li></ul>`
 
 templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.SearchParams, compact bool) {
 	if params == nil {
@@ -64,7 +46,7 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 			<button type="submit" class="btn btn-primary">Find</button>
 		</div>
 		<div class="col-auto d-flex align-items-center">
-			<span class="badge rounded-pill bg-secondary" style="cursor: help;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title={ getScriptureSearchHelp() }>?</span>
+			@CssTooltip(scriptureSearchWidgetHelpText)
 		</div>
 	</form>
 	<div class="row g-3">
