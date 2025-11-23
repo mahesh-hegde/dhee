@@ -9,13 +9,16 @@ var defaultScriptureSearchParams = &excerpts.SearchParams{OriginalQ: "", Q: "", 
 
 const scriptureSearchWidgetHelpText = `
 	<p>This search widget will find verses based on the selected search mode.</p>
-	<p>You can type text using the chosen transliteration scheme.</p>
+	<p>You can type text using the chosen transliteration scheme (Kyoto-Harvard, IAST etc...).</p>
 	<h5>Search Modes</h5>
 	<ul>
-		<li><strong>Word(s):</strong> Search for exact word(s) in the selected transliteration.</li>
-		<li><strong>Regex:</strong> Use regular expressions for advanced search patterns.</li>
+		<li><strong>Word(s):</strong> Search for exact word(s) in the romanized text of the verses.
+			<code>word*</code> syntax matches all words with prefix <code>word</code>, which can be useful for finding nominal declensions of the same word.</li>
+		<li><strong>Regex:</strong> Use regular expressions, returns the entries where a
+		  match is found within the roman text.</li>
 		<li><strong>Translations (FTS):</strong> Full-text search in translations. Use "word*" for prefix matching.</li>
 	</ul>
+	<br />
 	<h5>Transliteration Schemes</h5>
 	<p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p>
 	<ul>

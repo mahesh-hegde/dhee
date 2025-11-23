@@ -19,7 +19,24 @@ var defaultDictionarySearchParams = &dictionary.SearchParams{
 	Mode:  "exact",
 }
 
-const dictionarySearchWidgetHelpText = `<p>This search widget will find dictionary entries based on the selected search mode.</p><p>You can type text using the chosen transliteration scheme.</p><h5>Search Modes</h5><ul><li><strong>Exact Word:</strong> Finds entries that exactly match the search term.</li><li><strong>Prefix:</strong> Finds entries that start with the search term.</li><li><strong>Regex:</strong> Use regular expressions for advanced search patterns.</li><li><strong>Translations (FTS):</strong> Full-text search in entry meanings. Use "word*" for prefix matching.</li></ul><h5>Transliteration Schemes</h5><p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p><ul><li><a href="https://wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li><li><a href="https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li></ul>`
+const dictionarySearchWidgetHelpText = `
+	<p>This search widget will find dictionary entries based on the selected search mode.</p>
+	<p>You can type text using the chosen transliteration scheme.</p>
+	<h5>Search Modes</h5>
+	<ul>
+		<li><strong>Exact Word:</strong> Finds entries that exactly match the search term.</li>
+		<li><strong>Prefix:</strong> Finds words that start with the search term.</li>
+		<li><strong>Regex:</strong> Use regular expressions to match the word or its variants.</li>
+		<li><strong>Translations (FTS):</strong> Full-text search in entry meanings. Use "word*" for prefix matching.</li>
+	</ul>
+	<br />
+	<h5>Transliteration Schemes</h5>
+	<p>Read about transliteration schemes for typing Sanskrit text with an English keyboard:</p>
+	<ul>
+		<li><a href="https://wikipedia.org/wiki/Harvard-Kyoto" target="_blank">Harvard-Kyoto</a></li>
+		<li><a href="https://en.wikipedia.org/wiki/Sanskrit_Library_Phonetic_Alphabet" target="_blank">SLP1 (Sanskrit Library Phonetic Alphabet)</a></li>
+	</ul>
+`
 
 func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, compact bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -65,7 +82,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var3 templ.SafeURL
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 28, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 45, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -91,7 +108,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(dictName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 28, Col: 136}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 45, Col: 136}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -126,7 +143,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(params.OriginalQuery)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 30, Col: 114}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 47, Col: 114}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -161,7 +178,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(dictName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 33, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search_widget.templ`, Line: 50, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
