@@ -153,7 +153,7 @@ func (r *dheeHTMLRenderer) renderCodeSpan(w util.BufWriter, source []byte, n ast
 		url := fmt.Sprintf("/dictionaries/%s/words/%s", dictName, wordSLP1)
 		_, _ = w.WriteString(`<a href="`)
 		_, _ = w.Write(util.EscapeHTML(util.URLEscape([]byte(url), true)))
-		_, _ = w.WriteString(`" style="text-decoration: underline;">`)
+		_, _ = w.WriteString(`" class="dhee-dict-link">`)
 		_, _ = w.Write(util.EscapeHTML([]byte(wordIAST)))
 		_, _ = w.WriteString("</a>")
 	} else {
