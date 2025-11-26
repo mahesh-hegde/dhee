@@ -15,7 +15,7 @@ import (
 )
 
 func getKeys(s config.ScriptureDefn) []string {
-	keys := []string{"SourceText", "RomanText", "aux-pada", "Notes"}
+	keys := []string{"SourceText", "RomanText", "aux-pada", "Notes", "Related"}
 	for _, aux := range s.Auxiliaries {
 		if aux.Name != "pada" {
 			keys = append(keys, fmt.Sprintf("aux-%s", aux.Name))
@@ -570,7 +570,7 @@ func PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefinitio
 	})
 }
 
-func Navigation(data *excerpts.ExcerptTemplateData) templ.Component {
+func RelatedCard(data *excerpts.ExcerptTemplateData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -591,130 +591,285 @@ func Navigation(data *excerpts.ExcerptTemplateData) templ.Component {
 			templ_7745c5c3_Var28 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<div class=\"d-flex justify-content-between my-4\" style=\"font-size: 0.6em\">")
+		var hasRelated bool
+		for _, e := range data.Excerpts {
+			if len(e.Suggested) > 0 || len(e.SuggestedAuto) > 0 {
+				hasRelated = true
+			}
+		}
+		if hasRelated {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<div class=\"card\" data-section-key=\"Related\"><div class=\"card-header\">Related Passages</div><div class=\"card-body\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, excerpt := range data.Excerpts {
+				if len(excerpt.Suggested) > 0 || len(excerpt.SuggestedAuto) > 0 {
+					if len(data.Excerpts) > 1 {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<p><strong>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var29 string
+						templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 150, Col: 41}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</strong></p>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					for _, related := range excerpt.Suggested {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "<a href=\"")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var30 templ.SafeURL
+						templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/excerpts/%s/%s", data.Scripture.Name, related.ReadableIndex)))
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 153, Col: 102}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "\" class=\"badge bg-secondary me-1 text-decoration-none\" title=\"Curated suggestion\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var31 string
+						templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(related.ReadableIndex)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 154, Col: 31}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "</a> ")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					for _, related := range excerpt.SuggestedAuto {
+						var title string
+						if related.CosineSimilarity != nil {
+							title = fmt.Sprintf("Similarity: %.2f", *related.CosineSimilarity)
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, " <a href=\"")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var32 templ.SafeURL
+						templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/excerpts/%s/%s", data.Scripture.Name, related.ReadableIndex)))
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 162, Col: 102}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "\" class=\"badge bg-secondary me-1 text-decoration-none\" title=\"")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var33 string
+						templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 162, Col: 171}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var34 string
+						templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(related.ReadableIndex)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 163, Col: 31}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "</a>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, " ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					if len(data.Excerpts) > 1 {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, "<p></p>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "</div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		return nil
+	})
+}
+
+func Navigation(data *excerpts.ExcerptTemplateData) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var35 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var35 == nil {
+			templ_7745c5c3_Var35 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "<div class=\"d-flex justify-content-between my-4\" style=\"font-size: 0.6em\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if data.Previous != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var29 templ.SafeURL
-			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinURLErrs(data.Previous)
+			var templ_7745c5c3_Var36 templ.SafeURL
+			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinURLErrs(data.Previous)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 137, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 179, Col: 26}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" class=\"btn btn-sm btn-primary\">&larr; Previous (")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var30 string
-			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(data.Previous)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 137, Col: 92}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "\" class=\"btn btn-sm btn-primary\">&larr; Previous (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, ")</a> ")
+			var templ_7745c5c3_Var37 string
+			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(data.Previous)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 179, Col: 92}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, ")</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<span></span> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<span></span> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if data.Up != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "<a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var31 templ.SafeURL
-			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinURLErrs(data.Up)
+			var templ_7745c5c3_Var38 templ.SafeURL
+			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinURLErrs(data.Up)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 142, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 184, Col: 20}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\" class=\"btn btn-sm btn-info\">&uarr; ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var32 string
-			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(data.UpType)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 142, Col: 71}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "\" class=\"btn btn-sm btn-info\">&uarr; ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, " ")
+			var templ_7745c5c3_Var39 string
+			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(data.UpType)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 184, Col: 71}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var33 string
-			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(data.Up)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 142, Col: 83}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "</a> ")
+			var templ_7745c5c3_Var40 string
+			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(data.Up)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 184, Col: 83}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if data.Next != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "<a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var34 templ.SafeURL
-			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinURLErrs(data.Next)
+			var templ_7745c5c3_Var41 templ.SafeURL
+			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinURLErrs(data.Next)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 145, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 187, Col: 22}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "\" class=\"btn btn-sm btn-primary\">Next (")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var35 string
-			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(data.Next)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 145, Col: 73}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "\" class=\"btn btn-sm btn-primary\">Next (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, ") &rarr;</a>")
+			var templ_7745c5c3_Var42 string
+			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(data.Next)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 187, Col: 73}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, ") &rarr;</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, "<span></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<span></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -738,12 +893,12 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var36 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var36 == nil {
-			templ_7745c5c3_Var36 = templ.NopComponent
+		templ_7745c5c3_Var43 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var43 == nil {
+			templ_7745c5c3_Var43 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, "<div class=\"container\"><noscript><div class=\"alert alert-info\" role=\"alert\">JavaScript is required to be enabled for most of the useful features of this website.</div></noscript><div class=\"row my-3\"><div class=\"col-lg-6 offset-lg-6\" style=\"font-size: 0.7em;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "<div class=\"container\"><noscript><div class=\"alert alert-info\" role=\"alert\">JavaScript is required to be enabled for most of the useful features of this website.</div></noscript><div class=\"row my-3\"><div class=\"col-lg-6 offset-lg-6\" style=\"font-size: 0.7em;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -751,204 +906,204 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "</div></div><script>\n\t\tconst scriptureName = \"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "</div></div><script>\n\t\tconst scriptureName = \"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var37, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(data.Scripture.Name)
+		templ_7745c5c3_Var44, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(data.Scripture.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 165, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 207, Col: 47}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var37)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "\";\n\t\tconst scriptureKeys = ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var44)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var38, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(getKeys(data.Scripture))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 166, Col: 50}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "\";\n\t\tconst scriptureKeys = ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, ";\n\t\t</script>")
+		templ_7745c5c3_Var45, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(getKeys(data.Scripture))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 208, Col: 50}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var45)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, ";\n\t\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if data != nil && len(data.Excerpts) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "<div class=\"my-4\"><h2 class=\"text-center\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "<div class=\"my-4\"><h2 class=\"text-center\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var39 string
-			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.ReadableName)
+			var templ_7745c5c3_Var46 string
+			templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.ReadableName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 171, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 213, Col: 34}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, " ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var40 string
-			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[0].ReadableIndex)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 171, Col: 69}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, " ")
+			var templ_7745c5c3_Var47 string
+			templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[0].ReadableIndex)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 213, Col: 69}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(data.Excerpts) > 1 {
-				var templ_7745c5c3_Var41 string
-				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(" - ")
+				var templ_7745c5c3_Var48 string
+				templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(" - ")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 173, Col: 13}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 215, Col: 13}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, " ")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var42 string
-				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[len(data.Excerpts)-1].ReadableIndex)
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, " ")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 174, Col: 57}
+					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
+				var templ_7745c5c3_Var49 string
+				templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[len(data.Excerpts)-1].ReadableIndex)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 216, Col: 57}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "</h2></div><div class=\"d-flex flex-row justify-content-start my-3\"><div class=\"d-flex justify-content-start me-2\"><span class=\"badge bg-success\">Addressed to: ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "</h2></div><div class=\"d-flex flex-row justify-content-start my-3\"><div class=\"d-flex justify-content-start me-2\"><span class=\"badge bg-success\">Addressed to: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var43 string
-			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(data.AddressedTo)
+			var templ_7745c5c3_Var50 string
+			templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(data.AddressedTo)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 180, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 222, Col: 68}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "</span></div><div class=\"d-flex justify-content-start me-2\"><span class=\"badge bg-secondary\">Group: ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var44 string
-			templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[0].Group)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 183, Col: 69}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "</span></div><div class=\"d-flex justify-content-start me-2\"><span class=\"badge bg-secondary\">Group: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "</span></div></div><div id=\"cards-container\" class=\"dual-column\"><div class=\"card\" data-section-key=\"SourceText\"><div class=\"card-header\">Text (Devanagari)</div><div class=\"card-body\" id=\"source-text-section\">")
+			var templ_7745c5c3_Var51 string
+			templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpts[0].Group)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 225, Col: 69}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "</span></div></div><div id=\"cards-container\" class=\"dual-column\"><div class=\"card\" data-section-key=\"SourceText\"><div class=\"card-header\">Text (Devanagari)</div><div class=\"card-body\" id=\"source-text-section\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, excerpt := range data.Excerpts {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<p><strong>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "<p><strong>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var45 string
-				templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
+				var templ_7745c5c3_Var52 string
+				templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 193, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 235, Col: 41}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "</strong></p><div class=\"verse\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "</strong></p><div class=\"verse\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, line := range excerpt.SourceText {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "<p class=\"line\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "<p class=\"line\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var46 string
-					templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(line)
+					var templ_7745c5c3_Var53 string
+					templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(line)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 196, Col: 31}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 238, Col: 31}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "</p>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "</p>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "</div></div><div class=\"card\" data-section-key=\"RomanText\"><div class=\"card-header\">Text (Roman)</div><div class=\"card-body verse\" id=\"roman-text-section\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "</div></div><div class=\"card\" data-section-key=\"RomanText\"><div class=\"card-header\">Text (Roman)</div><div class=\"card-body verse\" id=\"roman-text-section\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, excerpt := range data.Excerpts {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "<p><strong>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "<p><strong>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var47 string
-				templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
+				var templ_7745c5c3_Var54 string
+				templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 208, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 250, Col: 41}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "</strong></p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "</strong></p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, line := range excerpt.RomanText {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "<p class=\"roman-text\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "<p class=\"roman-text\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var48 string
-					templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(line)
+					var templ_7745c5c3_Var55 string
+					templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(line)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 210, Col: 36}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 252, Col: 36}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "</p>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "</p>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -966,44 +1121,44 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 				}
 			}
 			if data.Excerpts[0].Notes != nil {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "<div class=\"card\" data-section-key=\"Notes\"><div class=\"card-header\">Notes by ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "<div class=\"card\" data-section-key=\"Notes\"><div class=\"card-header\">Notes by ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var49 string
-				templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.NotesBy)
+				var templ_7745c5c3_Var56 string
+				templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.NotesBy)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 225, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 267, Col: 40}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "</div><div class=\"card-body\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "</div><div class=\"card-body\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, excerpt := range data.Excerpts {
 					if len(excerpt.Notes) > 0 {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "<p><strong>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "<p><strong>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						var templ_7745c5c3_Var50 string
-						templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
+						var templ_7745c5c3_Var57 string
+						templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 230, Col: 43}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 272, Col: 43}
 						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "</strong></p>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "</strong></p>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						for _, note := range excerpt.Notes {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "<div>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "<div>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
@@ -1011,19 +1166,23 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "</div>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "</div>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						}
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "</div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "</div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "</div><div class=\"card my-3\"><div class=\"card-header d-flex justify-content-between align-items-center\"><div>Grammatical analysis</div><div><button class=\"btn btn-sm btn-outline-info me-2\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#grammaticalCollapse\" aria-expanded=\"true\" aria-controls=\"grammaticalCollapse\">Toggle table</button></div></div><div class=\"card-body collapse\" id=\"grammaticalCollapse\">")
+			templ_7745c5c3_Err = RelatedCard(data).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "</div><div class=\"card my-3\"><div class=\"card-header d-flex justify-content-between align-items-center\"><div>Grammatical analysis</div><div><button class=\"btn btn-sm btn-outline-info me-2\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#grammaticalCollapse\" aria-expanded=\"true\" aria-controls=\"grammaticalCollapse\">Toggle table</button></div></div><div class=\"card-body collapse\" id=\"grammaticalCollapse\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1031,68 +1190,68 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "</div></div><style>\n\t\t#cards-container.single-column {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t}\n\n\t\t#cards-container.single-column .card {\n\t\t\tmargin-top: 1rem;\n\t\t\tmargin-bottom: 1rem;\n\t\t}\n\n\t\t#cards-container.dual-column {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr;\n\t\t\tgap: 1rem;\n\t\t\tmargin-top: 0;\n\t\t}\n\n\t\t@media (min-width: 992px) {\n\t\t\t#cards-container.dual-column {\n\t\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t\t}\n\t\t}\n\n\t\t#cards-container .card:last-child:nth-child(odd) {\n\t\t\tgrid-column: 1 / -1;\n\t\t}\n        .dotted-underline {\n            border-bottom: 1px dotted currentColor;\n            cursor: help;\n        }\n        .pada-word {\n            cursor: pointer;\n            position: relative;\n        }\n\n        .pada-popup {\n            position: absolute;\n            background: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: 4px;\n            padding: 12px;\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n            z-index: 1000;\n            max-width: 400px;\n            max-height: 40vh;\n            overflow-y: auto;\n            font-size: 0.9rem;\n            line-height: 1.4;\n        }\n\n        .pada-word a {\n            border-bottom: 1px dotted currentColor;\n            text-decoration: none;\n            cursor: help;\n            color: var(--bs-body-color);\n        }\n\n        .table-word {\n            cursor: pointer;\n        }\n\n        .table-word-underline {\n            border-bottom: 1px dotted currentColor;\n        }\n\n        .table-word-popup {\n            position: absolute;\n            background: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: 4px;\n            padding: 12px;\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n            z-index: 1000;\n            max-width: 400px;\n            max-height: 40vh;\n            overflow-y: auto;\n            font-size: 0.9rem;\n            line-height: 1.4;\n        }\n\n\t\t.pref-checkbox-item {\n\t\t\tcursor: move;\n\t\t\tpadding: 0.25rem 0.5rem;\n\t\t\tborder: 1px solid var(--bs-border-color);\n\t\t\tborder-radius: 0.25rem;\n\t\t\tbackground: var(--bs-body-bg);\n\t\t\tuser-select: none;\n\t\t\twhite-space: nowrap;\n\t\t}\n\n\t\t.pref-checkbox-item:hover {\n\t\t\tbackground: var(--bs-secondary-bg);\n\t\t}\n\n\t\t.pref-checkbox-item.drag-over-before::before,\n\t\t.pref-checkbox-item.drag-over-after::after {\n\t\t\tcontent: '+';\n\t\t\tcolor: #0d6efd;\n\t\t\tfont-weight: bold;\n\t\t\tpadding: 0 0.25rem;\n\t\t}\n\n\t\t.pref-checkbox-item input {\n\t\t\tcursor: pointer;\n\t\t}\n\n\t\t.pref-checkbox-item.drag-over-before::before,\n\t\t.pref-checkbox-item.drag-over-after::after {\n\t\t\tcontent: '+';\n\t\t\tcolor: #0d6efd;\n\t\t\tfont-weight: bold;\n\t\t\tpadding: 0 0.25rem;\n\t\t}\n\n\t\t.pref-checkbox-item input {\n\t\t\tcursor: pointer;\n\t\t}\n\n\t\t#display-prefs {\n\t\t\tfont-size: 0.7em;\n\t\t}\n\t\t\t</style> <script>\n\t\tconst scripture = '")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "</div></div><style>\n\t\t#cards-container.single-column {\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t}\n\n\t\t#cards-container.single-column .card {\n\t\t\tmargin-top: 1rem;\n\t\t\tmargin-bottom: 1rem;\n\t\t}\n\n\t\t#cards-container.dual-column {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr;\n\t\t\tgap: 1rem;\n\t\t\tmargin-top: 0;\n\t\t}\n\n\t\t@media (min-width: 992px) {\n\t\t\t#cards-container.dual-column {\n\t\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t\t}\n\t\t}\n\n\t\t#cards-container .card:last-child:nth-child(odd) {\n\t\t\tgrid-column: 1 / -1;\n\t\t}\n        .dotted-underline {\n            border-bottom: 1px dotted currentColor;\n            cursor: help;\n        }\n        .pada-word {\n            cursor: pointer;\n            position: relative;\n        }\n\n        .pada-popup {\n            position: absolute;\n            background: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: 4px;\n            padding: 12px;\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n            z-index: 1000;\n            max-width: 400px;\n            max-height: 40vh;\n            overflow-y: auto;\n            font-size: 0.9rem;\n            line-height: 1.4;\n        }\n\n        .pada-word a {\n            border-bottom: 1px dotted currentColor;\n            text-decoration: none;\n            cursor: help;\n            color: var(--bs-body-color);\n        }\n\n        .table-word {\n            cursor: pointer;\n        }\n\n        .table-word-underline {\n            border-bottom: 1px dotted currentColor;\n        }\n\n        .table-word-popup {\n            position: absolute;\n            background: var(--bs-body-bg);\n            color: var(--bs-body-color);\n            border: 1px solid var(--bs-border-color);\n            border-radius: 4px;\n            padding: 12px;\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n            z-index: 1000;\n            max-width: 400px;\n            max-height: 40vh;\n            overflow-y: auto;\n            font-size: 0.9rem;\n            line-height: 1.4;\n        }\n\n\t\t.pref-checkbox-item {\n\t\t\tcursor: move;\n\t\t\tpadding: 0.25rem 0.5rem;\n\t\t\tborder: 1px solid var(--bs-border-color);\n\t\t\tborder-radius: 0.25rem;\n\t\t\tbackground: var(--bs-body-bg);\n\t\t\tuser-select: none;\n\t\t\twhite-space: nowrap;\n\t\t}\n\n\t\t.pref-checkbox-item:hover {\n\t\t\tbackground: var(--bs-secondary-bg);\n\t\t}\n\n\t\t.pref-checkbox-item.drag-over-before::before,\n\t\t.pref-checkbox-item.drag-over-after::after {\n\t\t\tcontent: '+';\n\t\t\tcolor: #0d6efd;\n\t\t\tfont-weight: bold;\n\t\t\tpadding: 0 0.25rem;\n\t\t}\n\n\t\t.pref-checkbox-item input {\n\t\t\tcursor: pointer;\n\t\t}\n\n\t\t.pref-checkbox-item.drag-over-before::before,\n\t\t.pref-checkbox-item.drag-over-after::after {\n\t\t\tcontent: '+';\n\t\t\tcolor: #0d6efd;\n\t\t\tfont-weight: bold;\n\t\t\tpadding: 0 0.25rem;\n\t\t}\n\n\t\t.pref-checkbox-item input {\n\t\t\tcursor: pointer;\n\t\t}\n\n\t\t#display-prefs {\n\t\t\tfont-size: 0.7em;\n\t\t}\n\t\t\t</style> <script>\n\t\tconst scripture = '")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var51, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(data.Scripture.Name)
+			templ_7745c5c3_Var58, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(data.Scripture.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 381, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 424, Col: 43}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var51)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var58)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "';\n\t\tconst setupOrderPrefs = function() {\n\t\t\t// Display preferences management\n\t\t\tvar prefContainer = document.getElementById('display-prefs');\n\t\t\tif (!prefContainer) return;\n\n\t\t\tvar checkboxItems = prefContainer.querySelectorAll('.pref-checkbox-item');\n\t\t\tvar prefDraggedItem = null;\n\n\t\t\t// Enable checkboxes since JS is available\n\t\t\tcheckboxItems.forEach(function(item) {\n\t\t\t\titem.querySelector('input').disabled = false;\n\t\t\t});\n\n\t\t\t// Load and apply saved preferences\n\t\t\tfunction loadPreferences() {\n\t\t\t\tif (typeof(Storage) === \"undefined\") {\n\t\t\t\t\tcheckboxItems.forEach(function(item) {\n\t\t\t\t\t\titem.querySelector('input').disabled = true;\n\t\t\t\t\t});\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\ttry {\n\t\t\t\t\tvar saved = localStorage.getItem('verseDisplayChoices/' + scripture);\n\t\t\t\t\tvar order = JSON.parse(localStorage.getItem('verseDisplayOrder/' + scripture) || '[]');\n\t\t\t\t\t\n\t\t\t\t\t// Apply order first (before setting checkbox states)\n\t\t\t\t\tif (order.length > 0) {\n\t\t\t\t\t\torder.forEach(function(key) {\n\t\t\t\t\t\t\tvar item = prefContainer.querySelector('[data-pref-key=\"' + key + '\"]');\n\t\t\t\t\t\t\tif (item) prefContainer.appendChild(item);\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\t// Then apply checkbox states\n\t\t\t\t\tif (saved) {\n\t\t\t\t\t\tvar prefs = JSON.parse(saved);\n\t\t\t\t\t\tArray.from(prefContainer.children).forEach(function(item) {\n\t\t\t\t\t\t\tif (!item.classList.contains('pref-checkbox-item')) return;\n\t\t\t\t\t\t\tvar key = item.getAttribute('data-pref-key');\n\t\t\t\t\t\t\tvar checkbox = item.querySelector('input');\n\t\t\t\t\t\t\tcheckbox.checked = prefs.indexOf(key) !== -1;\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t\tapplyPreferences();\n\t\t\t\t} catch(e) {\n\t\t\t\t\tconsole.error('Failed to load preferences:', e);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tfunction savePreferences() {\n\t\t\t\tif (typeof(Storage) === \"undefined\") return;\n\n\t\t\t\tvar enabled = [];\n\t\t\t\tvar order = [];\n\t\t\t\t\n\t\t\t\t// Use childNodes or children to get actual DOM order, not querySelectorAll\n\t\t\t\tArray.from(prefContainer.children).forEach(function(item) {\n\t\t\t\t\tif (!item.classList.contains('pref-checkbox-item')) return;\n\n\t\t\t\t\tvar key = item.getAttribute('data-pref-key');\n\t\t\t\t\torder.push(key);\n\t\t\t\t\tif (item.querySelector('input').checked) {\n\t\t\t\t\t\tenabled.push(key);\n\t\t\t\t\t}\n\t\t\t\t});\n\n\t\t\t\tlocalStorage.setItem('verseDisplayChoices/' + scripture, JSON.stringify(enabled));\n\t\t\t\tlocalStorage.setItem('verseDisplayOrder/' + scripture, JSON.stringify(order));\n\t\t\t}\n\n\t\t\tfunction applyPreferences() {\n\t\t\t\tvar allSections = document.querySelectorAll('[data-section-key]');\n\t\t\t\tallSections.forEach(function(section) {\n\t\t\t\t\tsection.style.display = 'none';\n\t\t\t\t});\n\n\t\t\t\tArray.from(prefContainer.children).forEach(function(item) {\n\t\t\t\t\tif (!item.classList.contains('pref-checkbox-item')) return;\n\n\t\t\t\t\tvar key = item.getAttribute('data-pref-key');\n\t\t\t\t\tvar checkbox = item.querySelector('input');\n\t\t\t\t\tif (checkbox.checked) {\n\t\t\t\t\t\tvar section = document.querySelector('[data-section-key=\"' + key + '\"]');\n\t\t\t\t\t\tif (section) section.style.display = 'block';\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\t// Reorder sections based on checkbox order\n\t\t\t\tvar container = document.querySelector('.container');\n\t\t\t\tvar firstSection = container.querySelector('[data-section-key]');\n\t\t\t\tif (!firstSection) return;\n\t\t\t\t\n\t\t\t\tvar parent = firstSection.parentNode;\n\t\t\t\tArray.from(prefContainer.children).forEach(function(item) {\n\t\t\t\t\tif (!item.classList.contains('pref-checkbox-item')) return;\n\n\t\t\t\t\tvar key = item.getAttribute('data-pref-key');\n\t\t\t\t\tvar section = document.querySelector('[data-section-key=\"' + key + '\"]');\n\t\t\t\t\tif (section && parent.contains(section)) {\n\t\t\t\t\t\tparent.appendChild(section); // Append in order\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\n\t\t\t// Checkbox change handler\n\t\t\tcheckboxItems.forEach(function(item) {\n\t\t\t\tvar checkbox = item.querySelector('input');\n\t\t\t\tcheckbox.addEventListener('change', function() {\n\t\t\t\t\tsavePreferences();\n\t\t\t\t\tapplyPreferences();\n\t\t\t\t});\n\t\t\t});\n\n\t\t\t// Drag and drop with early returns\n\t\t\tcheckboxItems.forEach(function(item) {\n\t\t\t\titem.addEventListener('dragstart', function(e) {\n\t\t\t\t\t// Only handle if dragging from pref checkboxes\n\t\t\t\t\tif (!e.target.classList.contains('pref-checkbox-item')) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tprefDraggedItem = this;\n\t\t\t\t\te.dataTransfer.effectAllowed = 'move';\n\t\t\t\t\te.dataTransfer.setData('application/x-pref-checkbox', this.getAttribute('data-pref-key'));\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\titem.addEventListener('dragover', function(e) {\n\t\t\t\t\t// Only respond to our drag type\n\t\t\t\t\tif (!e.dataTransfer.types.includes('application/x-pref-checkbox')) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tif (prefDraggedItem === this) return;\n\t\t\t\t\t\n\t\t\t\t\te.preventDefault();\n\t\t\t\t\t\n\t\t\t\t\tvar rect = this.getBoundingClientRect();\n\t\t\t\t\tvar midpoint = rect.left + rect.width / 2;\n\t\t\t\t\t\n\t\t\t\t\tprefContainer.querySelectorAll('.pref-checkbox-item').forEach(function(i) {\n\t\t\t\t\t\ti.classList.remove('drag-over-before', 'drag-over-after');\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\tif (e.clientX < midpoint) {\n\t\t\t\t\t\tthis.classList.add('drag-over-before');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tthis.classList.add('drag-over-after');\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\titem.addEventListener('dragleave', function(e) {\n\t\t\t\t\t// Only handle our drag type\n\t\t\t\t\tif (!e.dataTransfer.types.includes('application/x-pref-checkbox')) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tthis.classList.remove('drag-over-before', 'drag-over-after');\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\titem.addEventListener('drop', function(e) {\n\t\t\t\t\tvar key = e.dataTransfer.getData('application/x-pref-checkbox');\n\t\t\t\t\tif (!key) return; // Not our drag type\n\t\t\t\t\tif (prefDraggedItem === this) return;\n\t\t\t\t\t\n\t\t\t\t\te.preventDefault();\n\t\t\t\t\t\n\t\t\t\t\tvar rect = this.getBoundingClientRect();\n\t\t\t\t\tvar midpoint = rect.left + rect.width / 2;\n\t\t\t\t\t\n\t\t\t\t\tif (e.clientX < midpoint) {\n\t\t\t\t\t\tprefContainer.insertBefore(prefDraggedItem, this);\n\t\t\t\t\t} else {\n\t\t\t\t\t\tprefContainer.insertBefore(prefDraggedItem, this.nextSibling);\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tthis.classList.remove('drag-over-before', 'drag-over-after');\n\t\t\t\t\tsavePreferences();\n\t\t\t\t\tapplyPreferences();\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\titem.addEventListener('dragend', function(e) {\n\t\t\t\t\t// Only handle our drag type\n\t\t\t\t\tif (!e.dataTransfer.types.includes('application/x-pref-checkbox')) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tprefContainer.querySelectorAll('.pref-checkbox-item').forEach(function(i) {\n\t\t\t\t\t\ti.classList.remove('drag-over-before', 'drag-over-after');\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\n\t\t\tloadPreferences();\n\t\t}\n\n\t\tconst setupLayoutPrefs = function() {\n\t\t\t// Layout preferences\n\t\t\tconst layoutRadios = document.querySelectorAll('input[name=\"layout\"]');\n\t\t\tlayoutRadios.forEach(function(radio) {\n\t\t\t\tradio.disabled = false;\n\t\t\t\tradio.addEventListener('change', function() {\n\t\t\t\t\tconst container = document.getElementById('cards-container');\n\t\t\t\t\tif (this.value === 'single') {\n\t\t\t\t\t\tcontainer.classList.remove('dual-column');\n\t\t\t\t\t\tcontainer.classList.add('single-column');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tcontainer.classList.remove('single-column');\n\t\t\t\t\t\tcontainer.classList.add('dual-column');\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tif (typeof(Storage) !== \"undefined\") {\n\t\t\t\t\t\tlocalStorage.setItem('layoutPref/' + scripture, this.value);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t});\n\n\t\t\t// Load saved layout preference\n\t\t\tif (typeof(Storage) !== \"undefined\") {\n\t\t\t\tconst savedLayout = localStorage.getItem('layoutPref/' + scripture);\n\t\t\t\tif (savedLayout) {\n\t\t\t\t\tconst radio = document.querySelector('input[name=\"layout\"][value=\"' + savedLayout + '\"]');\n\t\t\t\t\tif (radio) {\n\t\t\t\t\t\tradio.checked = true;\n\t\t\t\t\t\tconst container = document.getElementById('cards-container');\n\t\t\t\t\t\tcontainer.classList.remove('single-column', 'dual-column');\n\t\t\t\t\t\tcontainer.classList.add(savedLayout === 'single' ? 'single-column' : 'dual-column');\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n        // Pada word popup handler and table word popup handler\n        // initFn will be called by layout body after bootstrap is loaded. This way we can keep JS loading in the end.\n        const initFn = (function () {\n            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]'))\n            tooltipTriggerList.forEach(function (tooltipTriggerEl) {\n                new bootstrap.Tooltip(tooltipTriggerEl)\n            })\n\n            // Pada word hover cards\n            document.querySelectorAll('.pada-word').forEach(function (wordEl) {\n                var padaId = wordEl.getAttribute('data-pada-id');\n                var dataEl = document.getElementById(padaId);\n\n                if (!dataEl) return;\n\n                wordEl.addEventListener('mouseenter', function (e) {\n                    window.dhee.popupManager.close();\n\n                    // Create popup\n                    var popup = document.createElement('div');\n                    popup.className = 'pada-popup';\n                    popup.innerHTML = dataEl.querySelector('.pada-popup-content').innerHTML;\n\n                    // Position popup\n                    document.body.appendChild(popup);\n                    var rect = wordEl.getBoundingClientRect();\n                    popup.style.left = rect.left + 'px';\n                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';\n\n                    window.dhee.popupManager.set(popup);\n                });\n\n                wordEl.addEventListener('mouseleave', function (e) {\n                    setTimeout(function () {\n\t\t\t\t\t\tconst p = window.dhee.popupManager.get();\n                        if (p && !p.matches(':hover')) {\n\t\t\t\t\t\t\twindow.dhee.popupManager.close();\n\t\t\t\t\t\t}\n                    }, 100);\n                });\n            });\n\n            // Table word hover cards\n            document.querySelectorAll('.table-word').forEach(function (wordEl) {\n                var wordId = wordEl.getAttribute('data-word-id');\n                var dataEl = document.getElementById(wordId);\n\n                if (!dataEl) return;\n\n                wordEl.addEventListener('mouseenter', function (e) {\n                    window.dhee.popupManager.close();\n\n                    // Create popup\n                    var popup = document.createElement('div');\n                    popup.className = 'table-word-popup';\n                    popup.innerHTML = dataEl.querySelector('.table-word-popup-content').innerHTML;\n\n                    // Position popup\n                    document.body.appendChild(popup);\n                    var rect = wordEl.getBoundingClientRect();\n                    popup.style.left = rect.left + 'px';\n                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';\n\n                    window.dhee.popupManager.set(popup);\n                });\n\n                wordEl.addEventListener('mouseleave', function (e) {\n                    setTimeout(function () {\n\t\t\t\t\t\tconst p = window.dhee.popupManager.get();\n                        if (p && !p.matches(':hover')) {\n\t\t\t\t\t\t\twindow.dhee.popupManager.close();\n\t\t\t\t\t\t}\n                    }, 100);\n                });\n            });\n\n            window.dhee.setupTextSelectionSearch('roman-text-section', 'iast', 2);\n            window.dhee.setupTextSelectionSearch('source-text-section', 'dn', 3);\n            window.dhee.setupTextSelectionSearch('pada-section', 'iast', 2);\n\n\t\t\ttry {\n\t\t\t\tsetupOrderPrefs();\n\t\t\t\tsetupLayoutPrefs()\n\t\t\t} catch (e) {\n\t\t\t\tconsole.error(\"Failed to setup display order preferences:\", e);\n\t\t\t}\n        });\n\t\t\t</script> <div class=\"d-flex flex-row\"><div id=\"display-prefs\" class=\"d-flex flex-wrap justify-content-start gap-2\" style=\"max-width: 80%;\"><label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"SourceText\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>Devanagari</span></label> <label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"RomanText\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>Roman</span></label> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "';\n\t\tconst setupOrderPrefs = function() {\n\t\t\t// Display preferences management\n\t\t\tvar prefContainer = document.getElementById('display-prefs');\n\t\t\tif (!prefContainer) return;\n\n\t\t\tvar checkboxItems = prefContainer.querySelectorAll('.pref-checkbox-item');\n\t\t\tvar prefDraggedItem = null;\n\n\t\t\t// Enable checkboxes since JS is available\n\t\t\tcheckboxItems.forEach(function(item) {\n\t\t\t\titem.querySelector('input').disabled = false;\n\t\t\t});\n\n\t\t\t// Load and apply saved preferences\n\t\t\tfunction loadPreferences() {\n\t\t\t\tif (typeof(Storage) === \"undefined\") {\n\t\t\t\t\tcheckboxItems.forEach(function(item) {\n\t\t\t\t\t\titem.querySelector('input').disabled = true;\n\t\t\t\t\t});\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\ttry {\n\t\t\t\t\tvar saved = localStorage.getItem('verseDisplayChoices/' + scripture);\n\t\t\t\t\tvar order = JSON.parse(localStorage.getItem('verseDisplayOrder/' + scripture) || '[]');\n\t\t\t\t\t\n\t\t\t\t\t// Apply order first (before setting checkbox states)\n\t\t\t\t\tif (order.length > 0) {\n\t\t\t\t\t\torder.forEach(function(key) {\n\t\t\t\t\t\t\tvar item = prefContainer.querySelector('[data-pref-key=\"' + key + '\"]');\n\t\t\t\t\t\t\tif (item) prefContainer.appendChild(item);\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\t// Then apply checkbox states\n\t\t\t\t\tif (saved) {\n\t\t\t\t\t\tvar prefs = JSON.parse(saved);\n\t\t\t\t\t\tArray.from(prefContainer.children).forEach(function(item) {\n\t\t\t\t\t\t\tif (!item.classList.contains('pref-checkbox-item')) return;\n\t\t\t\t\t\t\tvar key = item.getAttribute('data-pref-key');\n\t\t\t\t\t\t\tvar checkbox = item.querySelector('input');\n\t\t\t\t\t\t\tcheckbox.checked = prefs.indexOf(key) !== -1;\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t\tapplyPreferences();\n\t\t\t\t} catch(e) {\n\t\t\t\t\tconsole.error('Failed to load preferences:', e);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tfunction savePreferences() {\n\t\t\t\tif (typeof(Storage) === \"undefined\") return;\n\n\t\t\t\tvar enabled = [];\n\t\t\t\tvar order = [];\n\t\t\t\t\n\t\t\t\t// Use childNodes or children to get actual DOM order, not querySelectorAll\n\t\t\t\tArray.from(prefContainer.children).forEach(function(item) {\n\t\t\t\t\tif (!item.classList.contains('pref-checkbox-item')) return;\n\n\t\t\t\t\tvar key = item.getAttribute('data-pref-key');\n\t\t\t\t\torder.push(key);\n\t\t\t\t\tif (item.querySelector('input').checked) {\n\t\t\t\t\t\tenabled.push(key);\n\t\t\t\t\t}\n\t\t\t\t});\n\n\t\t\t\tlocalStorage.setItem('verseDisplayChoices/' + scripture, JSON.stringify(enabled));\n\t\t\t\tlocalStorage.setItem('verseDisplayOrder/' + scripture, JSON.stringify(order));\n\t\t\t}\n\n\t\t\tfunction applyPreferences() {\n\t\t\t\tvar allSections = document.querySelectorAll('[data-section-key]');\n\t\t\t\tallSections.forEach(function(section) {\n\t\t\t\t\tsection.style.display = 'none';\n\t\t\t\t});\n\n\t\t\t\tArray.from(prefContainer.children).forEach(function(item) {\n\t\t\t\t\tif (!item.classList.contains('pref-checkbox-item')) return;\n\n\t\t\t\t\tvar key = item.getAttribute('data-pref-key');\n\t\t\t\t\tvar checkbox = item.querySelector('input');\n\t\t\t\t\tif (checkbox.checked) {\n\t\t\t\t\t\tvar section = document.querySelector('[data-section-key=\"' + key + '\"]');\n\t\t\t\t\t\tif (section) section.style.display = 'block';\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\t// Reorder sections based on checkbox order\n\t\t\t\tvar container = document.querySelector('.container');\n\t\t\t\tvar firstSection = container.querySelector('[data-section-key]');\n\t\t\t\tif (!firstSection) return;\n\t\t\t\t\n\t\t\t\tvar parent = firstSection.parentNode;\n\t\t\t\tArray.from(prefContainer.children).forEach(function(item) {\n\t\t\t\t\tif (!item.classList.contains('pref-checkbox-item')) return;\n\n\t\t\t\t\tvar key = item.getAttribute('data-pref-key');\n\t\t\t\t\tvar section = document.querySelector('[data-section-key=\"' + key + '\"]');\n\t\t\t\t\tif (section && parent.contains(section)) {\n\t\t\t\t\t\tparent.appendChild(section); // Append in order\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\n\t\t\t// Checkbox change handler\n\t\t\tcheckboxItems.forEach(function(item) {\n\t\t\t\tvar checkbox = item.querySelector('input');\n\t\t\t\tcheckbox.addEventListener('change', function() {\n\t\t\t\t\tsavePreferences();\n\t\t\t\t\tapplyPreferences();\n\t\t\t\t});\n\t\t\t});\n\n\t\t\t// Drag and drop with early returns\n\t\t\tcheckboxItems.forEach(function(item) {\n\t\t\t\titem.addEventListener('dragstart', function(e) {\n\t\t\t\t\t// Only handle if dragging from pref checkboxes\n\t\t\t\t\tif (!e.target.classList.contains('pref-checkbox-item')) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tprefDraggedItem = this;\n\t\t\t\t\te.dataTransfer.effectAllowed = 'move';\n\t\t\t\t\te.dataTransfer.setData('application/x-pref-checkbox', this.getAttribute('data-pref-key'));\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\titem.addEventListener('dragover', function(e) {\n\t\t\t\t\t// Only respond to our drag type\n\t\t\t\t\tif (!e.dataTransfer.types.includes('application/x-pref-checkbox')) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tif (prefDraggedItem === this) return;\n\t\t\t\t\t\n\t\t\t\t\te.preventDefault();\n\t\t\t\t\t\n\t\t\t\t\tvar rect = this.getBoundingClientRect();\n\t\t\t\t\tvar midpoint = rect.left + rect.width / 2;\n\t\t\t\t\t\n\t\t\t\t\tprefContainer.querySelectorAll('.pref-checkbox-item').forEach(function(i) {\n\t\t\t\t\t\ti.classList.remove('drag-over-before', 'drag-over-after');\n\t\t\t\t\t});\n\t\t\t\t\t\n\t\t\t\t\tif (e.clientX < midpoint) {\n\t\t\t\t\t\tthis.classList.add('drag-over-before');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tthis.classList.add('drag-over-after');\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\titem.addEventListener('dragleave', function(e) {\n\t\t\t\t\t// Only handle our drag type\n\t\t\t\t\tif (!e.dataTransfer.types.includes('application/x-pref-checkbox')) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tthis.classList.remove('drag-over-before', 'drag-over-after');\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\titem.addEventListener('drop', function(e) {\n\t\t\t\t\tvar key = e.dataTransfer.getData('application/x-pref-checkbox');\n\t\t\t\t\tif (!key) return; // Not our drag type\n\t\t\t\t\tif (prefDraggedItem === this) return;\n\t\t\t\t\t\n\t\t\t\t\te.preventDefault();\n\t\t\t\t\t\n\t\t\t\t\tvar rect = this.getBoundingClientRect();\n\t\t\t\t\tvar midpoint = rect.left + rect.width / 2;\n\t\t\t\t\t\n\t\t\t\t\tif (e.clientX < midpoint) {\n\t\t\t\t\t\tprefContainer.insertBefore(prefDraggedItem, this);\n\t\t\t\t\t} else {\n\t\t\t\t\t\tprefContainer.insertBefore(prefDraggedItem, this.nextSibling);\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tthis.classList.remove('drag-over-before', 'drag-over-after');\n\t\t\t\t\tsavePreferences();\n\t\t\t\t\tapplyPreferences();\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\titem.addEventListener('dragend', function(e) {\n\t\t\t\t\t// Only handle our drag type\n\t\t\t\t\tif (!e.dataTransfer.types.includes('application/x-pref-checkbox')) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tprefContainer.querySelectorAll('.pref-checkbox-item').forEach(function(i) {\n\t\t\t\t\t\ti.classList.remove('drag-over-before', 'drag-over-after');\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\n\t\t\tloadPreferences();\n\t\t}\n\n\t\tconst setupLayoutPrefs = function() {\n\t\t\t// Layout preferences\n\t\t\tconst layoutRadios = document.querySelectorAll('input[name=\"layout\"]');\n\t\t\tlayoutRadios.forEach(function(radio) {\n\t\t\t\tradio.disabled = false;\n\t\t\t\tradio.addEventListener('change', function() {\n\t\t\t\t\tconst container = document.getElementById('cards-container');\n\t\t\t\t\tif (this.value === 'single') {\n\t\t\t\t\t\tcontainer.classList.remove('dual-column');\n\t\t\t\t\t\tcontainer.classList.add('single-column');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tcontainer.classList.remove('single-column');\n\t\t\t\t\t\tcontainer.classList.add('dual-column');\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tif (typeof(Storage) !== \"undefined\") {\n\t\t\t\t\t\tlocalStorage.setItem('layoutPref/' + scripture, this.value);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t});\n\n\t\t\t// Load saved layout preference\n\t\t\tif (typeof(Storage) !== \"undefined\") {\n\t\t\t\tconst savedLayout = localStorage.getItem('layoutPref/' + scripture);\n\t\t\t\tif (savedLayout) {\n\t\t\t\t\tconst radio = document.querySelector('input[name=\"layout\"][value=\"' + savedLayout + '\"]');\n\t\t\t\t\tif (radio) {\n\t\t\t\t\t\tradio.checked = true;\n\t\t\t\t\t\tconst container = document.getElementById('cards-container');\n\t\t\t\t\t\tcontainer.classList.remove('single-column', 'dual-column');\n\t\t\t\t\t\tcontainer.classList.add(savedLayout === 'single' ? 'single-column' : 'dual-column');\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n        // Pada word popup handler and table word popup handler\n        // initFn will be called by layout body after bootstrap is loaded. This way we can keep JS loading in the end.\n        const initFn = (function () {\n            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]'))\n            tooltipTriggerList.forEach(function (tooltipTriggerEl) {\n                new bootstrap.Tooltip(tooltipTriggerEl)\n            })\n\n            // Pada word hover cards\n            document.querySelectorAll('.pada-word').forEach(function (wordEl) {\n                var padaId = wordEl.getAttribute('data-pada-id');\n                var dataEl = document.getElementById(padaId);\n\n                if (!dataEl) return;\n\n                wordEl.addEventListener('mouseenter', function (e) {\n                    window.dhee.popupManager.close();\n\n                    // Create popup\n                    var popup = document.createElement('div');\n                    popup.className = 'pada-popup';\n                    popup.innerHTML = dataEl.querySelector('.pada-popup-content').innerHTML;\n\n                    // Position popup\n                    document.body.appendChild(popup);\n                    var rect = wordEl.getBoundingClientRect();\n                    popup.style.left = rect.left + 'px';\n                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';\n\n                    window.dhee.popupManager.set(popup);\n                });\n\n                wordEl.addEventListener('mouseleave', function (e) {\n                    setTimeout(function () {\n\t\t\t\t\t\tconst p = window.dhee.popupManager.get();\n                        if (p && !p.matches(':hover')) {\n\t\t\t\t\t\t\twindow.dhee.popupManager.close();\n\t\t\t\t\t\t}\n                    }, 100);\n                });\n            });\n\n            // Table word hover cards\n            document.querySelectorAll('.table-word').forEach(function (wordEl) {\n                var wordId = wordEl.getAttribute('data-word-id');\n                var dataEl = document.getElementById(wordId);\n\n                if (!dataEl) return;\n\n                wordEl.addEventListener('mouseenter', function (e) {\n                    window.dhee.popupManager.close();\n\n                    // Create popup\n                    var popup = document.createElement('div');\n                    popup.className = 'table-word-popup';\n                    popup.innerHTML = dataEl.querySelector('.table-word-popup-content').innerHTML;\n\n                    // Position popup\n                    document.body.appendChild(popup);\n                    var rect = wordEl.getBoundingClientRect();\n                    popup.style.left = rect.left + 'px';\n                    popup.style.top = (rect.bottom + window.scrollY + 5) + 'px';\n\n                    window.dhee.popupManager.set(popup);\n                });\n\n                wordEl.addEventListener('mouseleave', function (e) {\n                    setTimeout(function () {\n\t\t\t\t\t\tconst p = window.dhee.popupManager.get();\n                        if (p && !p.matches(':hover')) {\n\t\t\t\t\t\t\twindow.dhee.popupManager.close();\n\t\t\t\t\t\t}\n                    }, 100);\n                });\n            });\n\n            window.dhee.setupTextSelectionSearch('roman-text-section', 'iast', 2);\n            window.dhee.setupTextSelectionSearch('source-text-section', 'dn', 3);\n            window.dhee.setupTextSelectionSearch('pada-section', 'iast', 2);\n\n\t\t\ttry {\n\t\t\t\tsetupOrderPrefs();\n\t\t\t\tsetupLayoutPrefs()\n\t\t\t} catch (e) {\n\t\t\t\tconsole.error(\"Failed to setup display order preferences:\", e);\n\t\t\t}\n        });\n\t\t\t</script> <div class=\"d-flex flex-row\"><div id=\"display-prefs\" class=\"d-flex flex-wrap justify-content-start gap-2\" style=\"max-width: 80%;\"><label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"SourceText\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>Devanagari</span></label> <label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"RomanText\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>Roman</span></label> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, aux := range data.Scripture.Auxiliaries {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "<label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "<label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var52 string
-				templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs("aux-" + aux.Name)
+				var templ_7745c5c3_Var59 string
+				templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs("aux-" + aux.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 712, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 755, Col: 90}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var53 string
-				templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(aux.ReadableName)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 714, Col: 31}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "</span></label> ")
+				var templ_7745c5c3_Var60 string
+				templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(aux.ReadableName)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 757, Col: 31}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "</span></label> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "<label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"Notes\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>Notes by ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, "<label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"Notes\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>Notes by ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var54 string
-			templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.NotesBy)
+			var templ_7745c5c3_Var61 string
+			templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.NotesBy)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 719, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/excerpts.templ`, Line: 762, Col: 45}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "</span></label></div></div><div class=\"d-flex justify-content-start mt-2\"><div id=\"layout-prefs\" class=\"d-flex align-items-center gap-3\" style=\"font-size: 0.7em;\"><label class=\"form-check-label\"><input type=\"radio\" name=\"layout\" value=\"single\" disabled class=\"form-check-input me-1\"> <span>Single column</span></label> <label class=\"form-check-label\"><input type=\"radio\" name=\"layout\" value=\"dual\" checked disabled class=\"form-check-input me-1\"> <span>Dual column</span></label></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 117, "</span></label> <label class=\"pref-checkbox-item\" draggable=\"true\" data-pref-key=\"Related\"><input type=\"checkbox\" checked disabled class=\"me-1\"> <span>Related Passages</span></label></div></div><div class=\"d-flex justify-content-start mt-2\"><div id=\"layout-prefs\" class=\"d-flex align-items-center gap-3\" style=\"font-size: 0.7em;\"><label class=\"form-check-label\"><input type=\"radio\" name=\"layout\" value=\"single\" disabled class=\"form-check-input me-1\"> <span>Single column</span></label> <label class=\"form-check-label\"><input type=\"radio\" name=\"layout\" value=\"dual\" checked disabled class=\"form-check-input me-1\"> <span>Dual column</span></label></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1100,12 +1259,12 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if data.Scripture.Attribution != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "<div class=\"text-center my-4 text-muted\" style=\"font-size: 60%;\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "<div class=\"text-center my-4 text-muted\" style=\"font-size: 60%;\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -1113,18 +1272,18 @@ func Excerpts(data *excerpts.ExcerptTemplateData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 120, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "<div class=\"alert alert-warning mt-4\" role=\"alert\">No results found!</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 121, "<div class=\"alert alert-warning mt-4\" role=\"alert\">No results found!</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 122, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
