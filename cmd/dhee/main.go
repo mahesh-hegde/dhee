@@ -85,9 +85,10 @@ func readConfig(dataDir string) *config.DheeConfig {
 
 func runPreprocess() {
 	flags := pflag.NewFlagSet("preprocess", pflag.ExitOnError)
-	var input, output string
+	var input, output, embeddingsFile string
 	flags.StringVarP(&input, "input", "i", "", "Input directory (required)")
 	flags.StringVarP(&output, "output", "o", "", "Output directory (required)")
+	flags.StringVar(&embeddingsFile, "embeddings-file", "", "Path to embeddings JSONL file (optional)")
 
 	flags.Parse(os.Args[2:])
 
@@ -104,7 +105,7 @@ func runPreprocess() {
 		os.Exit(1)
 	}
 
-	if err := excerpts.PreprocessRvDataset(path.Join(input, "tei"), output); err != nil {
+	if err := excerpts.PreprocessRvDataset(path.Join(input, "tei"), output, embeddingsFile); err != nil {
 		slog.Error("error when preprocessing rigveda dataset", "error", err)
 		os.Exit(1)
 	}
