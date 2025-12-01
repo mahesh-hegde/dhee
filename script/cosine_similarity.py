@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import logging
 import os
 from typing import Any, Dict, List
 
@@ -9,6 +10,10 @@ import numpy as np
 
 def main() -> None:
 	"""Main function to run the script."""
+	logging.basicConfig(
+		level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+	)
+
 	parser = argparse.ArgumentParser(
 		description="Compute cosine similarity for verses based on embeddings."
 	)
@@ -53,7 +58,7 @@ def main() -> None:
 		for line in f:
 			excerpts.append(json.loads(line))
 
-	print(f"Loaded {len(excerpts)} excerpts.")
+	logging.info(f"Loaded {len(excerpts)} excerpts.")
 
 	excerpts_by_index: Dict[str, Dict[str, Any]] = {
 		e["readable_index"]: e for e in excerpts
@@ -92,7 +97,7 @@ def main() -> None:
 	all_related: Dict[str, List[Dict[str, Any]]] = {}
 
 	for aux in args.auxiliaries:
-		print(f"Processing auxiliary: {aux}")
+		logging.info(f"Processing auxiliary: {aux}")
 
 		texts_to_embed: List[str] = []
 		indices_for_texts: List[str] = []
@@ -105,15 +110,15 @@ def main() -> None:
 					indices_for_texts.append(index)
 
 		if not texts_to_embed:
-			print(f"No texts found for auxiliary '{aux}'. Skipping.")
+			logging.info(f"No texts found for auxiliary '{aux}'. Skipping.")
 			continue
 
-		print(f"Found {len(texts_to_embed)} texts to embed for auxiliary '{aux}'.")
+		logging.info(f"Found {len(texts_to_embed)} texts to embed for auxiliary '{aux}'.")
 
 		embeddings = get_embeddings(texts_to_embed)
 		embeddings = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
 
-		print("Embeddings generated. Calculating similarities...")
+		logging.info("Embeddings generated. Calculating similarities...")
 
 		for i, source_index in enumerate(indices_for_texts):
 			source_embedding = embeddings[i]
@@ -163,7 +168,7 @@ def main() -> None:
 		base, _ = os.path.splitext(args.input_file)
 		output_file = f"{base}.emb.jsonl"
 
-	print(f"Writing output to {output_file}")
+	logging.info(f"Writing output to {output_file}")
 	with open(output_file, "w", encoding="utf-8") as f:
 		for readable_index, related_list in all_related.items():
 			# Sort by score descending and take top 5 across all auxiliaries
