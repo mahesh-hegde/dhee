@@ -2,6 +2,7 @@ package docstore
 
 import (
 	"database/sql"
+	"log/slog"
 	"path/filepath"
 )
 
@@ -11,6 +12,7 @@ func NewSQLiteDB(dataDir string, readonly bool) (*sql.DB, error) {
 	if readonly {
 		dbPath = dbPath + "?mode=ro"
 	}
+	slog.Info("opening SQLite DB", "dbPath", dbPath)
 	db, err := sql.Open(SQLiteDriverName, dbPath)
 	if err != nil {
 		return nil, err

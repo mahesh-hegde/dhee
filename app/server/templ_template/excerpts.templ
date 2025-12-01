@@ -142,7 +142,7 @@ templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 	if hasRelated {
 		<div class="card" data-section-key="Related">
 			<div class="card-header">
-				Related Passages
+				Similar Excerpts
 			</div>
 			<div class="card-body">
 				for _, excerpt := range data.Excerpts {
@@ -155,24 +155,36 @@ templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 								{ related.ReadableIndex }
 							</a>
 						}
-						for _, related := range excerpt.SuggestedSemantic {
-							{{ var title []string }}
-							if related.CosineSimilarity != nil {
-								{{ title = append(title, fmt.Sprintf("cosine similarity: %.2f", *related.CosineSimilarity)) }}
+						<p>
+							if len(excerpt.SuggestedSemantic) > 0 {
+								<span style="font-size: 0.8rem">Based on semantic similarity:</span>
+								<br/>
 							}
-							<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", data.Scripture.Name, related.ReadableIndex)) } class="badge bg-secondary me-1 text-decoration-none" title={ strings.Join(title, ", ") }>
-								{ related.ReadableIndex }
-							</a>
-						}
-						for _, related := range excerpt.SuggestedTextual {
-							{{ var title []string }}
-							if related.TextualRelevanceScore != nil {
-								{{ title = append(title, fmt.Sprintf("textual relevance: %.2f", *related.TextualRelevanceScore)) }}
+							for _, related := range excerpt.SuggestedSemantic {
+								{{ var title []string }}
+								if related.CosineSimilarity != nil {
+									{{ title = append(title, fmt.Sprintf("cosine similarity: %.2f", *related.CosineSimilarity)) }}
+								}
+								<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", data.Scripture.Name, related.ReadableIndex)) } class="badge bg-secondary me-1 text-decoration-none" title={ strings.Join(title, ", ") }>
+									{ related.ReadableIndex }
+								</a>
 							}
-							<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", data.Scripture.Name, related.ReadableIndex)) } class="badge bg-secondary me-1 text-decoration-none" title={ strings.Join(title, ", ") }>
-								{ related.ReadableIndex }
-							</a>
-						}
+						</p>
+						<p>
+							if len(excerpt.SuggestedTextual) > 0 {
+								<span style="font-size: 0.8rem">Based on textual similarity:</span>
+								<br/>
+							}
+							for _, related := range excerpt.SuggestedTextual {
+								{{ var title []string }}
+								if related.TextualRelevanceScore != nil {
+									{{ title = append(title, fmt.Sprintf("textual relevance: %.2f", *related.TextualRelevanceScore)) }}
+								}
+								<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", data.Scripture.Name, related.ReadableIndex)) } class="badge bg-success me-1 text-decoration-none" title={ strings.Join(title, ", ") }>
+									{ related.ReadableIndex }
+								</a>
+							}
+						</p>
 						if len(data.Excerpts) > 1 {
 							<p></p>
 						}
@@ -773,7 +785,7 @@ templ Excerpts(data *excerpts.ExcerptTemplateData) {
 					</label>
 					<label class="pref-checkbox-item" draggable="true" data-pref-key="Related">
 						<input type="checkbox" checked disabled class="me-1"/>
-						<span>Related Passages</span>
+						<span>Similar Excerpts</span>
 					</label>
 				</div>
 			</div>

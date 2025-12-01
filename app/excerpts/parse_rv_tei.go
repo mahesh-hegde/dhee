@@ -366,7 +366,7 @@ const (
 	// How many suggestions to generate per excerpt
 	maxTextualSuggestions = 5
 	// Minimum similarity score to be considered for suggestion
-	minTextualSimilarity = 0.2
+	minTextualSimilarity = 0.3
 )
 
 type textualSuggestion struct {
