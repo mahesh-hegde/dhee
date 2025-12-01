@@ -15,6 +15,7 @@ Design goals
 - [X] Search (regexp and / or text based - half done, there are some bugs due to accent marks in the dataset).
 - [X] Hierarchical navigation (i.e show the mandala/sukta/rik hierarchy).
 - [X] Show Monier-Williams dictionary hints along with Padapatha text.
+- [X] Embedding and textual (TF-IDF) based recommendations of similar verses. (Currently using this model: `Snowflake/snowflake-arctic-embed-l-v2.0`)
 - [ ] Integrate the [Multi-layer annotation of rigveda](https://ashutosh-modi.github.io/publications/papers/lrec18/Multi-layer%20Annotation%20of%20the%20Rigveda.pdf) to show shorter lexicon meanings before the dictionary entries.
 - [ ] Integrate Anukramani data on verse authors for rigveda.
 
@@ -33,6 +34,15 @@ Design goals
 go run ./cmd/dhee index --data-dir ./data
 # run server
 go run ./cmd/dhee server --data-dir ./data
+```
+
+## Regenerating embeddings
+You will need python to generate embeddings
+
+```bash
+python3 ./script/cosine_similarity.py --input-file data/rv.jsonl --embedding-model Snowflake/snowflake-arctic-embed-l-v2.0 --output-file data/rv.emb.jsonl --auxiliaries griffith
+
+go run ./cmd/dhee preprocess --input ./data --output ./data --embeddings-file ./data/rv.emb.jsonl
 ```
 
 ## Acknowledgements
