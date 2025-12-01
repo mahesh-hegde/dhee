@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/excerpts"
+	"strings"
 )
 
 func getKeys(s config.ScriptureDefn) []string {
@@ -155,11 +156,11 @@ templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 							</a>
 						}
 						for _, related := range excerpt.SuggestedAuto {
-							{{ var title string }}
+							{{ var title []string }}
 							if related.CosineSimilarity != nil {
-								{{ title = fmt.Sprintf("Similarity: %.2f", *related.CosineSimilarity) }}
+								{{ title = append(title, fmt.Sprintf("cosine similarity: %.2f", *related.CosineSimilarity)) }}
 							}
-							<a href={ templ.URL(fmt.Sprintf("/excerpts/%s/%s", data.Scripture.Name, related.ReadableIndex)) } class="badge bg-secondary me-1 text-decoration-none" title={ title }>
+							<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", data.Scripture.Name, related.ReadableIndex)) } class="badge bg-secondary me-1 text-decoration-none" title={ strings.Join(title, ", ") }>
 								{ related.ReadableIndex }
 							</a>
 						}
