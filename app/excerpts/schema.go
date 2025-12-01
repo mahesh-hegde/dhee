@@ -88,8 +88,9 @@ type Excerpt struct {
 	Group         string               `json:"group,omitempty"`
 	Addressees    []string             `json:"addressees,omitempty"`
 	Links         []ExternalLink       `json:"links,omitempty"`
-	Suggested     []Related            `json:"suggested,omitempty"`
-	SuggestedAuto []Related            `json:"suggested_auto,omitempty"`
+	Suggested         []Related            `json:"suggested,omitempty"`
+	SuggestedSemantic []Related            `json:"suggested_semantic,omitempty"`
+	SuggestedTextual  []Related            `json:"suggested_textual,omitempty"`
 }
 
 // ExcerptInDB is the type sent to bleve, with the content of main excerpt serialized without indexing,

@@ -594,7 +594,7 @@ func RelatedCard(data *excerpts.ExcerptTemplateData) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		var hasRelated bool
 		for _, e := range data.Excerpts {
-			if len(e.Suggested) > 0 || len(e.SuggestedAuto) > 0 {
+			if len(e.Suggested) > 0 || len(e.SuggestedSemantic) > 0 {
 				hasRelated = true
 			}
 		}
@@ -604,7 +604,7 @@ func RelatedCard(data *excerpts.ExcerptTemplateData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, excerpt := range data.Excerpts {
-				if len(excerpt.Suggested) > 0 || len(excerpt.SuggestedAuto) > 0 {
+				if len(excerpt.Suggested) > 0 || len(excerpt.SuggestedSemantic) > 0 {
 					if len(data.Excerpts) > 1 {
 						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<p><strong>")
 						if templ_7745c5c3_Err != nil {
@@ -656,7 +656,7 @@ func RelatedCard(data *excerpts.ExcerptTemplateData) templ.Component {
 							return templ_7745c5c3_Err
 						}
 					}
-					for _, related := range excerpt.SuggestedAuto {
+					for _, related := range excerpt.SuggestedSemantic {
 						var title []string
 						if related.CosineSimilarity != nil {
 							title = append(title, fmt.Sprintf("cosine similarity: %.2f", *related.CosineSimilarity))

@@ -135,7 +135,7 @@ templ PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefiniti
 templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 	{{ var hasRelated bool }}
 	for _, e := range data.Excerpts {
-		if len(e.Suggested) > 0 || len(e.SuggestedAuto) > 0 {
+		if len(e.Suggested) > 0 || len(e.SuggestedSemantic) > 0 {
 			{{ hasRelated = true }}
 		}
 	}
@@ -146,7 +146,7 @@ templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 			</div>
 			<div class="card-body">
 				for _, excerpt := range data.Excerpts {
-					if len(excerpt.Suggested) > 0 || len(excerpt.SuggestedAuto) > 0 {
+					if len(excerpt.Suggested) > 0 || len(excerpt.SuggestedSemantic) > 0 {
 						if len(data.Excerpts) > 1 {
 							<p><strong>{ excerpt.ReadableIndex }</strong></p>
 						}
@@ -155,7 +155,7 @@ templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 								{ related.ReadableIndex }
 							</a>
 						}
-						for _, related := range excerpt.SuggestedAuto {
+						for _, related := range excerpt.SuggestedSemantic {
 							{{ var title []string }}
 							if related.CosineSimilarity != nil {
 								{{ title = append(title, fmt.Sprintf("cosine similarity: %.2f", *related.CosineSimilarity)) }}

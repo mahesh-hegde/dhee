@@ -187,3 +187,17 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+## Textual similarity logic
+## For each word in verse A
+##    wf = count of word in all verses
+##    wlf = count of lemma in all verses
+##    wscore = (1 if word in verse_B else 0) / wf
+##    wscore += (1 if word_lemma in verse_B else 0) / wlf
+##    if previous word position +1 == current word position
+## 	    score += bonus
+##      bonus += 1
+##    else
+##      bonus = wscore
+## final_score = score / (len(verse_A_words) + len(verse_B_words))

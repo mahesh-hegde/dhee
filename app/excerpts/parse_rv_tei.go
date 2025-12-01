@@ -453,7 +453,7 @@ func PreprocessRvDataset(teiInputDir, outputDir, embeddingsFile string) error {
 				if related, ok := embeddings[excerpt.ReadableIndex]; ok {
 					for _, r := range related {
 						score := r.Score // a copy
-						excerpt.SuggestedAuto = append(excerpt.SuggestedAuto, Related{
+						excerpt.SuggestedSemantic = append(excerpt.SuggestedSemantic, Related{
 							Scripture:        "rigveda", // This is hardcoded for now.
 							ReadableIndex:    r.ReadableIndex,
 							CosineSimilarity: &score,
