@@ -135,7 +135,7 @@ templ PadaCard(data *excerpts.ExcerptTemplateData, aux *config.AuxiliaryDefiniti
 templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 	{{ var hasRelated bool }}
 	for _, e := range data.Excerpts {
-		if len(e.Suggested) > 0 || len(e.SuggestedSemantic) > 0 {
+		if len(e.Suggested) > 0 || len(e.SuggestedSemantic) > 0 || len(e.SuggestedTextual) > 0 {
 			{{ hasRelated = true }}
 		}
 	}
@@ -146,7 +146,7 @@ templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 			</div>
 			<div class="card-body">
 				for _, excerpt := range data.Excerpts {
-					if len(excerpt.Suggested) > 0 || len(excerpt.SuggestedSemantic) > 0 {
+					if len(excerpt.Suggested) > 0 || len(excerpt.SuggestedSemantic) > 0 || len(excerpt.SuggestedTextual) > 0 {
 						if len(data.Excerpts) > 1 {
 							<p><strong>{ excerpt.ReadableIndex }</strong></p>
 						}
@@ -159,6 +159,15 @@ templ RelatedCard(data *excerpts.ExcerptTemplateData) {
 							{{ var title []string }}
 							if related.CosineSimilarity != nil {
 								{{ title = append(title, fmt.Sprintf("cosine similarity: %.2f", *related.CosineSimilarity)) }}
+							}
+							<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", data.Scripture.Name, related.ReadableIndex)) } class="badge bg-secondary me-1 text-decoration-none" title={ strings.Join(title, ", ") }>
+								{ related.ReadableIndex }
+							</a>
+						}
+						for _, related := range excerpt.SuggestedTextual {
+							{{ var title []string }}
+							if related.TextualRelevanceScore != nil {
+								{{ title = append(title, fmt.Sprintf("textual relevance: %.2f", *related.TextualRelevanceScore)) }}
 							}
 							<a href={ templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", data.Scripture.Name, related.ReadableIndex)) } class="badge bg-secondary me-1 text-decoration-none" title={ strings.Join(title, ", ") }>
 								{ related.ReadableIndex }
