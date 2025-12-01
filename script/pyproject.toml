@@ -1,0 +1,12 @@
+[project]
+name = "dhee-scripts"
+version = "0.1.0"
+description = "Various scripts for dhee"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.3.5",
+    "requests>=2.32.5",
+    "sentence-transformers[onnx]>=5.1.2",
+]
+
