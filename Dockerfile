@@ -3,8 +3,8 @@
 ARG distroless_tag=nonroot
 
 FROM golang:1.25.4-trixie AS builder
-
-RUN apt-get update && apt-get install -y build-essential && apt clean
+ARG build_tags="json1,fts5"
+RUN apt-get update && apt-get install -y build-essential && apt-get clean
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
@@ -12,7 +12,7 @@ COPY ./app/ ./app/
 COPY ./cmd/ ./cmd/
 RUN ls -l
 RUN mkdir -p bin
-RUN go build -tags json1,fts5 -o bin/dhee ./cmd/dhee
+RUN go build -tags "${build_tags}" -o bin/dhee ./cmd/dhee
 COPY ./data/ ./data/
 RUN bin/dhee preprocess --input ./data --output ./data/ --embeddings-file data/rv.emb.jsonl
 RUN bin/dhee index --data-dir ./data --store sqlite
