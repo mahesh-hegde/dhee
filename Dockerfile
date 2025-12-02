@@ -1,5 +1,6 @@
 
-ARG distroless_tag=latest
+# can use nonroot-debug for debugging
+ARG distroless_tag=nonroot
 
 FROM golang:1.25.4-trixie AS builder
 
@@ -17,11 +18,14 @@ RUN bin/dhee preprocess --input ./data --output ./data/ --embeddings-file data/r
 RUN bin/dhee index --data-dir ./data --store sqlite
 
 FROM gcr.io/distroless/base-debian12:${distroless_tag}
+
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libsqlite3.so.* /usr/lib/x86_64-linux-gnu/
+USER nonroot:nonroot
 WORKDIR /app
-COPY --from=builder /app/bin/dhee /app/bin/dhee
-COPY --from=builder /app/data/dhee.db /app/data/dhee.db
-COPY ./data/config.json /app/data/config.json
+
+COPY --chown=nonroot:nonroot --from=builder /app/bin/dhee /app/bin/dhee
+COPY --chown=nonroot:nonroot --from=builder /app/data/dhee.db /app/data/dhee.db
+COPY --chown=nonroot:nonroot ./data/config.json /app/data/config.json
 
 ENTRYPOINT ["./bin/dhee", "server", "--data-dir", "./data", "--store", "sqlite", "--address", "0.0.0.0"]
 
