@@ -2,7 +2,9 @@ package dictionary
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"net/http"
 
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
@@ -63,6 +65,10 @@ func (s *DictionaryService) Search(ctx context.Context, dictionaryName string, s
 	if searchParams.Tl == common.TlNagari {
 		searchParams.Query = s.transliterator.FoldDevanagariAccents(searchParams.Query)
 	}
+	dict := s.conf.GetDictByName(dictionaryName)
+	if dict == nil {
+		return SearchResults{}, common.NewUserVisibleError(http.StatusNotFound, fmt.Sprintf("No such dictionary named %q", dictionaryName))
+	}
 
 	if searchParams.Mode != common.SearchTranslations {
 		finalQuery, err := s.transliterator.Convert(searchParams.Query, searchParams.Tl, common.TlSLP1)
@@ -84,6 +90,7 @@ func (s *DictionaryService) Search(ctx context.Context, dictionaryName string, s
 		}
 		res.Items[idx].Nagari = nagari
 	}
+	res.DictionaryReadableName = dict.ReadableName
 	res.Params = searchParams
 	return res, nil
 }

@@ -2,7 +2,7 @@ package templ_template
 
 import "github.com/mahesh-hegde/dhee/app/config"
 
-templ Layout(conf *config.DheeConfig, page templ.Component) {
+templ Layout(conf *config.DheeConfig, title string, page templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" data-bs-theme="dark">
 		<head>
@@ -46,7 +46,7 @@ templ Layout(conf *config.DheeConfig, page templ.Component) {
         })()
 			</script>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>{ conf.InstanceName }</title>
+			<title>{ title }</title>
 			<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
 			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>

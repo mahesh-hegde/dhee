@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -29,6 +30,7 @@ func NewDheeController(dictStore dictionary.DictStore, excerptStore excerpts.Exc
 }
 
 func (c *DheeController) GetHome(ctx echo.Context) error {
+	ctx.Set("pageTitle", c.conf.InstanceName)
 	return ctx.Render(http.StatusOK, "home", c.conf)
 }
 
@@ -50,6 +52,8 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 	if scri == nil {
 		return echo.NewHTTPError(404, "invalid text name")
 	}
+
+	ctx.Set("pageTitle", scri.ReadableName+" "+pathStr)
 
 	if len(parts) < len(scri.Hierarchy) {
 		return ctx.Redirect(307, ctx.Echo().Reverse("hierarchy", scriptureName, pathStr))
@@ -130,6 +134,11 @@ func (c *DheeController) GetHierarchy(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Failed to get hierarchy")
 	}
 
+	title := hier.Scripture.ReadableName
+	if pathStr != "" {
+		title = title + " " + pathStr
+	}
+	ctx.Set("pageTitle", title)
 	return ctx.Render(http.StatusOK, "hierarchy", hier)
 }
 
@@ -165,6 +174,7 @@ func (c *DheeController) SearchScripture(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to search scripture")
 	}
 
+	ctx.Set("pageTitle", "Search results for: "+strconv.Quote(query))
 	return ctx.Render(http.StatusOK, "scripture_search", excerpts)
 }
 
@@ -177,6 +187,7 @@ func (c *DheeController) GetDictionaryWord(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Failed to get dictionary entries")
 	}
 
+	ctx.Set("pageTitle", strconv.Quote(word)+" in "+entries.Dictionary.ReadableName)
 	return ctx.Render(http.StatusOK, "dictionary_word", entries)
 }
 
@@ -231,6 +242,11 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 		return common.WrapErrorForResponse(err, "Failed to search dictionary")
 	}
 
+	titleQuery := query
+	if titleQuery == "" {
+		titleQuery = textQuery
+	}
+	ctx.Set("pageTitle", fmt.Sprintf("Search %q in %s", titleQuery, results.DictionaryName))
 	templateName := "dictionary_search"
 	if preview == "true" {
 		templateName = "dictionary_search.preview"

@@ -37,9 +37,10 @@ type DictSearchResult struct {
 }
 
 type SearchResults struct {
-	DictionaryName string
-	Items          []DictSearchResult
-	Params         SearchParams
+	DictionaryName         string
+	DictionaryReadableName string
+	Items                  []DictSearchResult
+	Params                 SearchParams
 }
 
 type Cognate struct {
