@@ -14,7 +14,9 @@
                 "--input",
                 "./data",
                 "--output",
-                "./data"
+                "./data",
+                "--embeddings-file",
+                "./data/rv.emb.jsonl",
             ]
         },
         {
