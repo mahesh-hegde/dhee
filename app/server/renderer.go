@@ -80,7 +80,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 
 	pageTitle := t.conf.InstanceName
 	if title, ok := c.Get("pageTitle").(string); ok && title != "" {
-		pageTitle = title + " - " + t.conf.InstanceName
+		pageTitle = title + " | " + t.conf.InstanceName
 	}
 
 	return templ_template.Layout(t.conf, pageTitle, page).Render(ctx, w)
