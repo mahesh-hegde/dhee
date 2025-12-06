@@ -17,7 +17,6 @@ import (
 
 func StartServer(controller *DheeController, conf *config.DheeConfig, host string, port int) {
 	e := echo.New()
-	e.Renderer = NewTemplateRenderer(conf)
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
 		code := http.StatusInternalServerError
 		msg := http.StatusText(code)
@@ -80,7 +79,15 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
-	e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", http.FileServer(http.FS(staticDir)))))
+
+	staticServerHashFs, err := NewHashFS(staticDir)
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+
+	e.Renderer = NewTemplateRenderer(conf, staticServerHashFs)
+
+	e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", staticServerHashFs)))
 
 	e.GET("/favicon.ico", func(c echo.Context) error {
 		file, err := templateFs.ReadFile("templ_template/favicon.ico")

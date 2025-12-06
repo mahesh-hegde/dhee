@@ -45,4 +45,8 @@ func CssTooltip(helpText string) templ.Component {
 	})
 }
 
+func AppendHashToPath(path string, hash string) string {
+	return path + "?hash=" + hash
+}
+
 var _ = templruntime.GeneratedTemplate

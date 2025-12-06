@@ -100,3 +100,12 @@ func (c *DheeConfig) GetAuxiliaryAttributions(scriptureName string) map[string]s
 	}
 	return attributions
 }
+
+type AssetHashStore interface {
+	FormatWithHash(path string) string
+}
+
+type PageRenderContext struct {
+	Config      *DheeConfig
+	AssetHashes AssetHashStore
+}

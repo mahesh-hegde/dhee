@@ -49,3 +49,7 @@ templ CssTooltip(helpText string) {
 		</div>
 	</div>
 }
+
+func AppendHashToPath(path string, hash string) string {
+	return path + "?hash=" + hash
+}

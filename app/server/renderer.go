@@ -14,7 +14,13 @@ import (
 )
 
 type TemplateRenderer struct {
-	conf *config.DheeConfig
+	conf   *config.DheeConfig
+	hashFS *HashFS
+}
+
+type RendererConfigContext struct {
+	conf   *config.DheeConfig
+	HashFS *HashFS
 }
 
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
@@ -83,11 +89,12 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 		pageTitle = title + " | " + t.conf.InstanceName
 	}
 
-	return templ_template.Layout(t.conf, pageTitle, page).Render(ctx, w)
+	return templ_template.Layout(config.PageRenderContext{Config: t.conf, AssetHashes: t.hashFS}, pageTitle, page).Render(ctx, w)
 }
 
-func NewTemplateRenderer(conf *config.DheeConfig) *TemplateRenderer {
+func NewTemplateRenderer(conf *config.DheeConfig, hashFS *HashFS) *TemplateRenderer {
 	return &TemplateRenderer{
-		conf: conf,
+		conf:   conf,
+		hashFS: hashFS,
 	}
 }

@@ -2,7 +2,7 @@ package templ_template
 
 import "github.com/mahesh-hegde/dhee/app/config"
 
-templ Layout(conf *config.DheeConfig, title string, page templ.Component) {
+templ Layout(rctx config.PageRenderContext, title string, page templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" data-bs-theme="dark">
 		<head>
@@ -165,7 +165,7 @@ templ Layout(conf *config.DheeConfig, title string, page templ.Component) {
 		<body>
 			<nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
 				<div class="container-fluid">
-					<a class="navbar-brand" href="/">{ conf.InstanceName }</a>
+					<a class="navbar-brand" href="/">{ rctx.Config.InstanceName }</a>
 					<ul class="navbar-nav">
 						<li class="nav-item dropdown">
 							<button class="btn btn-link nav-link dropdown-toggle" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
@@ -200,7 +200,7 @@ templ Layout(conf *config.DheeConfig, title string, page templ.Component) {
 			</nav>
 			@page
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-			<script src="/static/common.js"></script>
+			<script src={ "/static/" + rctx.AssetHashes.FormatWithHash("common.js") }></script>
 			<script type="text/javascript">
         // Init functions exported by inner template
         if (typeof preInit !== 'undefined' && Array.isArray(preInit)) {

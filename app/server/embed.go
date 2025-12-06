@@ -1,8 +1,11 @@
 package server
 
 import (
+	"crypto/sha256"
 	"embed"
+	"fmt"
 	"html/template"
+	"io"
 	"strings"
 )
 
@@ -11,6 +14,21 @@ var templateFs embed.FS
 
 //go:embed static
 var staticFs embed.FS
+
+func hashStaticFile(fileName string) string {
+	f, err := staticFs.Open("static/" + fileName)
+	if err != nil {
+		panic("failed to open static file " + fileName + " for hashing: " + err.Error())
+	}
+	defer f.Close()
+	hash := sha256.New()
+	if _, err := io.Copy(hash, f); err != nil {
+		panic("failed to hash static file " + fileName + ": " + err.Error())
+	}
+	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+var commonJsFileHash string = hashStaticFile("common.js")
 
 func sliceOf(a any, others ...any) []any {
 	slice := make([]any, 0, len(others)+1)
