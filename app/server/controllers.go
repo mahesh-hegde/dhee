@@ -15,17 +15,23 @@ import (
 	"github.com/mahesh-hegde/dhee/app/transliteration"
 )
 
+const MAX_CONCURRENT_REGEX_SEARCHES = 20
+
+// DheeController handles all HTTP requests.
 type DheeController struct {
-	ds   *dictionary.DictionaryService
-	es   *excerpts.ExcerptService
-	conf *config.DheeConfig
+	ds           *dictionary.DictionaryService
+	es           *excerpts.ExcerptService
+	conf         *config.DheeConfig
+	regexLimiter chan struct{}
 }
 
+// NewDheeController creates a new controller instance and initializes the regex limiter.
 func NewDheeController(dictStore dictionary.DictStore, excerptStore excerpts.ExcerptStore, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DheeController {
 	return &DheeController{
-		ds:   dictionary.NewDictionaryService(dictStore, conf, transliterator),
-		es:   excerpts.NewExcerptService(dictStore, excerptStore, conf, transliterator),
-		conf: conf,
+		ds:           dictionary.NewDictionaryService(dictStore, conf, transliterator),
+		es:           excerpts.NewExcerptService(dictStore, excerptStore, conf, transliterator),
+		conf:         conf,
+		regexLimiter: make(chan struct{}, MAX_CONCURRENT_REGEX_SEARCHES), // limit to 20 concurrent regex searches
 	}
 }
 
@@ -168,6 +174,16 @@ func (c *DheeController) SearchScripture(ctx echo.Context) error {
 		Scriptures: strings.Split(scriptures, ","),
 	}
 
+	// Apply rate limiting only for regex mode.
+	if params.Mode == "regex" {
+		select {
+		case c.regexLimiter <- struct{}{}:
+			defer func() { <-c.regexLimiter }()
+		case <-ctx.Request().Context().Done():
+			return common.NewUserVisibleError(http.StatusRequestTimeout, "Request timed out, please try again")
+		}
+	}
+
 	excerpts, err := c.es.Search(ctx.Request().Context(), params)
 	if err != nil {
 		slog.Error("error in scripture search", "err", err)
@@ -235,6 +251,16 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 		TextQuery:     textQuery,
 		Mode:          common.SearchMode(modeStr),
 		Tl:            tl,
+	}
+
+	// Apply rate limiting only for regex mode.
+	if params.Mode == "regex" {
+		select {
+		case c.regexLimiter <- struct{}{}:
+			defer func() { <-c.regexLimiter }()
+		case <-ctx.Request().Context().Done():
+			return common.NewUserVisibleError(http.StatusTooManyRequests, "too many users are using this functionality now, please try later")
+		}
 	}
 
 	results, err := c.ds.Search(ctx.Request().Context(), dictionaryName, params)

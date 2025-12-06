@@ -10,7 +10,7 @@ import (
 func NewSQLiteDB(dataDir string, readonly bool) (*sql.DB, error) {
 	dbPath := filepath.Join(dataDir, "dhee.db")
 	if readonly {
-		dbPath = dbPath + "?mode=ro"
+		dbPath = dbPath + "?mode=ro&immutable=1&_journal_mode=OFF"
 	}
 	slog.Info("opening SQLite DB", "dbPath", dbPath)
 	db, err := sql.Open(SQLiteDriverName, dbPath)
