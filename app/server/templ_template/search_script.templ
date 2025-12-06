@@ -1,7 +1,115 @@
 package templ_template
 
 templ SearchScript() {
+	<style>
+		/* Ensure the suggestion area matches the width of the input field */
+		.transliteration-suggestion {
+			display: flex;
+			align-items: center;
+			width: 100%;
+			box-sizing: border-box;
+			padding: 2px 4px;
+			font-size: 0.9rem;
+			color: #555;
+			position: relative; /* for tooltip positioning */
+		}
+		.transliteration-suggestion .suggestion-wrapper {
+			display: flex;
+			align-items: center;
+			width: 100%;
+		}
+		/* The icon is no longer used, but the class is kept for backward compatibility */
+		.transliteration-suggestion .suggestion-icon {
+			margin-right: 4px;
+			flex-shrink: 0;
+		}
+		.transliteration-suggestion .iast-text {
+			flex-grow: 1;
+			user-select: text;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		}
+		.transliteration-suggestion .copy-btn {
+			background: none;
+			border: none;
+			cursor: pointer;
+			padding: 0 4px;
+			margin-left: 4px;
+			flex-shrink: 0;
+			font-size: 1rem;
+			line-height: 1;
+			position: relative; /* for tooltip positioning */
+		}
+		/* Tooltip styling */
+		.transliteration-suggestion .copy-btn .tooltip {
+			position: absolute;
+			top: 1em;
+			left: 150%;
+			transform: translateX(-50%);
+			background: #333;
+			color: #fff;
+			padding: 2px 6px;
+			border-radius: 3px;
+			font-size: 0.75rem;
+			white-space: nowrap;
+			opacity: 0;
+			transition: opacity 0.2s ease-in-out;
+			pointer-events: none;
+		}
+		.transliteration-suggestion .copy-btn .tooltip.show {
+			opacity: 1;
+		}
+	</style>
 	<script>
+		// Utility function to copy IAST text to clipboard and show a tooltip
+		function copyIAST(text, btn) {
+			if (!navigator.clipboard) {
+				// Fallback for older browsers
+				const textarea = document.createElement('textarea');
+				textarea.value = text;
+				textarea.style.position = 'fixed';  // Prevent scrolling to bottom of page in MS Edge.
+				document.body.appendChild(textarea);
+				textarea.focus();
+				textarea.select();
+				try {
+					document.execCommand('copy');
+				} catch (err) {
+					console.error('Fallback: Oops, unable to copy', err);
+				}
+				document.body.removeChild(textarea);
+				showCopyTooltip(btn);
+				return;
+			}
+			navigator.clipboard.writeText(text).then(function() {
+				showCopyTooltip(btn);
+			}, function(err) {
+				console.error('Async: Could not copy text: ', err);
+			});
+		}
+
+		// Show a temporary tooltip next to the copy button
+		function showCopyTooltip(btn) {
+			// Remove any existing tooltip
+			const existing = btn.querySelector('.tooltip');
+			if (existing) {
+				existing.remove();
+			}
+			const tip = document.createElement('span');
+			tip.className = 'tooltip';
+			tip.textContent = 'Copied!';
+			btn.appendChild(tip);
+			// Force reflow to enable transition
+			void tip.offsetWidth;
+			tip.classList.add('show');
+			// Hide after 1.5 seconds
+			setTimeout(() => {
+				tip.classList.remove('show');
+				// Remove after transition
+				setTimeout(() => tip.remove(), 200);
+			}, 1500);
+		}
+
 		const initSearchScript = function() {
 			window.dhee = window.dhee || {};
 			window.dhee.transliterator = new Transliterator({});
@@ -38,10 +146,32 @@ templ SearchScript() {
 
 				try {
 					const iast = window.dhee.transliterator.convertNormalized(query, sourceTl, TlIAST);
-					suggestionEl.textContent = `🔎 ${iast}`;
+					// Clear any previous content
+					suggestionEl.innerHTML = '';
+
+					// Wrapper to hold copy button and text (button first)
+					const wrapper = document.createElement('div');
+					wrapper.className = 'suggestion-wrapper';
+					suggestionEl.appendChild(wrapper);
+
+					// Copy button using copy emoji, no borders
+					const btn = document.createElement('button');
+					btn.type = 'button';
+					btn.className = 'copy-btn';
+					btn.textContent = '📋';
+					btn.addEventListener('click', function() {
+						copyIAST(iast, this);
+					});
+					wrapper.appendChild(btn);
+
+					// IAST text span (selectable)
+					const span = document.createElement('span');
+					span.className = 'iast-text';
+					span.textContent = iast;
+					wrapper.appendChild(span);
 				} catch (e) {
 					console.error("Transliteration failed", e);
-					suggestionEl.textContent = ' ';
+					suggestionEl.innerHTML = ' ';
 				}
 			}
 
