@@ -1,32 +1,38 @@
 # Dhee - A platform for linguistic analysis of Vedic Sanskrit texts
 
-Dhee is a platform for studying and analyzing old vedic sanskrits. Currently Rigveda is supported. The long term goal is to support any vedic sanskrit text with a well defined chapter/verse hierarchy and English translations.
+Dhee is a platform for studying and analyzing old vedic sanskrits. Currently Rigveda is supported. The long term goal is to support any Vedic sanskrit text with a well defined chapter/verse hierarchy and English translations.
 
 Design goals
-- Simple, efficient and useful UI (technology-wise; no SPA, no NPM, no bloat).
-- Performant backend (written in Go and use `bleve` embedded database which resides on the same machine. aiming at <10ms response time for most queries).
-- Extensible and general enough to support texts other than the Rigveda. (Please contact me if you know the datasets for things other than any of the samhitas, brahmanas or upanishads.)
+- Simple, efficient and useful UI (technology-wise: no SPA, no NPM, no need for server rendering, no bloat).
+
+- Performant backend (written in Go and use `SQLite3` embedded database which resides on the same machine. aiming at <30ms response time for most pages).
+
+- Extensible and general enough to support texts other than the Rigveda. (Please contact me if you know the datasets for Vedic Sanskrit texts other than Rigveda: by which I mean the samhitas or brahmanas).
 
 ## Implementation roadmap
 
 ### Short term
 
 - [X] View one / many verses directly along with translations
-- [X] Search (regexp and / or text based - half done, there are some bugs due to accent marks in the dataset).
+- [X] Search (regexp and / or text based).
 - [X] Hierarchical navigation (i.e show the mandala/sukta/rik hierarchy).
 - [X] Show Monier-Williams dictionary hints along with Padapatha text.
 - [X] Embedding and textual (TF-IDF) based recommendations of similar verses. (Currently using this model: `Snowflake/snowflake-arctic-embed-l-v2.0`)
 - [ ] Integrate the [Multi-layer annotation of rigveda](https://ashutosh-modi.github.io/publications/papers/lrec18/Multi-layer%20Annotation%20of%20the%20Rigveda.pdf) to show shorter lexicon meanings before the dictionary entries.
-- [ ] Integrate Anukramani data on verse authors for rigveda.
+- [ ] Integrate `anukramaNi` data on verse authors for rigveda.
+- [ ] Use protocol buffer encoding in the SQLite database non-queriable blobs instead of JSON.
 
 ### Long term
-- [ ] Semantic search and similarity scores (hybrid embeddings + BM25, embeddings generated at build time; It's an open question how to do embeddings in Go at runtime. I'd avoid writing cgo wrappers if possible.)
-- [ ] Graphing and visualization wizard using `d3js` / `uplot`, for analyzing word frequency and grammatical forms using an advanced form input.
+- [X] Semantic similarity scores (embeddings and TF/IDF; embeddings generated at build time using a sentence transformer model and used to compute semantically similar verses.)
+- [ ] Graphing and visualization wizard using `d3js` / `uplot`, for analyzing word frequency and grammatical forms across multiple scriptures using an advanced form input.
+- [ ] Highlight and allow analysis of repeated refrains (N-gram where N >= 3)
+- [ ] Advanced search using a custom query syntax (boolean operators, grouping and column filters)
 
 ### Very long term
 - [ ] Find and include data for Yajurveda and Atharvaveda samhitas.
-- [ ] port INRIA's nominal declension and verb conjugation generator to Go and use it to analyze arbitrary word forms.
-
+- [ ] Arbitrary embedding search
+- [ ] port INRIA's inflected forms generator to Go and use it to analyze arbitrary word forms.
+- [ ] Support auto detecting variations and verse references across texts.
 
 ## How to run?
 ```bash
