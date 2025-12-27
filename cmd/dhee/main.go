@@ -116,6 +116,8 @@ func runServer() {
 	var address, dataDir, store string
 	var port int
 	var cpuProfile, memProfile string
+	var certDir string
+	var acme bool
 
 	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
 	slog.SetDefault(slog.New(jsonHandler))
@@ -124,9 +126,12 @@ func runServer() {
 	flags.IntVarP(&port, "port", "p", 8080, "Server port to bind")
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
-	flags.StringVar(&store, "store", "bleve", "storage backend to use (bleve or sqlite)")
+	flags.StringVar(&store, "store", "sqlite", "storage backend to use (bleve or sqlite)")
 	flags.StringVar(&cpuProfile, "cpu-profile", "", "write cpu profile to file")
 	flags.StringVar(&memProfile, "mem-profile", "", "write memory profile to file")
+
+	flags.StringVar(&certDir, "cert-dir", "", "directory to read/write TLS certs for ACME")
+	flags.BoolVar(&acme, "acme", false, "use ACME to renew TLS certificates")
 
 	flags.Parse(os.Args[2:])
 
@@ -216,7 +221,7 @@ func runServer() {
 	}
 
 	controller := server.NewDheeController(dictStore, excerptStore, conf, transliterator)
-	server.StartServer(controller, conf, address, port)
+	server.StartServer(controller, conf, address, port, certDir, acme)
 }
 
 func runIndex() {
@@ -224,7 +229,7 @@ func runIndex() {
 	var dataDir, store string
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
-	flags.StringVar(&store, "store", "bleve", "storage backend to use (bleve or sqlite)")
+	flags.StringVar(&store, "store", "sqlite", "storage backend to use (bleve or sqlite)")
 	flags.Parse(os.Args[2:])
 
 	if dataDir == "" {
@@ -252,7 +257,7 @@ func runStats() {
 	var dataDir, store string
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
-	flags.StringVar(&store, "store", "bleve", "storage backend to use (bleve or sqlite)")
+	flags.StringVar(&store, "store", "sqlite", "storage backend to use (bleve or sqlite)")
 	flags.Parse(os.Args[2:])
 
 	if dataDir == "" {

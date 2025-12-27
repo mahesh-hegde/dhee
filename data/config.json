@@ -3,6 +3,9 @@
     "fuzziness": 2,
     "timeout_seconds": 10,
     "log_latency": true,
+    "hostnames": [
+        "dhee.apratiratha.in"
+    ],
     "dictionaries": [
         {
             "name": "monier-williams",

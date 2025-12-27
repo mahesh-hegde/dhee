@@ -36,7 +36,9 @@
                 "--data-dir",
                 "./data",
                 "--store",
-                "sqlite"
+                "sqlite",
+                "--cert-dir",
+                "./certs",
             ]
         },
         {

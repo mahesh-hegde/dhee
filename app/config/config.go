@@ -48,6 +48,7 @@ type DheeConfig struct {
 	Fuzziness      int             `json:"fuzziness"`
 	LogLatency     bool            `json:"log_latency"`
 	TimeoutSeconds int64           `json:"timeout_seconds"`
+	Hostnames      []string        `json:"hostnames"`
 }
 
 func (c *DheeConfig) GetScriptureByName(name string) *ScriptureDefn {

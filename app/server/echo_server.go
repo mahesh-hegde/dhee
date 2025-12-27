@@ -7,15 +7,17 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
+	"golang.org/x/crypto/acme/autocert"
 )
 
-func StartServer(controller *DheeController, conf *config.DheeConfig, host string, port int) {
+func StartServer(controller *DheeController, conf *config.DheeConfig, host string, port int, certDir string, acme bool) {
 	e := echo.New()
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
 		code := http.StatusInternalServerError
@@ -109,5 +111,17 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 	e.GET("/dictionaries/:dictionaryName/suggestions", controller.SuggestDictionary)
 
 	addr := fmt.Sprintf("%s:%d", host, port)
-	e.Logger.Fatal(e.Start(addr))
+
+	if certDir != "" {
+		if acme {
+			slog.Info("using TLS with ACME", "dir", certDir)
+			e.AutoTLSManager.HostPolicy = autocert.HostWhitelist(conf.Hostnames...)
+			e.Logger.Fatal(e.StartAutoTLS(addr))
+		} else {
+			slog.Info("using TLS with certDir", "dir", certDir)
+			e.Logger.Fatal(e.StartTLS(addr, path.Join(certDir, "fullchain.pem"), path.Join(certDir, "privkey.pem")))
+		}
+	} else {
+		e.Logger.Fatal(e.Start(addr))
+	}
 }

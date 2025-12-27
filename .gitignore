@@ -10,3 +10,4 @@ __debug_bin*
 
 ## REPL
 repl/*.go
+certs/
