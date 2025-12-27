@@ -83,11 +83,11 @@ type Excerpt struct {
 	// Complex type. 2D array with each row corresponding to one division of the verse.
 	Glossings [][]WordGlossing `json:"glossings,omitempty"`
 	// Translations and alternative renderings
-	Auxiliaries   map[string]Auxiliary `json:"auxiliaries,omitempty"`
-	Notes         []string             `json:"notes,omitempty"`
-	Group         string               `json:"group,omitempty"`
-	Addressees    []string             `json:"addressees,omitempty"`
-	Links         []ExternalLink       `json:"links,omitempty"`
+	Auxiliaries       map[string]Auxiliary `json:"auxiliaries,omitempty"`
+	Notes             []string             `json:"notes,omitempty"`
+	Group             string               `json:"group,omitempty"`
+	Addressees        []string             `json:"addressees,omitempty"`
+	Links             []ExternalLink       `json:"links,omitempty"`
 	Suggested         []Related            `json:"suggested,omitempty"`
 	SuggestedSemantic []Related            `json:"suggested_semantic,omitempty"`
 	SuggestedTextual  []Related            `json:"suggested_textual,omitempty"`
