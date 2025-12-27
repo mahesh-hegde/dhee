@@ -27,6 +27,6 @@ COPY --chown=nonroot:nonroot --from=builder /app/bin/dhee /app/bin/dhee
 COPY --chown=nonroot:nonroot --from=builder /app/data/dhee.db /app/data/dhee.db
 COPY --chown=nonroot:nonroot ./data/config.json /app/data/config.json
 
-CMD ["./bin/dhee", "server", "--data-dir", "./data", "--store", "sqlite", "--address", "0.0.0.0", "--certs-dir", "/app/certs", "--acme", "--rate-limit", "8"]
+CMD ["./bin/dhee", "server", "--data-dir", "./data", "--store", "sqlite", "--address", "0.0.0.0", "--cert-dir", "/app/certs", "--acme", "--rate-limit", "8"]
 
 EXPOSE 8080
