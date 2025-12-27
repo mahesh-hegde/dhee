@@ -4,7 +4,8 @@
     "timeout_seconds": 10,
     "log_latency": true,
     "hostnames": [
-        "dhee.apratiratha.in"
+        "dhee.apratiratha.in",
+        "apratiratha.in"
     ],
     "dictionaries": [
         {

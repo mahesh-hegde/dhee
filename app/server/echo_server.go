@@ -45,8 +45,21 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 		}
 	}
 	e.HideBanner = true
-
+	e.Pre(middleware.HTTPSRedirect())
 	e.Pre(middleware.RemoveTrailingSlash())
+	e.Pre(echo.MiddlewareFunc(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			req := c.Request()
+			url := req.URL
+			if req.Host != dheeConf.Hostnames[0] && serverConf.AcmeEnabled {
+				// Redirect
+				url.Host = dheeConf.Hostnames[0]
+				slog.Info("redirect to canonical hostname", "original_hostname", req.Host)
+				return c.Redirect(http.StatusPermanentRedirect, url.String())
+			}
+			return next(c)
+		}
+	}))
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
 
