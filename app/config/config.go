@@ -51,6 +51,15 @@ type DheeConfig struct {
 	Hostnames      []string        `json:"hostnames"`
 }
 
+type ServerRuntimeConfig struct {
+	Addr              string
+	Port              int
+	CertDir           string
+	AcmeEnabled       bool
+	RateLimit         int // 0 for inifinite
+	RateLimitByRealIP bool
+}
+
 func (c *DheeConfig) GetScriptureByName(name string) *ScriptureDefn {
 	for _, s := range c.Scriptures {
 		if s.Name == name {

@@ -116,22 +116,23 @@ func runServer() {
 	var address, dataDir, store string
 	var port int
 	var cpuProfile, memProfile string
-	var certDir string
-	var acme bool
+	var serverConfig config.ServerRuntimeConfig
 
 	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
 	slog.SetDefault(slog.New(jsonHandler))
 
-	flags.StringVarP(&address, "address", "a", "localhost", "Server address to bind")
-	flags.IntVarP(&port, "port", "p", 8080, "Server port to bind")
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
 	flags.StringVar(&store, "store", "sqlite", "storage backend to use (bleve or sqlite)")
 	flags.StringVar(&cpuProfile, "cpu-profile", "", "write cpu profile to file")
 	flags.StringVar(&memProfile, "mem-profile", "", "write memory profile to file")
 
-	flags.StringVar(&certDir, "cert-dir", "", "directory to read/write TLS certs for ACME")
-	flags.BoolVar(&acme, "acme", false, "use ACME to renew TLS certificates")
+	flags.StringVarP(&serverConfig.Addr, "address", "a", "localhost", "Server address to bind")
+	flags.IntVarP(&serverConfig.Port, "port", "p", 8080, "Server port to bind")
+	flags.StringVar(&serverConfig.CertDir, "cert-dir", "", "directory to read/write TLS certs for ACME")
+	flags.BoolVar(&serverConfig.AcmeEnabled, "acme", false, "use ACME to renew TLS certificates")
+	flags.BoolVar(&serverConfig.RateLimitByRealIP, "rate-limit-by-real-ip", false, "Use X-Real-IP header to rate limit (useful behind an LB)")
+	flags.IntVar(&serverConfig.RateLimit, "rate-limit", 0, "Number of requests per second for rate limiting")
 
 	flags.Parse(os.Args[2:])
 
@@ -221,7 +222,7 @@ func runServer() {
 	}
 
 	controller := server.NewDheeController(dictStore, excerptStore, conf, transliterator)
-	server.StartServer(controller, conf, address, port, certDir, acme)
+	server.StartServer(controller, conf, serverConfig)
 }
 
 func runIndex() {

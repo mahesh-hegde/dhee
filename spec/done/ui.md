@@ -20,7 +20,7 @@ Finally, any of the GET screens where no result is found should display an error
 
 [Logo]           Dhee
   A platform for linguistic analysis of
-  vedic sanskrit texts
+  Vedic sanskrit texts
 
 ----------------------
 

@@ -15,9 +15,10 @@ import (
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/time/rate"
 )
 
-func StartServer(controller *DheeController, conf *config.DheeConfig, host string, port int, certDir string, acme bool) {
+func StartServer(controller *DheeController, dheeConf *config.DheeConfig, serverConf config.ServerRuntimeConfig) {
 	e := echo.New()
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
 		code := http.StatusInternalServerError
@@ -48,15 +49,53 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
-	if conf.TimeoutSeconds != 0 {
-		e.Use(middleware.ContextTimeout(time.Duration(conf.TimeoutSeconds) * time.Second))
+
+	var identifierExtractor middleware.Extractor
+
+	if serverConf.RateLimitByRealIP {
+		identifierExtractor = func(ctx echo.Context) (string, error) {
+			id := ctx.RealIP()
+			return id, nil
+		}
+	} else {
+		identifierExtractor = func(ctx echo.Context) (string, error) {
+			id := ctx.Request().RemoteAddr
+			return id, nil
+		}
+	}
+
+	// configure rate limiting if enabled
+	if serverConf.RateLimit > 0 {
+		config := middleware.RateLimiterConfig{
+			Skipper: middleware.DefaultSkipper,
+			Store: middleware.NewRateLimiterMemoryStoreWithConfig(
+				middleware.RateLimiterMemoryStoreConfig{
+					Rate:      rate.Limit(serverConf.RateLimit),
+					Burst:     3 * serverConf.RateLimit,
+					ExpiresIn: 3 * time.Minute,
+				},
+			),
+			IdentifierExtractor: identifierExtractor,
+			ErrorHandler: func(context echo.Context, err error) error {
+				return context.String(http.StatusForbidden, "Forbidden")
+			},
+			DenyHandler: func(context echo.Context, identifier string, err error) error {
+				return context.String(http.StatusTooManyRequests, "Too Many Requests")
+			},
+		}
+
+		e.Use(middleware.RateLimiterWithConfig(config))
+	}
+
+	if dheeConf.TimeoutSeconds != 0 {
+		e.Use(middleware.ContextTimeout(time.Duration(dheeConf.TimeoutSeconds) * time.Second))
 	}
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus:   true,
 		LogURI:      true,
 		LogError:    true,
-		LogLatency:  conf.LogLatency,
+		LogLatency:  dheeConf.LogLatency,
 		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 			if v.Error == nil {
@@ -87,7 +126,7 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 		e.Logger.Fatal(err)
 	}
 
-	e.Renderer = NewTemplateRenderer(conf, staticServerHashFs)
+	e.Renderer = NewTemplateRenderer(dheeConf, staticServerHashFs)
 
 	e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", staticServerHashFs)))
 
@@ -110,12 +149,17 @@ func StartServer(controller *DheeController, conf *config.DheeConfig, host strin
 	e.GET("/dictionaries/:dictionaryName/search", controller.SearchDictionary)
 	e.GET("/dictionaries/:dictionaryName/suggestions", controller.SuggestDictionary)
 
+	host := serverConf.Addr
+	port := serverConf.Port
+	certDir := serverConf.CertDir
+	acme := serverConf.AcmeEnabled
+
 	addr := fmt.Sprintf("%s:%d", host, port)
 
 	if certDir != "" {
 		if acme {
 			slog.Info("using TLS with ACME", "dir", certDir)
-			e.AutoTLSManager.HostPolicy = autocert.HostWhitelist(conf.Hostnames...)
+			e.AutoTLSManager.HostPolicy = autocert.HostWhitelist(dheeConf.Hostnames...)
 			e.Logger.Fatal(e.StartAutoTLS(addr))
 		} else {
 			slog.Info("using TLS with certDir", "dir", certDir)
