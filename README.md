@@ -17,13 +17,12 @@ Design goals
 - [X] Search (regexp and / or text based).
 - [X] Hierarchical navigation (i.e show the mandala/sukta/rik hierarchy).
 - [X] Show Monier-Williams dictionary hints along with Padapatha text.
-- [X] Embedding and textual (TF-IDF) based recommendations of similar verses. (Currently using this model: `Snowflake/snowflake-arctic-embed-l-v2.0`)
 - [ ] Integrate the [Multi-layer annotation of rigveda](https://ashutosh-modi.github.io/publications/papers/lrec18/Multi-layer%20Annotation%20of%20the%20Rigveda.pdf) to show shorter lexicon meanings before the dictionary entries.
 - [ ] Integrate `anukramaNi` data on verse authors for rigveda.
 - [ ] Use protocol buffer encoding in the SQLite database non-queriable blobs instead of JSON.
 
 ### Long term
-- [X] Semantic similarity scores (embeddings and TF/IDF; embeddings generated at build time using a sentence transformer model and used to compute semantically similar verses.)
+- [X] Embedding and textual (TF-IDF) based recommendations of similar verses. (Currently using this model: `Snowflake/snowflake-arctic-embed-l-v2.0`)
 - [ ] Graphing and visualization wizard using `d3js` / `uplot`, for analyzing word frequency and grammatical forms across multiple scriptures using an advanced form input.
 - [ ] Highlight and allow analysis of repeated refrains (N-gram where N >= 3)
 - [ ] Advanced search using a custom query syntax (boolean operators, grouping and column filters)

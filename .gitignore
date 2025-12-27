@@ -8,3 +8,5 @@ __debug_bin*
 *.pprof
 *.bin
 
+## REPL
+repl/*.go

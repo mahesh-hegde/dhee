@@ -112,6 +112,15 @@
                 "--data-dir",
                 "./data"
             ]
+        },
+        {
+            "name": "Poor man's REPL",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/repl/main.go",
+            "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart",
         }
     ]
 }
