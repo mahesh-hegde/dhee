@@ -34,7 +34,7 @@ func Home(data *config.DheeConfig) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\"><div class=\"text-center my-4\"><h1>Dhee</h1><p class=\"lead\">A platform for reading vedic Sanskrit texts</p></div><h2>Scriptures</h2><div class=\"accordion\" id=\"scriptureAccordion\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\"><div class=\"text-center my-4\"><h1>Dhee</h1><p class=\"lead\">A platform for reading Vedic Sanskrit texts</p></div><h2>Scriptures</h2><div class=\"accordion\" id=\"scriptureAccordion\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

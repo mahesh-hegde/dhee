@@ -160,6 +160,7 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 		if acme {
 			slog.Info("using TLS with ACME", "dir", certDir)
 			e.AutoTLSManager.HostPolicy = autocert.HostWhitelist(dheeConf.Hostnames...)
+			e.AutoTLSManager.Cache = autocert.DirCache(certDir)
 			e.Logger.Fatal(e.StartAutoTLS(addr))
 		} else {
 			slog.Info("using TLS with certDir", "dir", certDir)
