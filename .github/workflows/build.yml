@@ -2,10 +2,7 @@ name: default-pipeline
 on:
   push:
     branches:
-      - main
-  # push:
-  #     branches:
-  #       - "refs/tags/*"
+      - "refs/tags/*"
 jobs:
   pre-build-checks:
     runs-on: ubuntu-latest
