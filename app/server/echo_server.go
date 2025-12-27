@@ -95,6 +95,7 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 		LogStatus:   true,
 		LogURI:      true,
 		LogError:    true,
+		LogRemoteIP: true,
 		LogLatency:  dheeConf.LogLatency,
 		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
@@ -103,12 +104,14 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 					slog.String("uri", v.URI),
 					slog.Int("status", v.Status),
 					slog.Int64("latency_ms", v.Latency.Milliseconds()),
+					slog.String("remote_ip", v.RemoteIP),
 				)
 			} else {
 				logger.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
 					slog.String("uri", v.URI),
 					slog.Int("status", v.Status),
 					slog.String("err", v.Error.Error()),
+					slog.String("remote_ip", v.RemoteIP),
 					slog.Int64("latency_ms", v.Latency.Milliseconds()),
 				)
 			}
