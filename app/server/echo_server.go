@@ -65,7 +65,7 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 
 	var identifierExtractor middleware.Extractor
 
-	if serverConf.RateLimitByRealIP {
+	if serverConf.BehindLoadBalancer {
 		identifierExtractor = func(ctx echo.Context) (string, error) {
 			id := ctx.RealIP()
 			return id, nil
@@ -98,6 +98,10 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 		}
 
 		e.Use(middleware.RateLimiterWithConfig(config))
+	}
+
+	if serverConf.GzipLevel != 0 {
+		e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: serverConf.GzipLevel, MinLength: 512}))
 	}
 
 	if dheeConf.TimeoutSeconds != 0 {

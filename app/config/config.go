@@ -52,12 +52,13 @@ type DheeConfig struct {
 }
 
 type ServerRuntimeConfig struct {
-	Addr              string
-	Port              int
-	CertDir           string
-	AcmeEnabled       bool
-	RateLimit         int // 0 for inifinite
-	RateLimitByRealIP bool
+	Addr               string
+	Port               int
+	CertDir            string
+	AcmeEnabled        bool
+	RateLimit          int // 0 for inifinite
+	BehindLoadBalancer bool
+	GzipLevel          int // 0 to disable
 }
 
 func (c *DheeConfig) GetScriptureByName(name string) *ScriptureDefn {

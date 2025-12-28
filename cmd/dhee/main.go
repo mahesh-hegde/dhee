@@ -131,7 +131,8 @@ func runServer() {
 	flags.IntVarP(&serverConfig.Port, "port", "p", 8080, "Server port to bind")
 	flags.StringVar(&serverConfig.CertDir, "cert-dir", "", "directory to read/write TLS certs for ACME")
 	flags.BoolVar(&serverConfig.AcmeEnabled, "acme", false, "use ACME to renew TLS certificates")
-	flags.BoolVar(&serverConfig.RateLimitByRealIP, "rate-limit-by-real-ip", false, "Use X-Real-IP header to rate limit (useful behind an LB)")
+	flags.BoolVar(&serverConfig.BehindLoadBalancer, "behind-load-balancer", false, "Certain behaviors when behind a load balancer (e.g., trusting X-Forwarded-For header)")
+	flags.IntVar(&serverConfig.GzipLevel, "gzip-level", 1, "Gzip compression level (1-9), or 0 to disable gzip")
 	flags.IntVar(&serverConfig.RateLimit, "rate-limit", 0, "Number of requests per second for rate limiting")
 
 	flags.Parse(os.Args[2:])
