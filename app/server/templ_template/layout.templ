@@ -81,11 +81,11 @@ templ Layout(rctx config.PageRenderContext, title string, page templ.Component) 
         }
 
         .navbar-custom {
-            background-color: #4a0e0e;
+            background-color: #280000;
         }
 
         [data-bs-theme="dark"] .navbar-custom {
-            background-color: #3a0000;
+            background-color: #280000;
         }
 
         .verse .line {
@@ -110,7 +110,8 @@ templ Layout(rctx config.PageRenderContext, title string, page templ.Component) 
         }
 
         [data-bs-theme="dark"] .accordion-header {
-            --bs-accordion-active-bg: #002a00;
+            --bs-accordion-active-bg: #280000;
+            --bs-accordion-active-color: lightgray;
         }
         [data-bs-theme="dark"] .search-result td em, [data-bs-theme="dark"] .search-result td mark {
             background: darkslategrey;
