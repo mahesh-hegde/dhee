@@ -45,7 +45,8 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, c
 	}
 	<form action={ templ.URL(fmt.Sprintf("/dictionaries/%s/search", dictName)) } method="GET" class={ formClass } data-dict-name={ dictName }>
 		<div class={ inputClass }>
-			<input type="text" class="form-control search-input" name="q" placeholder="Search" value={ params.OriginalQuery }/>
+			<input id={ "dictionary-search-input-" + dictName } type="text" class="form-control search-input" name="q" placeholder="Search" value={ params.OriginalQuery }/>
+			<div class="invalid-feedback">Query is empty or invalid! Please provide a valid query.</div>
 		</div>
 		<div class={ selectClass }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-dict-name={ dictName }>
@@ -70,6 +71,24 @@ templ DictionarySearchWidget(dictName string, params *dictionary.SearchParams, c
 		<div class="col-auto d-flex align-items-center">
 			@CssTooltip(dictionarySearchWidgetHelpText)
 		</div>
+		<script>
+			(function () {
+				const form = document.currentScript.closest("form");
+				let id = "#dictionary-search-input-{{ dictName }}";
+				const input = form.querySelector(id);
+
+				form.addEventListener("submit", function (e) {
+					if (!input.value.trim()) {
+						e.preventDefault();
+						input.classList.add("is-invalid");
+					}
+				});
+
+				input.addEventListener("focus", function () {
+					input.classList.remove("is-invalid");
+				});
+			})();
+		</script>
 	</form>
 	<div class="row g-3">
 		<div class="col-sm-6">

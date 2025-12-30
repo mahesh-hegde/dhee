@@ -43,7 +43,8 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 	<form action="/scripture-search" method="GET" class={ formClass } data-scripture-name={ scripture.Name }>
 		<input type="hidden" name="scriptures" value={ scripture.Name }/>
 		<div class={ inputClass }>
-			<input type="text" class="form-control search-input" name="query" placeholder={ "Search " + scripture.ReadableName } value={ params.OriginalQ }/>
+			<input id={ "scripture-search-input-" + scripture.Name } type="text" class="form-control search-input" name="query" placeholder={ "Search " + scripture.ReadableName } value={ params.OriginalQ }/>
+			<div class="invalid-feedback">Query is empty or invalid! Please provide a valid query.</div>
 		</div>
 		<div class={ selectClass }>
 			<select name="tl" class="form-select bg-info-subtle transliteration-select" data-scripture-name={ scripture.Name }>
@@ -67,6 +68,24 @@ templ ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sea
 		<div class="col-auto d-flex align-items-center">
 			@CssTooltip(scriptureSearchWidgetHelpText)
 		</div>
+		<script>
+			(function () {
+				let id = "#scripture-search-input-{{ scripture.Name }}";
+				const form = document.currentScript.closest("form");
+				const input = form.querySelector(id);
+
+				form.addEventListener("submit", function (e) {
+					if (!input.value.trim()) {
+						e.preventDefault();
+						input.classList.add("is-invalid");
+					}
+				});
+
+				input.addEventListener("focus", function () {
+					input.classList.remove("is-invalid");
+				});
+			})();
+		</script>
 	</form>
 	<div class="row g-3">
 		<div class="col-sm-6">
