@@ -192,15 +192,6 @@ func runServer() {
 	var err error
 
 	switch store {
-	case "bleve":
-		dbPath := path.Join(dataDir, "docstore.bleve")
-		index, err := bleve.OpenUsing(dbPath, map[string]any{"read_only": true})
-		if err != nil {
-			slog.Error("error opening index, did you run the 'index' command first?", "err", err)
-			os.Exit(1)
-		}
-		dictStore = dictionary.NewBleveDictStore(index, conf)
-		excerptStore = excerpts.NewBleveExcerptStore(index, conf)
 	case "sqlite":
 		db, err := docstore.NewSQLiteDB(dataDir, true)
 		if err != nil {

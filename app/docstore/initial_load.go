@@ -10,10 +10,8 @@ import (
 	"log/slog"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
-	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis"
 	"github.com/blevesearch/bleve/v2/analysis/char/asciifolding"
 	"github.com/blevesearch/bleve/v2/mapping"
@@ -362,41 +360,6 @@ func LoadInitialData(dictStore dictionary.DictStore, excerptStore excerpts.Excer
 
 func InitDB(store, dataDir string, config *config.DheeConfig) (io.Closer, error) {
 	switch store {
-	case "bleve":
-		dbPath := filepath.Join(dataDir, "docstore.bleve")
-
-		_, err := os.Stat(dbPath)
-
-		if errors.Is(err, os.ErrNotExist) {
-			slog.Info("Creating new bleve index", "path", dbPath)
-			mapping := GetBleveIndexMappings()
-			index, err := bleve.New(dbPath, mapping)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create new bleve index: %w", err)
-			}
-
-			slog.Info("Loading initial data into the index...")
-			dictStore := dictionary.NewBleveDictStore(index, config)
-			excerptStore := excerpts.NewBleveExcerptStore(index, config)
-
-			if err := LoadInitialData(dictStore, excerptStore, dataDir, config); err != nil {
-				// Cleanup created index on load failure
-				os.RemoveAll(dbPath)
-				return nil, fmt.Errorf("failed to load data: %w", err)
-			}
-			slog.Info("Initial data loaded successfully.")
-			if err := index.Close(); err != nil {
-				return nil, err
-			}
-		} else if err != nil {
-			return nil, fmt.Errorf("failed to open bleve index: %w", err)
-		}
-		index, err := bleve.OpenUsing(dbPath, map[string]any{"read_only": true})
-		if err != nil {
-			return nil, err
-		}
-		slog.Info("Opened existing bleve index", "path", dbPath)
-		return index, nil
 	case "sqlite":
 		dbPath := path.Join(dataDir, "dhee.db")
 		_, err := os.Stat(dbPath)

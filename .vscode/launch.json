@@ -42,26 +42,6 @@
             ]
         },
         {
-            "name": "dhee server (bleve)",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "program": "${workspaceFolder}/cmd/dhee/main.go",
-            "cwd": "${workspaceFolder}",
-            "internalConsoleOptions": "openOnSessionStart",
-            "preLaunchTask": "go_generate",
-            "buildFlags": [
-                "-tags=json1,fts5"
-            ],
-            "args": [
-                "server",
-                "--data-dir",
-                "./data",
-                "--store",
-                "bleve"
-            ]
-        },
-        {
             "name": "dhee index",
             "type": "go",
             "request": "launch",
@@ -79,26 +59,6 @@
                 "./data",
                 "--store",
                 "sqlite"
-            ]
-        },
-        {
-            "name": "dhee index (bleve)",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "preLaunchTask": "remove_db",
-            "buildFlags": [
-                "-tags=json1,fts5"
-            ],
-            "program": "${workspaceFolder}/cmd/dhee/main.go",
-            "cwd": "${workspaceFolder}",
-            "internalConsoleOptions": "openOnSessionStart",
-            "args": [
-                "index",
-                "--data-dir",
-                "./data",
-                "--store",
-                "bleve"
             ]
         },
         {
