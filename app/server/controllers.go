@@ -19,19 +19,42 @@ const MAX_CONCURRENT_REGEX_SEARCHES = 20
 
 // DheeController handles all HTTP requests.
 type DheeController struct {
-	ds           *dictionary.DictionaryService
-	es           *excerpts.ExcerptService
-	conf         *config.DheeConfig
-	regexLimiter chan struct{}
+	ds            *dictionary.DictionaryService
+	es            *excerpts.ExcerptService
+	conf          *config.DheeConfig
+	sconf         *config.ServerRuntimeConfig
+	regexLimiter  chan struct{}
+	globalLimiter chan struct{}
 }
 
 // NewDheeController creates a new controller instance and initializes the regex limiter.
-func NewDheeController(dictStore dictionary.DictStore, excerptStore excerpts.ExcerptStore, conf *config.DheeConfig, transliterator *transliteration.Transliterator) *DheeController {
-	return &DheeController{
+func NewDheeController(dictStore dictionary.DictStore, excerptStore excerpts.ExcerptStore, conf *config.DheeConfig, sconf *config.ServerRuntimeConfig, transliterator *transliteration.Transliterator) *DheeController {
+	controller := &DheeController{
 		ds:           dictionary.NewDictionaryService(dictStore, conf, transliterator),
 		es:           excerpts.NewExcerptService(dictStore, excerptStore, conf, transliterator),
 		conf:         conf,
+		sconf:        sconf,
 		regexLimiter: make(chan struct{}, MAX_CONCURRENT_REGEX_SEARCHES), // limit to 20 concurrent regex searches
+	}
+	if sconf.GlobalRateLimit > 0 {
+		controller.globalLimiter = make(chan struct{}, sconf.GlobalRateLimit)
+	}
+	for i := 0; i < sconf.GlobalRateLimit; i++ {
+		controller.globalLimiter <- struct{}{}
+	}
+	return controller
+}
+
+func (c *DheeController) GlobalRateLimitMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		// Acquire a token from the global limiter, but if context is done, return 429
+		select {
+		case <-c.globalLimiter:
+			defer func() { c.globalLimiter <- struct{}{} }()
+			return next(ctx)
+		case <-ctx.Request().Context().Done():
+			return echo.NewHTTPError(http.StatusTooManyRequests, "Global concurrent request limit reached, please try later")
+		}
 	}
 }
 

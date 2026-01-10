@@ -116,7 +116,7 @@ func runServer() {
 	var address, dataDir, store string
 	var port int
 	var cpuProfile, memProfile string
-	var serverConfig config.ServerRuntimeConfig
+	var serverConf config.ServerRuntimeConfig
 
 	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
 	slog.SetDefault(slog.New(jsonHandler))
@@ -127,13 +127,14 @@ func runServer() {
 	flags.StringVar(&cpuProfile, "cpu-profile", "", "write cpu profile to file")
 	flags.StringVar(&memProfile, "mem-profile", "", "write memory profile to file")
 
-	flags.StringVarP(&serverConfig.Addr, "address", "a", "localhost", "Server address to bind")
-	flags.IntVarP(&serverConfig.Port, "port", "p", 8080, "Server port to bind")
-	flags.StringVar(&serverConfig.CertDir, "cert-dir", "", "directory to read/write TLS certs for ACME")
-	flags.BoolVar(&serverConfig.AcmeEnabled, "acme", false, "use ACME to renew TLS certificates")
-	flags.BoolVar(&serverConfig.BehindLoadBalancer, "behind-load-balancer", false, "Certain behaviors when behind a load balancer (e.g., trusting X-Forwarded-For header)")
-	flags.IntVar(&serverConfig.GzipLevel, "gzip-level", 1, "Gzip compression level (1-9), or 0 to disable gzip")
-	flags.IntVar(&serverConfig.RateLimit, "rate-limit", 0, "Number of requests per second for rate limiting")
+	flags.StringVarP(&serverConf.Addr, "address", "a", "localhost", "Server address to bind")
+	flags.IntVarP(&serverConf.Port, "port", "p", 8080, "Server port to bind")
+	flags.StringVar(&serverConf.CertDir, "cert-dir", "", "directory to read/write TLS certs for ACME")
+	flags.BoolVar(&serverConf.AcmeEnabled, "acme", false, "use ACME to renew TLS certificates")
+	flags.BoolVar(&serverConf.BehindLoadBalancer, "behind-load-balancer", false, "Certain behaviors when behind a load balancer (e.g., trusting X-Forwarded-For header)")
+	flags.IntVar(&serverConf.GzipLevel, "gzip-level", 1, "Gzip compression level (1-9), or 0 to disable gzip")
+	flags.IntVar(&serverConf.RateLimit, "rate-limit", 0, "Number of requests per second for rate limiting")
+	flags.IntVar(&serverConf.GlobalRateLimit, "global-rate-limit", 0, "Global request rate limit per second")
 
 	flags.Parse(os.Args[2:])
 
@@ -213,8 +214,8 @@ func runServer() {
 		os.Exit(1)
 	}
 
-	controller := server.NewDheeController(dictStore, excerptStore, conf, transliterator)
-	server.StartServer(controller, conf, serverConfig)
+	controller := server.NewDheeController(dictStore, excerptStore, conf, &serverConf, transliterator)
+	server.StartServer(controller, conf, serverConf)
 }
 
 func runIndex() {

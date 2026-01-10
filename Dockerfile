@@ -3,7 +3,7 @@
 ARG distroless_tag=nonroot
 
 FROM golang:1.25.4-trixie AS builder
-ARG build_tags="json1,fts5"
+ARG build_tags="json1,fts5,native_sqlite"
 RUN apt-get update && apt-get install -y build-essential && apt-get clean
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -27,6 +27,6 @@ COPY --chown=nonroot:nonroot --from=builder /app/bin/dhee /app/bin/dhee
 COPY --chown=nonroot:nonroot --from=builder /app/data/dhee.db /app/data/dhee.db
 COPY --chown=nonroot:nonroot ./data/config.json /app/data/config.json
 
-CMD ["./bin/dhee", "server", "--data-dir", "./data", "--store", "sqlite", "--address", "0.0.0.0", "--cert-dir", "/app/certs", "--acme", "--rate-limit", "8"]
+CMD ["./bin/dhee", "server", "--data-dir", "./data", "--store", "sqlite", "--address", "0.0.0.0", "--cert-dir", "/app/certs", "--acme", "--rate-limit", "8", "--global-rate-limit", "64"]
 
 EXPOSE 8080

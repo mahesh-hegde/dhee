@@ -100,6 +100,10 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 		e.Use(middleware.RateLimiterWithConfig(config))
 	}
 
+	if serverConf.GlobalRateLimit > 0 {
+		e.Use(controller.GlobalRateLimitMiddleware)
+	}
+
 	if serverConf.GzipLevel != 0 {
 		e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: serverConf.GzipLevel, MinLength: 512}))
 	}

@@ -57,6 +57,7 @@ type ServerRuntimeConfig struct {
 	CertDir            string
 	AcmeEnabled        bool
 	RateLimit          int // 0 for inifinite
+	GlobalRateLimit    int // 0 for infinite
 	BehindLoadBalancer bool
 	GzipLevel          int // 0 to disable
 }
