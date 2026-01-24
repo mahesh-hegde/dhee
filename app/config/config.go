@@ -46,7 +46,9 @@ type DheeConfig struct {
 	DefaultDict    string          `json:"default_dict"`
 	Scriptures     []ScriptureDefn `json:"scriptures"`
 	Fuzziness      int             `json:"fuzziness"`
-	LogLatency     bool            `json:"log_latency"`
+	// If 0, cache is disabled.
+	DictionaryCacheSize int  `json:"dictionary_cache_size"`
+	LogLatency          bool `json:"log_latency"`
 	TimeoutSeconds int64           `json:"timeout_seconds"`
 	Hostnames      []string        `json:"hostnames"`
 }
