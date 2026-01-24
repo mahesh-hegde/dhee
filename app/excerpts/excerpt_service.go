@@ -8,11 +8,13 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/transliteration"
+	"github.com/patrickmn/go-cache"
 )
 
 type ExcerptService struct {
@@ -21,6 +23,7 @@ type ExcerptService struct {
 	conf           *config.DheeConfig
 	transliterator *transliteration.Transliterator
 	scriptureMap   map[string]config.ScriptureDefn
+	wordCache      *cache.Cache
 }
 
 // Get returns the excerpts given by paths. If any of the excerpts could not be found, it returns an error.
@@ -91,9 +94,42 @@ func (s *ExcerptService) Get(ctx context.Context, paths []QualifiedPath) (*Excer
 
 	// Fetch dictionary entries.
 	dictName := s.conf.DefaultDict
-	dictEntries, err := s.ds.Get(ctx, dictName, words)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get dictionary entries: %w", err)
+
+	var dictEntries []dictionary.DictionaryEntry
+	var wordsToQuery []string
+
+	if s.wordCache != nil {
+		cachedCount := 0
+		for _, w := range words {
+			if item, found := s.wordCache.Get(w); found {
+				if entry, ok := item.(dictionary.DictionaryEntry); ok {
+					dictEntries = append(dictEntries, entry)
+					cachedCount++
+				}
+			} else {
+				wordsToQuery = append(wordsToQuery, w)
+			}
+		}
+		// slog.Info("dictionary cache hit", "found", cachedCount, "total", len(words))
+	} else {
+		wordsToQuery = words
+	}
+
+	if len(wordsToQuery) > 0 {
+		fetchedEntries, err := s.ds.Get(ctx, dictName, wordsToQuery)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get dictionary entries: %w", err)
+		}
+		if s.wordCache != nil {
+			for _, entry := range fetchedEntries {
+				s.wordCache.Set(entry.Word, entry, cache.DefaultExpiration)
+				dictEntries = append(dictEntries, entry)
+			}
+		} else {
+			for _, entry := range fetchedEntries {
+				dictEntries = append(dictEntries, entry)
+			}
+		}
 	}
 
 	// Map words to their dictionary entries for quick lookup
@@ -309,11 +345,17 @@ func NewExcerptService(
 		scriptureMap[scri.Name] = scri
 	}
 
+	var wordCache *cache.Cache
+	if conf.DictionaryCacheSize > 0 {
+		wordCache = cache.New(2*time.Hour, 10*time.Minute)
+	}
+
 	return &ExcerptService{
 		ds:             dictStore,
 		store:          excerptStore,
 		conf:           conf,
 		transliterator: transliterator,
 		scriptureMap:   scriptureMap,
+		wordCache:      wordCache,
 	}
 }

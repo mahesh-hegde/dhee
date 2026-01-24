@@ -40,15 +40,17 @@ type DictDefn struct {
 }
 
 type DheeConfig struct {
-	InstanceName   string          `json:"instance_name"`
-	DataDir        string          `json:"-"`
-	Dictionaries   []DictDefn      `json:"dictionaries"`
-	DefaultDict    string          `json:"default_dict"`
-	Scriptures     []ScriptureDefn `json:"scriptures"`
-	Fuzziness      int             `json:"fuzziness"`
-	LogLatency     bool            `json:"log_latency"`
-	TimeoutSeconds int64           `json:"timeout_seconds"`
-	Hostnames      []string        `json:"hostnames"`
+	InstanceName string          `json:"instance_name"`
+	DataDir      string          `json:"-"`
+	Dictionaries []DictDefn      `json:"dictionaries"`
+	DefaultDict  string          `json:"default_dict"`
+	Scriptures   []ScriptureDefn `json:"scriptures"`
+	Fuzziness    int             `json:"fuzziness"`
+	// If 0, cache is disabled.
+	DictionaryCacheSize int      `json:"dictionary_cache_size"`
+	LogLatency          bool     `json:"log_latency"`
+	TimeoutSeconds      int64    `json:"timeout_seconds"`
+	Hostnames           []string `json:"hostnames"`
 }
 
 type ServerRuntimeConfig struct {
