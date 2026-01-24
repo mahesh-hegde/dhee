@@ -17,7 +17,7 @@ The scripture reader is designed to support any sanskrit scripture with arbitrar
 
 These are preprocessed into a standard intermediate format using `dhee preprocess` command. JSONL is chosen because of its streaming properties.
 
-Then `dhee index` command is used to create a bleve index which can be used by server to efficiently search and serve contents.
+Then `dhee index` command is used to create a SQLite3 index which can be used by server to efficiently search and serve contents.
 
 ## How to verify your changes?
 
@@ -26,8 +26,8 @@ Depending on which part(s) of the app you are modifying, you can run the followi
 - Preprocessing: `go run ./cmd/dhee preprocess --input ./data --output ./data`
   - This will convert the desperate data from various sources into JSONL files.
 
-- Indexing data: `rm -rf data/docstore.bleve/; go run ./cmd/dhee index --data-dir ./data`
-  - This will index the JSONL data into a bleve database in --data-dir.
+- Indexing data: `rm -rf data/dhee.db; go run ./cmd/dhee index --data-dir ./data`
+  - This will index the JSONL data into a SQLite3 database in --data-dir.
   - removing the existing db is required to force refresh.
 
 - Server `go run ./cmd/dhee server --data-dir ./data`

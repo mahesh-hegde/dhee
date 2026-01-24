@@ -12,21 +12,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/blevesearch/bleve/v2/analysis"
-	"github.com/blevesearch/bleve/v2/analysis/char/asciifolding"
-	"github.com/blevesearch/bleve/v2/mapping"
-
 	"github.com/mahesh-hegde/dhee/app/common"
 	"github.com/mahesh-hegde/dhee/app/config"
 	"github.com/mahesh-hegde/dhee/app/dictionary"
 	"github.com/mahesh-hegde/dhee/app/excerpts"
 	"github.com/mahesh-hegde/dhee/app/transliteration"
-
-	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
-	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
-	"github.com/blevesearch/bleve/v2/analysis/token/porter"
-	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
-	"github.com/blevesearch/bleve/v2/registry"
 )
 
 // Possible auxiliaries from all texts we know
@@ -40,12 +30,6 @@ func (ac AccentFoldingCharFilter) Filter(input []byte) []byte {
 	replacer := strings.NewReplacer(common.FoldableAccentsList...)
 	replaced := replacer.Replace(string(input))
 	return []byte(replaced)
-}
-
-func init() {
-	registry.RegisterCharFilter("accent_fold", func(config map[string]interface{}, cache *registry.Cache) (analysis.CharFilter, error) {
-		return AccentFoldingCharFilter{}, nil
-	})
 }
 
 func parseNotesFile(filePath string, mc *MarkdownConverter, scripture config.ScriptureDefn) (map[string]string, error) {
@@ -94,130 +78,6 @@ func parseNotesFile(filePath string, mc *MarkdownConverter, scripture config.Scr
 	}
 
 	return notes, nil
-}
-
-// --- bleve mappings ---
-func GetBleveIndexMappings() mapping.IndexMapping {
-	// Base index mapping
-	indexMapping := mapping.NewIndexMapping()
-
-	// Add custom analyzer for Sanskrit/IAST/Devanagari
-	err1 := indexMapping.AddCustomAnalyzer("sanskrit_ws",
-		map[string]any{
-			"type":         custom.Name,
-			"char_filters": []string{"accent_fold"},
-			"tokenizer":    unicode.Name,
-			"token_filters": []string{
-				lowercase.Name,
-			},
-		})
-	err2 := indexMapping.AddCustomAnalyzer("ascii_folding", map[string]any{
-		"type":         custom.Name,
-		"char_filters": []string{asciifolding.Name},
-		"tokenizer":    unicode.Name,
-		"token_filters": []string{
-			lowercase.Name,
-		},
-	})
-	if err1 != nil || err2 != nil {
-		slog.Error("error when defining index", "err1", err1, "err2", err2)
-		os.Exit(1)
-	}
-
-	// Analyzer for translation field: accent-fold + porter stemmer
-	err3 := indexMapping.AddCustomAnalyzer("translation_analyzer",
-		map[string]any{
-			"type":         custom.Name,
-			"char_filters": []string{"accent_fold"},
-			"tokenizer":    unicode.Name,
-			"token_filters": []string{
-				lowercase.Name,
-				porter.Name,
-			},
-		})
-	if err3 != nil {
-		slog.Error("error when defining translation analyzer", "err3", err3)
-		os.Exit(1)
-	}
-
-	// ----- ExcerptInDB mapping -----
-	excerptMapping := mapping.NewDocumentMapping()
-	eField := mapping.NewKeywordFieldMapping()
-	eField.Store = true
-	eField.Index = false
-	excerptMapping.AddFieldMappingsAt("e", eField) // stored only
-
-	excerptMapping.AddFieldMappingsAt("scripture", mapping.NewKeywordFieldMapping())
-
-	sField := mapping.NewTextFieldMapping()
-	sField.Analyzer = "sanskrit_ws"
-	excerptMapping.AddFieldMappingsAt("source_t", sField)
-
-	rField := mapping.NewTextFieldMapping()
-	rField.Analyzer = "sanskrit_ws"
-	excerptMapping.AddFieldMappingsAt("roman_t", rField)
-
-	// -- roman text as keyword for regex search --
-	rkField := mapping.NewKeywordFieldMapping()
-	excerptMapping.AddFieldMappingsAt("roman_k", rkField)
-
-	// -- roman text ascii folded --
-	rfField := mapping.NewTextFieldMapping()
-	rfField.Analyzer = "ascii_folding"
-	excerptMapping.AddFieldMappingsAt("roman_f", rfField)
-
-	// Translation field (accent-fold + porter stemming)
-	tField := mapping.NewTextFieldMapping()
-	tField.Analyzer = "translation_analyzer"
-	// store so we can extract serialized excerpt + rely on highlight fragments
-	tField.Store = true
-	excerptMapping.AddFieldMappingsAt("translation", tField)
-
-	excerptMapping.AddFieldMappingsAt("view_index", mapping.NewKeywordFieldMapping())
-	excerptMapping.AddFieldMappingsAt("sort_index", mapping.NewKeywordFieldMapping())
-
-	// Authors
-	excerptMapping.AddFieldMappingsAt("authors", mapping.NewTextFieldMapping())
-	// Addressees
-	excerptMapping.AddFieldMappingsAt("addressees", mapping.NewTextFieldMapping())
-	// Group
-	excerptMapping.AddFieldMappingsAt("group", mapping.NewTextFieldMapping())
-
-	// Meter
-	excerptMapping.AddFieldMappingsAt("meter", mapping.NewKeywordFieldMapping())
-
-	// Notes
-	excerptMapping.AddFieldMappingsAt("notes", mapping.NewTextFieldMapping())
-	excerptMapping.AddFieldMappingsAt("surfaces", mapping.NewKeywordFieldMapping())
-
-	auxMap := mapping.NewDocumentMapping()
-	for _, ax := range possibleAuxiliaries {
-		auxMap.AddFieldMappingsAt(ax, mapping.NewTextFieldMapping())
-	}
-	excerptMapping.AddSubDocumentMapping("auxiliaries", auxMap)
-
-	// ----- DictionaryEntryInDB mapping -----
-	dictMapping := mapping.NewDocumentMapping()
-
-	dictMapping.AddFieldMappingsAt("dict_name", mapping.NewKeywordFieldMapping())
-	dictMapping.AddFieldMappingsAt("word", mapping.NewKeywordFieldMapping())
-
-	ef := mapping.NewKeywordFieldMapping()
-	ef.Store, ef.Index = true, false
-	dictMapping.AddFieldMappingsAt("e", ef)
-
-	dictMapping.AddFieldMappingsAt("sid", mapping.NewKeywordFieldMapping())
-	dictMapping.AddFieldMappingsAt("variants", mapping.NewKeywordFieldMapping())
-	dictMapping.AddFieldMappingsAt("lit_refs", mapping.NewTextFieldMapping())
-
-	bodyField := mapping.NewTextFieldMapping()
-	dictMapping.AddFieldMappingsAt("body_text", bodyField)
-
-	indexMapping.AddDocumentMapping("excerpt", excerptMapping)
-	indexMapping.AddDocumentMapping("dictionary_entry", dictMapping)
-	indexMapping.TypeField = "_type"
-
-	return indexMapping
 }
 
 // --- data loading ---

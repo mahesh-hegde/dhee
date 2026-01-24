@@ -74,7 +74,7 @@ type Excerpt struct {
 	SourceText []string `json:"source_text"`
 	// Romanized text (eg: IAST)
 	RomanText []string `json:"roman_text"`
-	// Romanized text stored as keyword in bleve for regex queries
+	// Romanized text stored as keyword in SQLite3 for regex queries
 	RomanTextK string `json:"roman_text_k"`
 	RomanTextF string `json:"roman_text_f"`
 	// Authors to whom the verse is attributed
@@ -93,10 +93,8 @@ type Excerpt struct {
 	SuggestedTextual  []Related            `json:"suggested_textual,omitempty"`
 }
 
-// ExcerptInDB is the type sent to bleve, with the content of main excerpt serialized without indexing,
+// ExcerptInDB is the type sent to SQLite3, with the content of main excerpt serialized without indexing,
 // and only the fields we want to index being added as separate fields at top level.
-//
-// This lets us keep the bleve index small in both size and complexity, as well as potentially speeding up the queries.
 type ExcerptInDB struct {
 	// Excerpt serialized & stored as JSON but not indexed
 	E         string `json:"e"`

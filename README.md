@@ -35,7 +35,7 @@ Design goals
 
 ## How to run?
 ```bash
-# create a bleve search index of all data
+# create a SQLite3 search index of all data
 go run ./cmd/dhee index --data-dir ./data
 # run server
 go run ./cmd/dhee server --data-dir ./data

@@ -328,7 +328,7 @@ func (s *SQLiteExcerptStore) Search(ctx context.Context, scriptures []string, pa
 			ftsColumn = "roman_t"
 		case common.SearchFuzzy:
 			return nil, errors.New("fuzzy search is not supported on excerpts with sqlite store")
-		default: // "exact" from controller, which means match query in bleve. The bleve code defaults to a match query.
+		default:
 			ftsQuery = q
 			ftsColumn = "roman_t"
 		}
