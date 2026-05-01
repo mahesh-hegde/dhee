@@ -3,11 +3,13 @@ import argparse
 import json
 import logging
 import os
+import time
 from typing import Any, Dict, List
 
 import numpy as np
 
 MAX_RELATED_EXCERPTS = 5
+MAX_CANDIDATES_FOR_RERANKING = 50
 
 
 def main() -> None:
@@ -31,6 +33,12 @@ def main() -> None:
         help="Number of embeddings to generate in one batch.",
     )
     parser.add_argument(
+        "--batch-cooldown",
+        type=float,
+        default=0,
+        help="Cooldown in seconds after each embedding batch to reduce CPU/GPU heat.",
+    )
+    parser.add_argument(
         "--auxiliaries",
         nargs="+",
         required=True,
@@ -39,11 +47,20 @@ def main() -> None:
     parser.add_argument(
         "--threshold",
         type=float,
-        help=f"Minimum cosine similarity threshold. If not provided, top {MAX_RELATED_EXCERPTS} are picked.",
+        help=f"Minimum similarity threshold. If not provided, top {MAX_RELATED_EXCERPTS} are picked.",
     )
     parser.add_argument(
         "--tei-endpoint",
         help="Hugging Face TEI container endpoint. If provided, no local HF import.",
+    )
+    parser.add_argument(
+        "--reranker-model",
+        help="Hugging Face cross-encoder model for reranking. If specified, reranks top 50 candidates.",
+    )
+    parser.add_argument(
+        "--query-prefix",
+        default="",
+        help="Prefix to add to query text for reranker (e.g., 'WHICH VERSES ARE SIMILAR TO THIS VERSE?').",
     )
     parser.add_argument("--output-file", help="JSONL file to store the output.")
 
@@ -63,6 +80,14 @@ def main() -> None:
     excerpts_by_index: Dict[str, Dict[str, Any]] = {
         e["readable_index"]: e for e in excerpts
     }
+
+    # Initialize reranker if specified
+    reranker = None
+    if args.reranker_model:
+        from sentence_transformers import CrossEncoder
+
+        logging.info(f"Loading reranker model: {args.reranker_model}")
+        reranker = CrossEncoder(args.reranker_model)
 
     if args.tei_endpoint:
         import requests
@@ -122,33 +147,80 @@ def main() -> None:
 
         logging.info("Embeddings generated. Calculating similarities...")
 
+        # Determine number of candidates to retrieve
+        num_candidates = MAX_CANDIDATES_FOR_RERANKING + 1 if reranker else MAX_RELATED_EXCERPTS + 1
+
         for i, source_index in enumerate(indices_for_texts):
             source_embedding = embeddings[i]
             # Cosine similarity is dot product of normalized vectors
             similarities = np.dot(embeddings, source_embedding)
-            pick = -(MAX_RELATED_EXCERPTS + 1)
-            # Get top 6 indices to exclude self later
+            pick = -num_candidates
+            # Get top candidates to exclude self later
             top_indices = np.argpartition(similarities, pick)[pick:]
             # Sort these top indices by similarity
             top_indices = top_indices[np.argsort(similarities[top_indices])][::-1]
 
             related_excerpts: List[Dict[str, Any]] = []
-            for j in top_indices:
-                if i == j:
-                    continue  # Skip self
 
-                target_index = indices_for_texts[j]
-                score = float(similarities[j])
+            if reranker:
+                # Reranking mode: collect candidates and rerank them
+                candidates_data: List[tuple] = []  # (index_in_top_indices, target_index, embedding_score)
 
-                if args.threshold and score < args.threshold:
-                    continue
+                for j in top_indices:
+                    if i == j:
+                        continue  # Skip self
 
-                related_excerpts.append(
-                    {"readable_index": target_index, "score": score}
-                )
+                    target_index = indices_for_texts[j]
+                    embedding_score = float(similarities[j])
+                    candidates_data.append((j, target_index, embedding_score))
 
-                if len(related_excerpts) >= MAX_RELATED_EXCERPTS:
-                    break
+                if candidates_data:
+                    # Build query and candidate pairs for reranking
+                    query_text = args.query_prefix + " " if args.query_prefix else ""
+                    query_text += " ".join(excerpt["auxiliaries"][aux].get("text", []))
+
+                    pairs = [
+                        (query_text, " ".join(excerpts_by_index[target_idx]["auxiliaries"][aux].get("text", [])))
+                        for _, target_idx, _ in candidates_data
+                    ]
+
+                    # Get reranker scores
+                    reranker_scores = reranker.predict(pairs)
+
+                    # Build results with reranker scores
+                    for score_idx, (_, target_index, _) in enumerate(candidates_data):
+                        score = float(reranker_scores[score_idx])
+
+                        if args.threshold and score < args.threshold:
+                            continue
+
+                        related_excerpts.append(
+                            {"readable_index": target_index, "score": score}
+                        )
+
+                        if len(related_excerpts) >= MAX_RELATED_EXCERPTS:
+                            break
+
+                    # Sort by reranker score descending
+                    related_excerpts.sort(key=lambda x: x["score"], reverse=True)
+            else:
+                # Embedding-only mode: use original logic
+                for j in top_indices:
+                    if i == j:
+                        continue  # Skip self
+
+                    target_index = indices_for_texts[j]
+                    score = float(similarities[j])
+
+                    if args.threshold and score < args.threshold:
+                        continue
+
+                    related_excerpts.append(
+                        {"readable_index": target_index, "score": score}
+                    )
+
+                    if len(related_excerpts) >= MAX_RELATED_EXCERPTS:
+                        break
 
             if source_index not in all_related:
                 all_related[source_index] = []
