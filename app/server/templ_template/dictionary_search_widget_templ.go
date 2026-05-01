@@ -300,7 +300,7 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, ">Translations (FTS)</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-primary\">Find</button></div><div class=\"col-auto d-flex align-items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, ">Translations (FTS)</option></select></div><div class=\"col-auto\"><button type=\"submit\" class=\"btn btn-success\">Find</button></div><div class=\"col-auto d-flex align-items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
