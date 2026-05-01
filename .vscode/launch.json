@@ -1,24 +1,14 @@
 {
     "version": "0.2.0",
-    "configurations": [
+    "inputs": [
         {
-            "name": "dhee preprocess",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "program": "${workspaceFolder}/cmd/dhee/main.go",
-            "cwd": "${workspaceFolder}",
-            "internalConsoleOptions": "openOnSessionStart",
-            "args": [
-                "preprocess",
-                "--input",
-                "./data",
-                "--output",
-                "./data",
-                "--embeddings-file",
-                "./data/rv.emb.jsonl",
-            ]
-        },
+            "id": "rr_trace_path",
+            "type": "promptString",
+            "description": "Path to rr trace directory",
+            "default": "${workspaceFolder}/rr_trace"
+        }
+    ],
+    "configurations": [
         {
             "name": "dhee server",
             "type": "go",
@@ -35,10 +25,44 @@
                 "server",
                 "--data-dir",
                 "./data",
-                "--store",
-                "sqlite",
                 "--cert-dir",
                 "./certs",
+            ]
+        },
+        {
+            "name": "dhee server (rr - replay)",
+            "type": "go",
+            "request": "launch",
+            "mode": "replay",
+            "program": "${workspaceFolder}/cmd/dhee/main.go",
+            "cwd": "${workspaceFolder}",
+            "backend": "rr",
+            "internalConsoleOptions": "openOnSessionStart",
+            "args": [
+                "server",
+                "--data-dir",
+                "./data",
+                "--cert-dir",
+                "./certs",
+            ],
+            "traceDirPath": "${input:rr_trace_path}"
+        },
+        {
+            "name": "dhee preprocess",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/dhee/main.go",
+            "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart",
+            "args": [
+                "preprocess",
+                "--input",
+                "./data",
+                "--output",
+                "./data",
+                "--embeddings-file",
+                "./data/rv.emb.jsonl",
             ]
         },
         {
