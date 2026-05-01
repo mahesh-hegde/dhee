@@ -52,17 +52,17 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<style>\n\t\t\t.collapse {\n\t\t\t\tmax-height: 0;\n\t\t\t\topacity: 0;\n\t\t\t\toverflow: hidden;\n\t\t\t\ttransition: max-height 0.2s ease-out, opacity 0.15s ease-out;\n\t\t\t}\n\n\t\t\t.collapse.show {\n\t\t\t\tmax-height: 1000px;\n\t\t\t\topacity: 1;\n\t\t\t\ttransition: max-height 0.25s ease-in, opacity 0.2s ease-in;\n\t\t\t}\n\n\t\t\t.collapsing {\n\t\t\t\topacity: 0.5;\n\t\t\t}\n\t\t</style><h2 class=\"my-4\">Dictionary Search Results</h2>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<style>\n\t\t\t.collapse {\n\t\t\t\tmax-height: 0;\n\t\t\t\topacity: 0;\n\t\t\t\toverflow: hidden;\n\t\t\t\ttransition: max-height 0.2s ease-out, opacity 0.15s ease-out;\n\t\t\t}\n\n\t\t\t.collapse.show {\n\t\t\t\tmax-height: 1000px;\n\t\t\t\topacity: 1;\n\t\t\t\ttransition: max-height 0.25s ease-in, opacity 0.2s ease-in;\n\t\t\t}\n\n\t\t\t.collapsing {\n\t\t\t\topacity: 0.5;\n\t\t\t}\n\t\t\t@media (max-width: 767.98px) {\n\t\t\t\t.dictionary-results-table,\n\t\t\t\t.dictionary-results-table thead,\n\t\t\t\t.dictionary-results-table tbody,\n\t\t\t\t.dictionary-results-table tr,\n\t\t\t\t.dictionary-results-table td {\n\t\t\t\t\twidth: 100% !important;\n\t\t\t\t\tmax-width: 100% !important;\n\t\t\t\t\tdisplay: block !important;\n\t\t\t\t}\n\t\t\t\t.dictionary-results-table thead {\n\t\t\t\t\tdisplay: none !important;\n\t\t\t\t}\n\t\t\t\t.dictionary-results-table tr {\n\t\t\t\t\tborder: 1px solid var(--bs-border-color);\n\t\t\t\t\tmargin-bottom: 1rem;\n\t\t\t\t\tborder-radius: 0.25rem;\n\t\t\t\t\tbackground-color: var(--bs-body-bg);\n\t\t\t\t\tpage-break-inside: avoid;\n\t\t\t\t\tbreak-inside: avoid;\n\t\t\t\t}\n\t\t\t\t.dictionary-results-table tbody tr:nth-child(odd) {\n\t\t\t\t\tbackground-color: var(--bs-body-bg);\n\t\t\t\t}\n\t\t\t\t.dictionary-results-table tbody tr:nth-child(even) {\n\t\t\t\t\tbackground-color: var(--bs-body-bg);\n\t\t\t\t}\n\t\t\t\t.dictionary-results-table td {\n\t\t\t\t\ttext-align: left;\n\t\t\t\t\tpadding: 0.75rem !important;\n\t\t\t\t\tborder-bottom: 1px solid var(--bs-border-color) !important;\n\t\t\t\t\tword-wrap: break-word;\n\t\t\t\t\toverflow-wrap: break-word;\n\t\t\t\t}\n\t\t\t\t.dictionary-results-table td:last-child {\n\t\t\t\t\tborder-bottom: none !important;\n\t\t\t\t}\n\t\t\t\t.dictionary-results-table td::before {\n\t\t\t\t\tcontent: attr(data-label);\n\t\t\t\t\tfont-weight: 600;\n\t\t\t\t\tdisplay: block;\n\t\t\t\t\tfont-size: 0.875rem;\n\t\t\t\t\tcolor: #666;\n\t\t\t\t\tmargin-bottom: 0.25rem;\n\t\t\t\t}\n\t\t\t}\n\t\t</style><h2 class=\"my-4\">Dictionary Search Results</h2>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(data.Items) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<table class=\"table table-striped\"><thead><tr><th scope=\"col\" style=\"width: 1rem;\"></th><th scope=\"col\">Word (IAST)</th><th scope=\"col\">Word (Devanagari)</th><th scope=\"col\">Overview</th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"table-responsive\"><table class=\"table table-striped dictionary-results-table\"><thead><tr><th scope=\"col\" style=\"width: 1rem;\"></th><th scope=\"col\">Word (IAST)</th><th scope=\"col\">Word (Devanagari)</th><th scope=\"col\">Overview</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for i, item := range data.Items {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<tr><td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<tr><td data-label=\"\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -74,7 +74,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 					var templ_7745c5c3_Var2 string
 					templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(".collapse-result-%d", i))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 56, Col: 164}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 103, Col: 165}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 					if templ_7745c5c3_Err != nil {
@@ -85,14 +85,14 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</td><td><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</td><td data-label=\"Word (IAST)\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 templ.SafeURL
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/dictionaries/%s/words/%s", data.DictionaryName, item.Word)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 61, Col: 104}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 108, Col: 130}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -105,20 +105,20 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(item.IAST)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 61, Col: 118}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 108, Col: 144}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</a></td><td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</a></td><td data-label=\"Word (Devanagari)\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(item.Nagari)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 62, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 109, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -129,14 +129,14 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 					return templ_7745c5c3_Err
 				}
 				if len(item.Previews) > 0 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<td>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<td data-label=\"Overview\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.Previews[0])
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 65, Col: 30}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 112, Col: 53}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -147,7 +147,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<td></td>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<td data-label=\"Overview\"></td>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -176,14 +176,14 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"><td colspan=\"3\"></td><td>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"><td colspan=\"3\"></td><td data-label=\"Overview\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var9 string
 						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(preview)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 74, Col: 22}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/dictionary_search.templ`, Line: 121, Col: 45}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 						if templ_7745c5c3_Err != nil {
@@ -196,7 +196,7 @@ func DictionarySearch(data dictionary.SearchResults, isPreview bool) templ.Compo
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</tbody></table>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</tbody></table></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

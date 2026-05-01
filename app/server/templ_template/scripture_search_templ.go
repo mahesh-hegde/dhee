@@ -35,7 +35,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\"><div class=\"row my-3\"><div class=\"col-lg-6 offset-lg-6\" style=\"font-size: 0.7em;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\"><style>\n\t\t\t@media (max-width: 767.98px) {\n\t\t\t\t#search-results-table,\n\t\t\t\t#search-results-table thead,\n\t\t\t\t#search-results-table tbody,\n\t\t\t\t#search-results-table tr,\n\t\t\t\t#search-results-table td {\n\t\t\t\t\twidth: 100% !important;\n\t\t\t\t\tmax-width: 100% !important;\n\t\t\t\t\tdisplay: block !important;\n\t\t\t\t}\n\t\t\t\t#search-results-table thead {\n\t\t\t\t\tdisplay: none !important;\n\t\t\t\t}\n\t\t\t\t#search-results-table tr {\n\t\t\t\t\tborder: 1px solid var(--bs-border-color);\n\t\t\t\t\tmargin-bottom: 1rem;\n\t\t\t\t\tborder-radius: 0.25rem;\n\t\t\t\t\tbackground-color: var(--bs-body-bg);\n\t\t\t\t\tpage-break-inside: avoid;\n\t\t\t\t\tbreak-inside: avoid;\n\t\t\t\t}\n\t\t\t\t#search-results-table tbody tr:nth-child(odd) {\n\t\t\t\t\tbackground-color: var(--bs-body-bg);\n\t\t\t\t}\n\t\t\t\t#search-results-table tbody tr:nth-child(even) {\n\t\t\t\t\tbackground-color: var(--bs-body-bg);\n\t\t\t\t}\n\t\t\t\t#search-results-table td {\n\t\t\t\t\ttext-align: left;\n\t\t\t\t\tpadding: 0.75rem !important;\n\t\t\t\t\tborder-bottom: 1px solid var(--bs-border-color) !important;\n\t\t\t\t\tword-wrap: break-word;\n\t\t\t\t\toverflow-wrap: break-word;\n\t\t\t\t}\n\t\t\t\t#search-results-table td:last-child {\n\t\t\t\t\tborder-bottom: none !important;\n\t\t\t\t}\n\t\t\t\t#search-results-table td pre {\n\t\t\t\t\twidth: 100%;\n\t\t\t\t\tmax-width: 100%;\n\t\t\t\t\twhite-space: pre-wrap;\n\t\t\t\t\tword-break: break-word;\n\t\t\t\t\tmargin: 0;\n\t\t\t\t}\n\t\t\t\t#search-results-table td::before {\n\t\t\t\t\tcontent: attr(data-label);\n\t\t\t\t\tfont-weight: 600;\n\t\t\t\t\tdisplay: block;\n\t\t\t\t\tfont-size: 0.875rem;\n\t\t\t\t\tcolor: #666;\n\t\t\t\t\tmargin-bottom: 0.25rem;\n\t\t\t\t}\n\t\t\t}\n\t\t</style><div class=\"row my-3\"><div class=\"col-lg-6 offset-lg-6\" style=\"font-size: 0.7em;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%q", data.Search.Q))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 16, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 71, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -61,7 +61,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if data.Excerpts != nil && len(data.Excerpts) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<table id=\"search-results-table\" class=\"table table-striped search-result\"><thead><tr><th scope=\"col\">#</th><th scope=\"col\">Path</th><th scope=\"col\">Roman Text</th><th scope=\"col\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"table-responsive\"><table id=\"search-results-table\" class=\"table table-striped search-result\"><thead><tr><th scope=\"col\">#</th><th scope=\"col\">Path</th><th scope=\"col\">Roman Text</th><th scope=\"col\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -73,7 +73,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Scripture.TranslationAuxiliary)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 26, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 82, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -95,27 +95,27 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 			}
 			for i, hExcerpt := range data.Excerpts {
 				var excerpt = hExcerpt.Excerpt
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<tr><td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<tr><td data-label=\"#\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i+1))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 38, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 94, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</td><td><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</td><td data-label=\"Path\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 templ.SafeURL
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/scriptures/%s/excerpts/%s", excerpt.Scripture, excerpt.ReadableIndex)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 39, Col: 115}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 95, Col: 134}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -128,13 +128,13 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt.ReadableIndex)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 39, Col: 141}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 95, Col: 160}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</a></td><td class=\"roman-text-search\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</a></td><td class=\"roman-text-search\" data-label=\"Roman Text\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -160,7 +160,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 						var templ_7745c5c3_Var7 string
 						templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(line + "\n")
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 48, Col: 24}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 104, Col: 25}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 						if templ_7745c5c3_Err != nil {
@@ -172,7 +172,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</td><td class=\"wrap-50 translation-col\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</td><td class=\"wrap-50 translation-col\" data-label=\"Translation\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -187,7 +187,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 							var templ_7745c5c3_Var8 string
 							templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 59, Col: 17}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 115, Col: 18}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 							if templ_7745c5c3_Err != nil {
@@ -196,14 +196,14 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 						}
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</td><td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</td><td data-label=\"Addressee\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(excerpt.Addressees, ", "))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 64, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ_template/scripture_search.templ`, Line: 120, Col: 75}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -214,7 +214,7 @@ func ScriptureSearch(data *excerpts.ExcerptSearchData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</tbody></table>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</tbody></table></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -64,12 +64,12 @@ func DictionarySearchWidget(dictName string, params *dictionary.SearchParams, co
 			params = defaultDictionarySearchParams
 		}
 		formClass := "row g-3 dictionary-search-form"
-		inputClass := "col-sm-6"
-		selectClass := "col-sm-2"
+		inputClass := "col-12 col-sm-6"
+		selectClass := "col-6 col-sm-2"
 		if compact {
-			formClass = "row g-2 dictionary-search-form flex-nowrap"
-			inputClass = "col"
-			selectClass = "col-auto"
+			formClass = "row g-2 dictionary-search-form"
+			inputClass = "col-12 col-sm-6"
+			selectClass = "col-6 col-sm-2"
 		}
 		var templ_7745c5c3_Var2 = []any{formClass}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)

@@ -61,12 +61,12 @@ func ScriptureSearchWidget(scripture config.ScriptureDefn, params *excerpts.Sear
 			params = defaultScriptureSearchParams
 		}
 		formClass := "row g-3 scripture-search-form"
-		inputClass := "col-sm-6"
-		selectClass := "col-sm-2"
+		inputClass := "col-12 col-sm-6"
+		selectClass := "col-6 col-sm-2"
 		if compact {
-			formClass = "row g-2 scripture-search-form flex-nowrap"
-			inputClass = "col"
-			selectClass = "col-auto"
+			formClass = "row g-2 scripture-search-form"
+			inputClass = "col-12 col-sm-6"
+			selectClass = "col-6 col-sm-2"
 		}
 		var templ_7745c5c3_Var2 = []any{formClass}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)

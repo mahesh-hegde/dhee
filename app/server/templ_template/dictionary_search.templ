@@ -36,48 +36,96 @@ templ DictionarySearch(data dictionary.SearchResults, isPreview bool) {
 			.collapsing {
 				opacity: 0.5;
 			}
+			@media (max-width: 767.98px) {
+				.dictionary-results-table,
+				.dictionary-results-table thead,
+				.dictionary-results-table tbody,
+				.dictionary-results-table tr,
+				.dictionary-results-table td {
+					width: 100% !important;
+					max-width: 100% !important;
+					display: block !important;
+				}
+				.dictionary-results-table thead {
+					display: none !important;
+				}
+				.dictionary-results-table tr {
+					border: 1px solid var(--bs-border-color);
+					margin-bottom: 1rem;
+					border-radius: 0.25rem;
+					background-color: var(--bs-body-bg);
+					page-break-inside: avoid;
+					break-inside: avoid;
+				}
+				.dictionary-results-table tbody tr:nth-child(odd) {
+					background-color: var(--bs-body-bg);
+				}
+				.dictionary-results-table tbody tr:nth-child(even) {
+					background-color: var(--bs-body-bg);
+				}
+				.dictionary-results-table td {
+					text-align: left;
+					padding: 0.75rem !important;
+					border-bottom: 1px solid var(--bs-border-color) !important;
+					word-wrap: break-word;
+					overflow-wrap: break-word;
+				}
+				.dictionary-results-table td:last-child {
+					border-bottom: none !important;
+				}
+				.dictionary-results-table td::before {
+					content: attr(data-label);
+					font-weight: 600;
+					display: block;
+					font-size: 0.875rem;
+					color: #666;
+					margin-bottom: 0.25rem;
+				}
+			}
 		</style>
 		<h2 class="my-4">Dictionary Search Results</h2>
 		if len(data.Items) > 0 {
-			<table class="table table-striped">
-				<thead>
-					<tr>
-						<th scope="col" style="width: 1rem;"></th>
-						<th scope="col">Word (IAST)</th>
-						<th scope="col">Word (Devanagari)</th>
-						<th scope="col">Overview</th>
-					</tr>
-				</thead>
-				<tbody>
-					for i, item := range data.Items {
+			<div class="table-responsive">
+				<table class="table table-striped dictionary-results-table">
+					<thead>
 						<tr>
-							<td>
-								if len(item.Previews) > 1 {
-									<button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target={ fmt.Sprintf(".collapse-result-%d", i) } aria-expanded="false">
-										<i class="bi bi-plus-square"></i>
-									</button>
-								}
-							</td>
-							<td><a href={ templ.URL(fmt.Sprintf("/dictionaries/%s/words/%s", data.DictionaryName, item.Word)) }>{ item.IAST }</a></td>
-							<td>{ item.Nagari }</td>
-							<!-- TODO: show main H1, H2, H3 entries -->
-							if len(item.Previews) > 0 {
-								<td>{ item.Previews[0] }</td>
-							} else {
-								<td></td>
-							}
+							<th scope="col" style="width: 1rem;"></th>
+							<th scope="col">Word (IAST)</th>
+							<th scope="col">Word (Devanagari)</th>
+							<th scope="col">Overview</th>
 						</tr>
-						if len(item.Previews) > 1 {
-							for _, preview := range item.Previews[1:] {
-								<tr class={ "collapse " + fmt.Sprintf("collapse-result-%d", i) }>
-									<td colspan="3"></td>
-									<td>{ preview }</td>
-								</tr>
+					</thead>
+					<tbody>
+						for i, item := range data.Items {
+							<tr>
+								<td data-label="">
+									if len(item.Previews) > 1 {
+										<button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target={ fmt.Sprintf(".collapse-result-%d", i) } aria-expanded="false">
+											<i class="bi bi-plus-square"></i>
+										</button>
+									}
+								</td>
+								<td data-label="Word (IAST)"><a href={ templ.URL(fmt.Sprintf("/dictionaries/%s/words/%s", data.DictionaryName, item.Word)) }>{ item.IAST }</a></td>
+								<td data-label="Word (Devanagari)">{ item.Nagari }</td>
+								<!-- TODO: show main H1, H2, H3 entries -->
+								if len(item.Previews) > 0 {
+									<td data-label="Overview">{ item.Previews[0] }</td>
+								} else {
+									<td data-label="Overview"></td>
+								}
+							</tr>
+							if len(item.Previews) > 1 {
+								for _, preview := range item.Previews[1:] {
+									<tr class={ "collapse " + fmt.Sprintf("collapse-result-%d", i) }>
+										<td colspan="3"></td>
+										<td data-label="Overview">{ preview }</td>
+									</tr>
+								}
 							}
 						}
-					}
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
 		} else {
 			<div class="alert alert-warning" role="alert">
 				No results found!
