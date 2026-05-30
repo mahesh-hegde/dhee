@@ -59,8 +59,7 @@ func (c *DheeController) GlobalRateLimitMiddleware(next echo.HandlerFunc) echo.H
 }
 
 func (c *DheeController) GetHome(ctx echo.Context) error {
-	ctx.Set("pageTitle", c.conf.InstanceName)
-	return ctx.Render(http.StatusOK, "home", c.conf)
+	return ctx.Render(http.StatusOK, "home", PageData{Title: c.conf.InstanceName, Data: c.conf})
 }
 
 func (c *DheeController) GetExcerpts(ctx echo.Context) error {
@@ -81,8 +80,6 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 	if scri == nil {
 		return echo.NewHTTPError(404, "invalid text name")
 	}
-
-	ctx.Set("pageTitle", scri.ReadableName+" "+pathStr)
 
 	if len(parts) < len(scri.Hierarchy) {
 		return ctx.Redirect(307, ctx.Echo().Reverse("hierarchy", scriptureName, pathStr))
@@ -139,7 +136,7 @@ func (c *DheeController) GetExcerpts(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Failed to get excerpts. Cross check the excerpt number.")
 	}
 
-	return ctx.Render(http.StatusOK, "excerpts", excerpts)
+	return ctx.Render(http.StatusOK, "excerpts", PageData{Title: scri.ReadableName + " " + pathStr, Data: excerpts})
 }
 
 func (c *DheeController) GetHierarchy(ctx echo.Context) error {
@@ -167,8 +164,7 @@ func (c *DheeController) GetHierarchy(ctx echo.Context) error {
 	if pathStr != "" {
 		title = title + " " + pathStr
 	}
-	ctx.Set("pageTitle", title)
-	return ctx.Render(http.StatusOK, "hierarchy", hier)
+	return ctx.Render(http.StatusOK, "hierarchy", PageData{Title: title, Data: hier})
 }
 
 func (c *DheeController) SearchScripture(ctx echo.Context) error {
@@ -213,8 +209,7 @@ func (c *DheeController) SearchScripture(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to search scripture")
 	}
 
-	ctx.Set("pageTitle", "Search results for: "+strconv.Quote(query))
-	return ctx.Render(http.StatusOK, "scripture_search", excerpts)
+	return ctx.Render(http.StatusOK, "scripture_search", PageData{Title: "Search results for: " + strconv.Quote(query), Data: excerpts})
 }
 
 func (c *DheeController) GetDictionaryWord(ctx echo.Context) error {
@@ -226,8 +221,7 @@ func (c *DheeController) GetDictionaryWord(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Failed to get dictionary entries")
 	}
 
-	ctx.Set("pageTitle", strconv.Quote(word)+" in "+entries.Dictionary.ReadableName)
-	return ctx.Render(http.StatusOK, "dictionary_word", entries)
+	return ctx.Render(http.StatusOK, "dictionary_word", PageData{Title: strconv.Quote(word) + " in " + entries.Dictionary.ReadableName, Data: entries})
 }
 
 func (c *DheeController) SearchDictionary(ctx echo.Context) error {
@@ -295,12 +289,11 @@ func (c *DheeController) SearchDictionary(ctx echo.Context) error {
 	if titleQuery == "" {
 		titleQuery = textQuery
 	}
-	ctx.Set("pageTitle", fmt.Sprintf("Search %q in %s", titleQuery, results.DictionaryName))
 	templateName := "dictionary_search"
 	if preview == "true" {
 		templateName = "dictionary_search.preview"
 	}
-	return ctx.Render(http.StatusOK, templateName, results)
+	return ctx.Render(http.StatusOK, templateName, PageData{Title: fmt.Sprintf("Search %q in %s", titleQuery, results.DictionaryName), Data: results})
 }
 
 func (c *DheeController) SuggestDictionary(ctx echo.Context) error {
