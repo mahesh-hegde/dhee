@@ -45,7 +45,6 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 		}
 	}
 	e.HideBanner = true
-	e.Pre(middleware.HTTPSRedirect())
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Pre(echo.MiddlewareFunc(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -181,6 +180,7 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 	addr := fmt.Sprintf("%s:%d", host, port)
 
 	if certDir != "" {
+		e.Pre(middleware.HTTPSRedirect())
 		if acme {
 			slog.Info("using TLS with ACME", "dir", certDir)
 			e.AutoTLSManager.HostPolicy = autocert.HostWhitelist(dheeConf.Hostnames...)
