@@ -4,6 +4,7 @@ go 1.24.2
 
 require (
 	github.com/a-h/templ v0.3.960
+	github.com/aws/aws-lambda-go v1.54.0
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/patrickmn/go-cache v2.1.0+incompatible
