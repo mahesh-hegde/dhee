@@ -81,8 +81,8 @@
                 "index",
                 "--data-dir",
                 "./data",
-                "--store",
-                "sqlite"
+                // "--store",
+                // "sqlite"
             ]
         },
         {

@@ -14,7 +14,7 @@ RUN mkdir -p bin
 RUN go build -tags "${build_tags}" -o bin/dhee ./cmd/dhee
 COPY ./data/ ./data/
 RUN bin/dhee preprocess --input ./data --output ./data/ --embeddings-file data/rv.emb.jsonl
-RUN bin/dhee index --data-dir ./data --store sqlite
+RUN bin/dhee index --data-dir ./data
 
 FROM gcr.io/distroless/base-debian12:${distroless_tag}
 

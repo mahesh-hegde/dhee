@@ -48,7 +48,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: samplerolesession
+          role-session-name: dhee-push
           aws-region: ${{ vars.AWS_REGION }}
       - name: Docker build (lambda)
         run: docker build -t "${IMAGE_NAME_LAMBDA}:latest" --platform linux/amd64 -f Dockerfile.lambda .
