@@ -8,8 +8,8 @@ jobs:
   pre-build-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
         with:
           go-version: "^1.24.2"
       - name: Install gofumpt
@@ -29,7 +29,7 @@ jobs:
       IMAGE_NAME_LAMBDA: ghcr.io/mahesh-hegde/dhee-lambda
       IMAGE_NAME_ECR: ${{ vars.ECR_REPOSITORY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Docker login
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
