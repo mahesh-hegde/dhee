@@ -27,7 +27,7 @@ jobs:
       TAG_NAME: ${{ github.ref_name }}
       IMAGE_NAME: ghcr.io/mahesh-hegde/dhee
       IMAGE_NAME_LAMBDA: ghcr.io/mahesh-hegde/dhee-lambda
-      IMAGE_NAME_ECR: ${{ vars.ECR_REPOSITORY }}
+      IMAGE_NAME_ECR: ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Docker login
@@ -57,6 +57,6 @@ jobs:
       - name: Tag lambda image
         run: docker tag $IMAGE_NAME_LAMBDA:latest $IMAGE_NAME_LAMBDA:${TAG_NAME#v}
       - name: login to ECR
-        run: aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin ${{ vars.ECR_REPOSITORY }}
+        run: aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin ${{ vars.ECR_REGISTRY }}
       - name: Push lambda tagged image
         run: docker push $IMAGE_NAME_ECR:current
