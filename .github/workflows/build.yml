@@ -4,6 +4,12 @@ on:
     tags:
       - v*
     branches: [cs-260611] # TODO: remove
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
 jobs:
   pre-build-checks:
     runs-on: ubuntu-latest
