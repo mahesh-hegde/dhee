@@ -12,6 +12,14 @@ import (
 	"github.com/mahesh-hegde/dhee/app/config"
 )
 
+const robotsTxtContent = `
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: *
+Crawl-Delay: 120
+`
+
 // BuildEchoHandler creates and configures an Echo instance with the core routing and minimal middleware.
 // This handler can be used by both the traditional HTTP server and Lambda runtime.
 // It applies only the essential middleware: recovery, request ID, request logging, gzip (if enabled), and timeout.
@@ -90,6 +98,10 @@ func BuildEchoHandler(controller *DheeController, dheeConf *config.DheeConfig, s
 			return echo.ErrNotFound
 		}
 		return c.Blob(http.StatusOK, "image/x-icon", file)
+	})
+
+	e.GET("/robots.txt", func(c echo.Context) error {
+		return c.String(http.StatusOK, robotsTxtContent)
 	})
 
 	e.GET("/", controller.GetHome)
