@@ -38,6 +38,7 @@ func runLambda() {
 	flags.StringVarP(&dataDir, "data-dir", "d", "",
 		"data directory to read config.json and data JSONL files")
 	flags.IntVar(&serverConf.GzipLevel, "gzip-level", 1, "Gzip compression level (1-9), or 0 to disable gzip")
+	flags.BoolVar(&serverConf.BehindLoadBalancer, "behind-load-balancer", false, "Certain behaviors when behind a load balancer (e.g., trusting X-Forwarded-For header)")
 
 	// Note: Lambda doesn't support custom timeout via flag, but we keep it for consistency
 	// (would need to be set via Lambda environment variable or handler timeout)
