@@ -17,6 +17,7 @@ User-agent: SemrushBot
 Disallow: /
 
 User-agent: *
+Disallow: /dictionaries/
 Crawl-Delay: 120
 `
 
