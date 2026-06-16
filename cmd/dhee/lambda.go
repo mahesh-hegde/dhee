@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -81,6 +82,7 @@ func runLambda() {
 
 	// Create the Lambda handler wrapper
 	handler := func(ctx context.Context, event events.LambdaFunctionURLRequest) (events.LambdaFunctionURLResponse, error) {
+		startTime := time.Now()
 		slog.DebugContext(ctx, "Lambda event received", "method", event.RequestContext.HTTP.Method, "path", event.RawPath)
 
 		// Convert Lambda event to HTTP request
@@ -90,6 +92,7 @@ func runLambda() {
 			return events.LambdaFunctionURLResponse{
 				StatusCode: 400,
 				Body:       "Bad Request",
+				Headers:    map[string]string{"Cache-Control": "max-age=10800"},
 			}, nil
 		}
 
@@ -123,6 +126,29 @@ func runLambda() {
 			rw.Headers.Set("content-type", "text/html; charset=utf-8")
 			rw.Body.WriteString(errorHTML)
 		}
+
+		// Add cache-control header for 2xx and 4xx responses
+		if (rw.StatusCode >= 200 && rw.StatusCode < 300) || (rw.StatusCode >= 400 && rw.StatusCode < 500) {
+			rw.Headers.Set("Cache-Control", "max-age=10800")
+		}
+
+		// Build URL with query string
+		url := event.RawPath
+		if event.RawQueryString != "" {
+			url = url + "?" + event.RawQueryString
+		}
+
+		// Calculate processing time
+		processingTime := time.Since(startTime)
+
+		// Log request details
+		slog.InfoContext(ctx, "Lambda request completed",
+			"remote_ip", event.RequestContext.HTTP.SourceIP,
+			"url", url,
+			"status", rw.StatusCode,
+			"response_size_bytes", rw.BytesWritten(),
+			"processing_time_ms", processingTime.Milliseconds(),
+		)
 
 		// Convert response to Lambda format
 		response := server.HTTPResponseToLambdaResponse(rw)

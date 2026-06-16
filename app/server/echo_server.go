@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -51,6 +52,36 @@ func StartServer(controller *DheeController, dheeConf *config.DheeConfig, server
 			return id, nil
 		}
 	}
+
+	// Request logging
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogStatus:   true,
+		LogURI:      true,
+		LogError:    true,
+		LogRemoteIP: true,
+		LogLatency:  dheeConf.LogLatency,
+		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			if v.Error == nil {
+				logger.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
+					slog.String("uri", v.URI),
+					slog.Int("status", v.Status),
+					slog.Int64("latency_ms", v.Latency.Milliseconds()),
+					slog.String("remote_ip", v.RemoteIP),
+				)
+			} else {
+				logger.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
+					slog.String("uri", v.URI),
+					slog.Int("status", v.Status),
+					slog.String("err", v.Error.Error()),
+					slog.String("remote_ip", v.RemoteIP),
+					slog.Int64("latency_ms", v.Latency.Milliseconds()),
+				)
+			}
+			return nil
+		},
+	}))
 
 	// configure rate limiting if enabled
 	if serverConf.RateLimit > 0 {
