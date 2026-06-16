@@ -145,6 +145,7 @@ func runLambda() {
 		// Log request details
 		slog.InfoContext(ctx, "Lambda request completed",
 			"remote_ip", event.RequestContext.HTTP.SourceIP,
+			"user_agent", event.RequestContext.HTTP.UserAgent,
 			"url", url,
 			"status", rw.StatusCode,
 			"response_size_bytes", rw.BytesWritten(),
