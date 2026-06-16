@@ -53,6 +53,10 @@ func BuildEchoHandler(controller *DheeController, dheeConf *config.DheeConfig, s
 
 	e.Pre(middleware.RemoveTrailingSlash())
 
+	if serverConf.BehindLoadBalancer {
+		e.IPExtractor = echo.ExtractIPFromRealIPHeader()
+	}
+
 	// Optional: Gzip compression
 	if serverConf.GzipLevel != 0 {
 		e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: serverConf.GzipLevel, MinLength: 512}))

@@ -26,4 +26,4 @@ COPY --chown=nonroot:nonroot --from=builder /app/bin/dhee /app/bin/dhee
 COPY --chown=nonroot:nonroot --from=builder /app/data/dhee.db /app/data/dhee.db
 COPY --chown=nonroot:nonroot ./data/config.json /app/data/config.json
 
-ENTRYPOINT ["/app/bin/dhee", "lambda", "--data-dir", "./data"]
+ENTRYPOINT ["/app/bin/dhee", "lambda", "--data-dir=./data", "--behind-load-balancer", "--gzip-level=4"]
