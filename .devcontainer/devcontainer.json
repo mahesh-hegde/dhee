@@ -1,0 +1,12 @@
+{
+    "build": {
+        "dockerfile": "Dockerfile",
+    },
+    "forwardPorts": [
+        8080
+    ],
+    "mounts": [
+        "source=dhee-devc-bashhist,target=/commandhistory,type=volume"
+    ],
+    "containerUser": "dev",
+}
