@@ -43,6 +43,8 @@ func main() {
 		runPreprocess()
 	case "server":
 		runServer()
+	case "lambda":
+		runLambda()
 	case "index":
 		runIndex()
 	case "stats":
@@ -60,6 +62,7 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "Commands:")
 	fmt.Fprintln(os.Stderr, "  preprocess    Convert input data to output format")
 	fmt.Fprintln(os.Stderr, "  server        Start the dhee server")
+	fmt.Fprintln(os.Stderr, "  lambda        Start as AWS Lambda function")
 	fmt.Fprintln(os.Stderr, "  index         Build the search index in advance")
 	fmt.Fprintln(os.Stderr, "  stats         Show index statistics")
 }
