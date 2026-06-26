@@ -3,8 +3,6 @@ on:
   push:
     tags:
       - v*
-    branches: 
-      - fix_error_pages_on_lambda
 
 permissions:
   id-token: write

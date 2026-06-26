@@ -51,8 +51,6 @@ func BuildEchoHandler(controller *DheeController, dheeConf *config.DheeConfig, s
 			if renderErr := c.Render(code, "error", msg); renderErr != nil {
 				c.Logger().Error(renderErr)
 			}
-		} else {
-			c.Logger().Error("cannot write response because response is already committed")
 		}
 	}
 
