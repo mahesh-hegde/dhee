@@ -87,7 +87,9 @@ func runLambda() {
 		slog.DebugContext(ctx, "Lambda event received", "method", event.RequestContext.HTTP.Method, "path", event.RawPath)
 
 		// Convert Lambda event to HTTP request
-		req, err := server.LambdaEventToHTTPRequest(ctx, event)
+		hctx, hcancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer hcancel()
+		req, err := server.LambdaEventToHTTPRequest(hctx, event)
 		if err != nil {
 			slog.ErrorContext(ctx, "error converting Lambda event to HTTP request", "err", err)
 			return events.LambdaFunctionURLResponse{
