@@ -154,8 +154,6 @@ func runLambda() {
 
 		// Convert response to Lambda format
 		response := server.HTTPResponseToLambdaResponse(rw)
-		slog.DebugContext(ctx, "Lambda response prepared", "status", response.StatusCode, "size_bytes", rw.BytesWritten())
-
 		return response, nil
 	}
 

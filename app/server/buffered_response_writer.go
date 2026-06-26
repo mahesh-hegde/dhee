@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"log/slog"
 	"net/http"
 )
 
@@ -27,7 +28,7 @@ func NewBufferedResponseWriter() *BufferedResponseWriter {
 // limit is in bytes. Use 0 for unlimited (not recommended for Lambda).
 func NewBufferedResponseWriterWithLimit(limit int64) *BufferedResponseWriter {
 	return &BufferedResponseWriter{
-		StatusCode: http.StatusOK,
+		StatusCode: 0,
 		Headers:    make(http.Header),
 		committed:  false,
 		sizeLimit:  limit,
@@ -67,8 +68,10 @@ func (w *BufferedResponseWriter) Write(b []byte) (int, error) {
 // It can be called multiple times, but only the first call matters (to match net/http behavior).
 func (w *BufferedResponseWriter) WriteHeader(statusCode int) {
 	if w.committed {
+		slog.Error("attempt to write when response is already committed", "statusCode", statusCode)
 		return // Ignore subsequent calls
 	}
+	slog.Info("writing status code %d", "statusCode", statusCode)
 	w.StatusCode = statusCode
 	w.committed = true
 }
